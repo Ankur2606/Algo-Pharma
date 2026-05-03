@@ -5,18 +5,23 @@
 
 ---
 
+## Reddit API Compliance Statement
+
+AlgoPharma uses the Reddit Data API strictly in accordance with Reddit's [Data API Terms](https://redditinc.com/policies/data-api-terms), [Developer Terms](https://redditinc.com/policies/developer-terms), and [Responsible Builder Policy](https://support.reddithelp.com/hc/en-us/articles/42728983564564-Responsible-Builder-Policy).
+
+**Key compliance commitments:**
+
+Reddit data is used for non-commercial academic pharmacovigilance research only. No Reddit content is used as input for training, fine-tuning, or updating any machine learning or AI model. BioBERT, RoBERTa, and medspaCy are pre-trained models on which AlgoPharma runs inference only — Reddit posts are never used to update model weights. All analysis is performed at the drug-symptom signal level, not the user level. No user profiles are built, no per-user health characteristics are inferred or stored, and author identifiers are discarded immediately after ingestion. All API access is authenticated via OAuth2, rate-limited to well within the 100 requests/minute free tier, and performed under a registered app with explicit API access approval from Reddit. No Reddit content is redistributed, sold, licensed, or displayed alongside advertisements.
+
+---
+
 ## The Problem
 
 India's PvPI (Pharmacovigilance Programme of India), coordinated by IPC under CDSCO, depends almost entirely on spontaneous Individual Case Safety Reports (ICSRs) submitted by healthcare professionals. The system is structurally sound but statistically hollow.
 
-- Only **6–10%** of ADRs are actually reported in Indian healthcare settings
-- India contributes just **2%** of total ICSRs to WHO VigiBase despite being one of the world's largest pharmaceutical markets
-- Over **55%** of Indian health professionals remain unaware of PvPI's existence
-- Patients are writing detailed real-time symptom descriptions on Reddit, X, 1mg, Practo — **nobody in any regulatory body is reading this at scale**
+Only 6 to 10 percent of ADRs are actually reported in Indian healthcare settings. India contributes just 2 percent of total ICSRs to WHO VigiBase despite being one of the world's largest pharmaceutical markets. Over 55 percent of Indian health professionals remain unaware of PvPI's existence. Patients are writing detailed real-time symptom descriptions on Reddit, X, 1mg, and Practo — and nobody in any regulatory body is reading this at scale.
 
-When Dolo 650 paracetamol was being overused during COVID-19, online communities were posting about nausea, liver discomfort, and overuse patterns **weeks before** a single formal ICSR reached IPC Ghaziabad. That signal existed. It just had no pipeline.
-
-**AlgoPharma is that pipeline.**
+When Dolo 650 paracetamol was being overused during COVID-19, online communities were posting about nausea, liver discomfort, and overuse patterns weeks before a single formal ICSR reached IPC Ghaziabad. That signal existed. It just had no pipeline. AlgoPharma is that pipeline.
 
 ---
 
@@ -25,17 +30,18 @@ When Dolo 650 paracetamol was being overused during COVID-19, online communities
 AlgoPharma is a two-part, MCP-native agentic platform:
 
 **Part 1 — Data Acquisition Engine**
-A configurable engine built on the `BaseEngine` abstraction. A drug safety officer defines drug names, MedDRA-aligned symptom keywords, source targets, and crawl frequency entirely through a Next.js 15 dashboard — zero code required.
+A configurable engine built on the `BaseEngine` abstraction. A drug safety officer defines drug names, MedDRA-aligned symptom keywords, source targets, and crawl frequency entirely through a Next.js 15 dashboard with zero code required.
 
 **Part 2 — Clinical NLP Pipeline**
-Every ingested post passes through a five-stage pipeline:
-1. BioBERT NER (drug-disease entity extraction)
-2. RoBERTa sentiment scoring
-3. medspaCy negation parsing
-4. Rule-based AE classification
-5. Thread-level corroboration scoring
+Every ingested post passes through a five-stage inference pipeline. Author identifiers are stripped at ingestion before any NLP step runs.
 
-Output: structured, auditable adverse event signal records in PvPI-compatible format.
+1. BioBERT NER — inference only, identifies drug and symptom entity mentions in post text
+2. RoBERTa sentiment scoring — inference only, interprets colloquial patient language
+3. medspaCy negation parsing — filters false positives such as "I did not feel nausea"
+4. Rule-based AE classification — flags posts with co-located drug, symptom, and sentiment signals
+5. Thread-level corroboration scoring — aggregates signal strength across multiple posts about the same drug-symptom pair
+
+Output: structured, auditable adverse event signal records at the drug-symptom level, in PvPI-compatible format. No user-level records are produced at any stage.
 
 ---
 
@@ -57,21 +63,26 @@ Output: structured, auditable adverse event signal records in PvPI-compatible fo
 └──────────────────────────┬──────────────────────────────────┘
                            │
 ┌──────────────────────────▼──────────────────────────────────┐
-│                 Presidio PII/PHI Redaction                   │
-│     (PAN · UPI · GSTIN · Aadhaar · Custom Indian patterns)  │
+│          Author Identifier Strip + Presidio Redaction        │
+│   Username discarded · PAN · UPI · GSTIN · Aadhaar removed  │
+│         No user-level data passes this boundary              │
 └──────────────────────────┬──────────────────────────────────┘
-                           │
+                           │ Anonymised post text only
 ┌──────────────────────────▼──────────────────────────────────┐
-│                  5-Stage NLP Pipeline                        │
+│           5-Stage NLP Inference Pipeline                     │
 │                                                              │
 │  BioBERT NER → RoBERTa Sentiment → medspaCy Negation        │
 │       → AE Classification → Thread Corroboration            │
+│                                                              │
+│     Pre-trained models · Inference only · No fine-tuning     │
+│          Reddit data never updates model weights             │
 └──────────────────────────┬──────────────────────────────────┘
                            │
 ┌──────────────────────────▼──────────────────────────────────┐
-│              Signal Confidence Scoring                       │
+│         Drug-Symptom Signal Confidence Scoring               │
 │   AE Detection (60%) + Thread Corroboration (25%)           │
 │                + Source Health (15%)                         │
+│            Aggregated at drug-symptom level only             │
 └──────────────────────────┬──────────────────────────────────┘
                            │
 ┌──────────────────────────▼──────────────────────────────────┐
@@ -86,13 +97,13 @@ Output: structured, auditable adverse event signal records in PvPI-compatible fo
 
 | Layer | Responsibility | Stack |
 |-------|---------------|-------|
-| 1. Config & Auth | JWT RBAC, Redis blacklisting, audit logs | FastAPI + PostgreSQL |
-| 2. Data Acquisition | Standardized extraction via BaseEngine | PRAW, twitterapi.io, Firecrawl MCP |
-| 3. PII/PHI Redaction | Indian identifier patterns | Microsoft Presidio |
-| 4. Biomedical NER | Drug-disease entity co-location | BioBERT (BC5CDR fine-tuned) |
-| 5. Sentiment Scoring | Colloquial patient language | Twitter-roBERTa-base-sentiment |
+| 1. Config & Auth | JWT RBAC, Redis blacklisting, append-only audit logs for CDSCO compliance | FastAPI + PostgreSQL |
+| 2. Data Acquisition | Standardized read-only extraction via BaseEngine | PRAW, twitterapi.io, Firecrawl MCP |
+| 3. Anonymisation | Author identifier discard + Indian PII pattern redaction | Microsoft Presidio |
+| 4. Biomedical NER | Drug-disease entity co-location via inference | BioBERT (BC5CDR, pre-trained) |
+| 5. Sentiment Scoring | Colloquial patient language interpretation via inference | Twitter-roBERTa-base-sentiment (pre-trained) |
 | 6. AE Classification | Negation-aware rule engine | medspaCy |
-| 7. Signal Confidence | Weighted composite score | pgvector + custom formula |
+| 7. Signal Confidence | Weighted composite score at drug-symptom level | pgvector + custom formula |
 
 ---
 
@@ -103,60 +114,50 @@ Signal Confidence = (AE Detection × 0.60) + (Thread Corroboration × 0.25) + (S
 
 Source Health = f(
   crawler_success_rate_7d,
-  volume_consistency (CV),
-  bot_ratio_estimate (karma + account age heuristics),
+  volume_consistency (coefficient of variation),
+  bot_ratio_estimate (account age and karma heuristics — aggregate quality weight only,
+                      no individual user is profiled or stored),
   content_relevance (cosine similarity vs. ADR reference corpus in pgvector)
 )
 ```
+
+Note: bot ratio heuristics are applied solely as an aggregate source reliability weight. No individual user account is profiled, tracked, or stored at any point in the pipeline.
 
 ---
 
 ## Hero Feature: Agentic Source Onboarding
 
-Every competing system — OpenVigil, VigiAccess, Veeva Vault Safety — requires an **engineer** to integrate a new data source.
+Every competing system — OpenVigil, VigiAccess, Veeva Vault Safety — requires an engineer to integrate a new data source. AlgoPharma does not.
 
-**AlgoPharma does not.**
+A drug safety officer pastes any forum URL. A `claude-sonnet-4-20250514` agent then invokes the Firecrawl MCP server to fetch the fully-rendered page as clean markdown, analyzes the thread structure, generates a complete Python `ForumEngine` subclass with correct CSS selectors and pagination logic, validates it against three live thread URLs from the same forum, and surfaces three sample extracted posts for human review before activation. The entire flow completes in under two minutes.
 
-A drug safety officer pastes any forum URL. A `claude-sonnet-4-20250514` agent:
-1. Invokes Firecrawl MCP to fetch the fully-rendered page as clean markdown
-2. Analyzes thread structure and pagination patterns
-3. Generates a complete Python `ForumEngine` subclass with correct CSS selectors
-4. Validates against 3 live thread URLs from the same forum
-5. Surfaces 3 sample extracted posts for human review before activation
+When a forum updates its layout and extraction breaks, the fix is to paste the URL again.
 
-**Total time: under 2 minutes. No engineer required.**
-
-When a forum updates its layout and extraction breaks — paste the URL again.
-
-### Why This Matters for India
-
-Regional patient communities currently produce **zero** structured input into PvPI:
-- Tamil Nadu cancer support communities
-- Marathi diabetes groups on Facebook
-- Hindi-language health aggregators like Sehat.com
-
-Firecrawl renders any JavaScript stack natively. Claude analyzes forum structure regardless of regional language. These communities become monitorable in 2 minutes.
+**Why this matters for India specifically:** Regional patient communities including Tamil Nadu cancer support communities, Marathi diabetes groups, and Hindi-language health aggregators like Sehat.com currently produce zero structured input into PvPI. Firecrawl renders any JavaScript stack natively and Claude analyzes forum structure regardless of the regional language of the interface. These communities become monitorable within two minutes with no engineering involvement.
 
 ---
 
 ## Data Sources
 
-| Source | Method | Coverage |
-|--------|--------|----------|
-| Reddit | PRAW (OAuth2) | r/india, r/pharmacy, r/medicine, global health subs |
-| X / Twitter | twitterapi.io filtered stream | Real-time keyword stream |
-| Patient Forums | Firecrawl MCP + Claude agent | Any JS-rendered forum, any language |
-| 1mg / Practo | Firecrawl MCP | Indian health communities |
+| Source | Method | Access Type |
+|--------|--------|------------|
+| Reddit | PRAW via OAuth2, registered API access | Read-only, public posts only |
+| X / Twitter | twitterapi.io filtered stream | Read-only, public posts only |
+| Patient Forums | Firecrawl MCP + Claude agent | Read-only, public pages only |
+| 1mg / Practo | Firecrawl MCP | Read-only, public pages only |
 
 ---
 
 ## Compliance
 
-- **DPDP Act 2023** — Presidio-based PII redaction at pipeline entry point
-- **Data residency** — Firecrawl self-hosting option under AGPL-3.0 eliminates external data egress
-- **MedDRA coding** — Symptom keywords mapped to MedDRA Preferred Terms
-- **PvPI export schema** — Structured output compatible with IPC ICSR submission format
-- **WHO VigiBase** — Signal records exportable to Uppsala Monitoring Centre format
+**Reddit Policy**
+Reddit content is accessed under an approved non-commercial API registration. No Reddit data is used to train or fine-tune any model — all NLP processing uses pre-trained model inference only. No user-level health characteristics are inferred or stored. Author identifiers are discarded at the anonymisation layer before any NLP step. All access stays within the 100 requests/minute free tier. No Reddit content is redistributed or displayed alongside advertisements.
+
+**DPDP Act 2023 (India)**
+Presidio-based PII redaction at pipeline entry covers PAN, UPI, GSTIN, and Aadhaar patterns. The Firecrawl self-hosting option under AGPL-3.0 eliminates all external data egress for organisations with strict data residency requirements.
+
+**MedDRA & PvPI**
+Symptom keywords are mapped to MedDRA Preferred Terms. Structured output is compatible with IPC ICSR submission format. Signal records are exportable to WHO Uppsala Monitoring Centre VigiBase format.
 
 ---
 
@@ -165,7 +166,7 @@ Firecrawl renders any JavaScript stack natively. Claude analyzes forum structure
 ```
 Frontend        Next.js 15, TypeScript, Tailwind CSS
 Backend         FastAPI (Python), PostgreSQL, Redis
-ML/NLP          BioBERT (BC5CDR), Twitter-roBERTa, medspaCy, HuggingFace
+ML/NLP          BioBERT (BC5CDR), Twitter-roBERTa, medspaCy — inference only, no fine-tuning
 Vector DB       pgvector (ADR reference corpus)
 MCP Servers     Firecrawl, PRAW, twitterapi.io
 AI Agent        Anthropic claude-sonnet-4-20250514
@@ -182,32 +183,24 @@ Privacy         Microsoft Presidio (custom Indian recognizers)
 - Node.js 20+
 - PostgreSQL 15+ with pgvector extension
 - Redis 7+
+- Approved Reddit Data API access (register at [reddit.com/wiki/api](https://www.reddit.com/wiki/api))
 
 ### Installation
 
 ```bash
-# Clone the repo
 git clone https://github.com/yourusername/algopharma.git
 cd algopharma
 
-# Backend setup
+# Backend
 cd backend
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-
-# Configure environment
 cp .env.example .env
-# Fill in: REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, ANTHROPIC_API_KEY,
-#          TWITTER_API_KEY, FIRECRAWL_API_KEY, DATABASE_URL, REDIS_URL
-
-# Run database migrations
 alembic upgrade head
-
-# Start backend
 uvicorn main:app --reload
 
-# Frontend setup (new terminal)
+# Frontend (new terminal)
 cd ../frontend
 npm install
 npm run dev
@@ -216,7 +209,7 @@ npm run dev
 ### Environment Variables
 
 ```env
-# Reddit Data API
+# Reddit Data API (requires approved non-commercial access)
 REDDIT_CLIENT_ID=your_client_id
 REDDIT_CLIENT_SECRET=your_client_secret
 REDDIT_USER_AGENT=AlgoPharma/1.0 by /u/yourusername
@@ -253,4 +246,4 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-*AlgoPharma is a pharmacovigilance research tool. It does not provide medical advice. All signals require validation by a qualified drug safety professional before submission to regulatory bodies.*
+*AlgoPharma is a non-commercial pharmacovigilance research tool. It does not provide medical advice. All signals require validation by a qualified drug safety professional before submission to regulatory bodies. Reddit data is accessed under approved non-commercial API terms and is never used for model training.*
