@@ -23,6 +23,21 @@ def _trace_log(step_name: str, content: str):
     except Exception as e:
         logger.error(f"Failed to write trace log: {e}")
 
+def _clean_json(text: str) -> str:
+    text = text.strip()
+    if text.startswith("```"):
+        text = "\n".join(text.split("\n")[1:])
+    if text.endswith("```"):
+        text = "\n".join(text.split("\n")[:-1])
+    text = text.strip()
+    
+    if text.startswith("{"):
+        text = text[:text.rfind("}")+1]
+    elif text.startswith("["):
+        text = text[:text.rfind("]")+1]
+        
+    return text
+
 def onboard_forum(url: str) -> dict:
     """
     Seven-step pipeline to auto-analyse a forum and generate crawler config.
@@ -109,7 +124,7 @@ def onboard_forum(url: str) -> dict:
         )
 
         _trace_log("STEP 3: Gemini Analysis Output", response.text)
-        config = json.loads(response.text)
+        config = json.loads(_clean_json(response.text))
     except Exception as e:
         logger.error(f"Gemini analysis failed: {e}")
         return {"success": False, "error": f"Gemini error: {e}", "config": {}, "samples": [], "confidence": 0.0}
@@ -177,7 +192,7 @@ def onboard_forum(url: str) -> dict:
                 ),
             )
             _trace_log("STEP 6: Gemini Extraction Output", extract_response.text)
-            samples = json.loads(extract_response.text)
+            samples = json.loads(_clean_json(extract_response.text))
             if not isinstance(samples, list):
                 samples = [samples]
         except Exception as e:
