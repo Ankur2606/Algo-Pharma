@@ -62,8 +62,8 @@ NON-NEGOTIABLE CONSTRAINTS
 
 5. Every single Python file must have an
    if __name__ == "__main__": block that
-   runs the file's core function with test data
-   and prints clear PASS/FAIL output.
+   runs the file's core function with either the actual data by calling components if required or test data .
+   and prints clear output as well as pass and fail.
    Run any file standalone: uv run python <file.py>
 
 6. The existing JSON files are the primary data source
