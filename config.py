@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     # ── Google Gemini ─────────────────────────────────────
     GEMINI_API_KEY: str = ""
 
+    # ── Nvidia Nemotron ─────────────────────────────────────
+    NVIDIA_API_KEY: str = ""
+    NVIDIA_API_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
+    NVIDIA_MODEL: str = "nvidia/nemotron-3-super-120b-a12b"
+
     # ── Sarvam AI ─────────────────────────────────────────
     SARVAM_API_KEY: str = ""
 
@@ -55,7 +60,7 @@ if __name__ == "__main__":
 
     s = get_settings()
     secrets = {"SECRET_KEY", "TWITTER_API_KEY", "FIRECRAWL_API_KEY",
-               "GEMINI_API_KEY", "SARVAM_API_KEY", "REDDIT_CLIENT_SECRET"}
+               "GEMINI_API_KEY", "SARVAM_API_KEY", "REDDIT_CLIENT_SECRET", "NVIDIA_API_KEY"}
 
     print("=" * 55)
     print("  AlgoPharma — Configuration Check")

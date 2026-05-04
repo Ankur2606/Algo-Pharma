@@ -82,21 +82,22 @@ def onboard_forum(url: str) -> dict:
         logger.error(f"Firecrawl scrape failed: {e}")
         return {"success": False, "error": f"Firecrawl error: {e}", "config": {}, "samples": [], "confidence": 0.0}
 
-    # ── Step 3: Gemini structure analysis ─────────────────
-    if not settings.GEMINI_API_KEY:
+    # ── Step 3: Nvidia Nemotron structure analysis ─────────────────
+    if not settings.NVIDIA_API_KEY:
         return {
             "success": False,
-            "error": "GEMINI_API_KEY not configured. Set it in .env to enable forum analysis.",
+            "error": "NVIDIA_API_KEY not configured. Set it in .env to enable forum analysis.",
             "config": {},
             "samples": [],
             "confidence": 0.0,
         }
 
     try:
-        from google import genai
-        from google.genai import types
-        client = genai.Client(api_key=settings.GEMINI_API_KEY)
-        gemini_model = "gemini-3-flash-preview"
+        from openai import OpenAI
+        client = OpenAI(
+            base_url=settings.NVIDIA_API_BASE_URL,
+            api_key=settings.NVIDIA_API_KEY
+        )
 
         system_prompt = (
             "You are an expert at analyzing web forum structure. "
@@ -113,21 +114,30 @@ def onboard_forum(url: str) -> dict:
         )
 
         prompt_content = f"{system_prompt}\n\n---\n\nForum page markdown (first 8000 chars):\n\n{markdown[:8000]}"
-        _trace_log("STEP 3: Gemini Analysis Input", prompt_content)
+        _trace_log("STEP 3: LLM Analysis Input", prompt_content)
 
-        response = client.models.generate_content(
-            model=gemini_model,
-            contents=[prompt_content],
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-            ),
+        completion = client.chat.completions.create(
+            model=settings.NVIDIA_MODEL,
+            messages=[{"role": "user", "content": prompt_content}],
+            temperature=1,
+            top_p=0.95,
+            max_tokens=16384,
+            extra_body={"chat_template_kwargs": {"enable_thinking": True}, "reasoning_budget": 16384},
+            stream=True
         )
 
-        _trace_log("STEP 3: Gemini Analysis Output", response.text)
-        config = json.loads(_clean_json(response.text))
+        response_text = ""
+        for chunk in completion:
+            if not chunk.choices:
+                continue
+            if chunk.choices[0].delta.content is not None:
+                response_text += chunk.choices[0].delta.content
+
+        _trace_log("STEP 3: LLM Analysis Output", response_text)
+        config = json.loads(_clean_json(response_text))
     except Exception as e:
-        logger.error(f"Gemini analysis failed: {e}")
-        return {"success": False, "error": f"Gemini error: {e}", "config": {}, "samples": [], "confidence": 0.0}
+        logger.error(f"LLM analysis failed: {e}")
+        return {"success": False, "error": f"LLM error: {e}", "config": {}, "samples": [], "confidence": 0.0}
 
     # ── Step 4: Fetch sample thread URLs ─────────────────
     sample_urls = config.get("sample_thread_urls", [])[:3]
@@ -153,10 +163,10 @@ def onboard_forum(url: str) -> dict:
             from nlp.sentiment import SARVAM_LANG_MAP
             if detected_lang in SARVAM_LANG_MAP:
                 from sarvamai import SarvamAI
-                client = SarvamAI(api_subscription_key=settings.SARVAM_API_KEY)
+                sarvam_client = SarvamAI(api_subscription_key=settings.SARVAM_API_KEY)
                 for i, sm in enumerate(sample_markdowns):
                     try:
-                        resp = client.text.translate(
+                        resp = sarvam_client.text.translate(
                             input=sm["markdown"][:500],
                             source_language_code=SARVAM_LANG_MAP[detected_lang],
                             target_language_code="en-IN",
@@ -169,7 +179,7 @@ def onboard_forum(url: str) -> dict:
         except Exception:
             pass
 
-    # ── Step 6: Gemini extract sample posts ──────────────
+    # ── Step 6: Nvidia Nemotron extract sample posts ──────────────
     samples = []
     if sample_markdowns:
         try:
@@ -182,17 +192,27 @@ def onboard_forum(url: str) -> dict:
                 f"Return ONLY valid JSON array, each item with: author, date, content, url.\n\n"
                 f"Forum content:\n\n{combined[:6000]}"
             )
-            _trace_log("STEP 6: Gemini Extraction Input", prompt_content)
+            _trace_log("STEP 6: LLM Extraction Input", prompt_content)
 
-            extract_response = client.models.generate_content(
-                model=gemini_model,
-                contents=[prompt_content],
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                ),
+            completion = client.chat.completions.create(
+                model=settings.NVIDIA_MODEL,
+                messages=[{"role": "user", "content": prompt_content}],
+                temperature=1,
+                top_p=0.95,
+                max_tokens=16384,
+                extra_body={"chat_template_kwargs": {"enable_thinking": True}, "reasoning_budget": 16384},
+                stream=True
             )
-            _trace_log("STEP 6: Gemini Extraction Output", extract_response.text)
-            samples = json.loads(_clean_json(extract_response.text))
+
+            extract_response_text = ""
+            for chunk in completion:
+                if not chunk.choices:
+                    continue
+                if chunk.choices[0].delta.content is not None:
+                    extract_response_text += chunk.choices[0].delta.content
+
+            _trace_log("STEP 6: LLM Extraction Output", extract_response_text)
+            samples = json.loads(_clean_json(extract_response_text))
             if not isinstance(samples, list):
                 samples = [samples]
         except Exception as e:
@@ -234,13 +254,13 @@ if __name__ == "__main__":
         print("  ⚠️  FIRECRAWL_API_KEY not set in .env")
         print("  With API key set, this would:")
         print("    1. Firecrawl scrape the target forum URL")
-        print("    2. Send markdown to Gemini for structure analysis")
+        print("    2. Send markdown to LLM for structure analysis")
         print("    3. Fetch 3 sample thread URLs")
-        print("    4. Extract sample posts via Gemini")
+        print("    4. Extract sample posts via LLM")
         print("    5. Return config + samples for admin review")
-    elif not settings.GEMINI_API_KEY:
-        print("  ⚠️  GEMINI_API_KEY not set in .env")
-        print("  Both FIRECRAWL_API_KEY and GEMINI_API_KEY are needed.")
+    elif not settings.NVIDIA_API_KEY:
+        print("  ⚠️  NVIDIA_API_KEY not set in .env")
+        print("  Both FIRECRAWL_API_KEY and NVIDIA_API_KEY are needed.")
     else:
         test_url = "https://www.healthboards.com/boards/drug-interactions-side-effects/"
         print(f"  Testing with: {test_url}")
