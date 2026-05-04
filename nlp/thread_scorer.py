@@ -5,6 +5,12 @@ for a more robust final signal confidence.
 """
 
 import sys
+import os
+from pathlib import Path
+
+# Add project root to sys.path for standalone script execution
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import logging
 
 logger = logging.getLogger(__name__)

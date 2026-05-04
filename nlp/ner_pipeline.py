@@ -5,6 +5,12 @@ Two-model NER (when available) with keyword boost fallback.
 
 import re
 import sys
+import os
+from pathlib import Path
+
+# Add project root to sys.path for standalone script execution
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import logging
 
 logger = logging.getLogger(__name__)

@@ -4,6 +4,12 @@ Runs on already-ingested DB data. Computes PRR/ROR/chi² for drug-symptom pairs.
 """
 
 import sys
+import os
+from pathlib import Path
+
+# Add project root to sys.path for standalone script execution
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import json
 import logging
 from datetime import datetime, timezone, timedelta
