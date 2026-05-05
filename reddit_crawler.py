@@ -18,9 +18,10 @@ import urllib.request
 import urllib.parse
 from datetime import datetime
 
-# Enable UTF-8 printing for emojis on Windows
-if sys.stdout.encoding.lower() != 'utf-8':
-    sys.stdout.reconfigure(encoding='utf-8')
+# Enable UTF-8 printing for emojis on Windows (only when run directly, not when imported by MCP)
+if __name__ == "__main__":
+    if sys.stdout.encoding.lower() != 'utf-8':
+        sys.stdout.reconfigure(encoding='utf-8')
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 SEARCH_QUERY = "dolo 365 medicine side effects"      # your search term
@@ -32,15 +33,15 @@ OUTPUT_FILE  = "reddit_dolo365_results.json"
 
 
 def scrape_reddit(query: str, max_items: int = 100) -> list[dict]:
-    print(f"🔗 Connecting directly to Reddit API...")
+    print(f"🔗 Connecting directly to Reddit API...", file=sys.stderr)
     
     # Construct the URL
     safe_query = urllib.parse.quote(query)
     url = f"https://www.reddit.com/search.json?q={safe_query}&sort={SORT}&t={TIME_FILTER}&limit={max_items}"
     
-    print(f"🚀 Fetching search results for: '{query}'")
-    print(f"   Max items: {max_items} | Sort: {SORT} | Time: {TIME_FILTER}")
-    print(f"{'─'*55}")
+    print(f"🚀 Fetching search results for: '{query}'", file=sys.stderr)
+    print(f"   Max items: {max_items} | Sort: {SORT} | Time: {TIME_FILTER}", file=sys.stderr)
+    print(f"{'─'*55}", file=sys.stderr)
 
     req = urllib.request.Request(
         url, 
@@ -48,14 +49,14 @@ def scrape_reddit(query: str, max_items: int = 100) -> list[dict]:
     )
     
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=15) as response:
             data = json.loads(response.read().decode('utf-8'))
     except Exception as e:
-        print(f"❌ Error fetching from Reddit: {e}")
+        print(f"❌ Error fetching from Reddit: {e}", file=sys.stderr)
         return []
 
-    print(f"✅ Fetched results successfully.")
-    print(f"{'─'*55}")
+    print(f"✅ Fetched results successfully.", file=sys.stderr)
+    print(f"{'─'*55}", file=sys.stderr)
 
     posts = []
     children = data.get("data", {}).get("children", [])

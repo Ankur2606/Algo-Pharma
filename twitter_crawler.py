@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Enable UTF-8 printing for emojis on Windows
-if sys.stdout.encoding.lower() != 'utf-8':
+# Enable UTF-8 printing for emojis on Windows (only when run directly, not when imported by MCP)
+if __name__ == "__main__" and sys.stdout.encoding.lower() != 'utf-8':
     sys.stdout.reconfigure(encoding='utf-8')
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
@@ -21,19 +21,19 @@ OUTPUT_FILE     = "twitter_dolo365_results.json"
 # ─────────────────────────────────────────────────────────────────────────────
 
 def scrape_twitter(query: str, query_type: str = "Top") -> list[dict]:
-    print(f"🔗 Connecting to twitterapi.io...")
+    print(f"🔗 Connecting to twitterapi.io...", file=sys.stderr)
     
     if not TWITTER_API_KEY:
-        print("❌ Error: TWITTER_API_KEY not found in .env")
+        print("❌ Error: TWITTER_API_KEY not found in .env", file=sys.stderr)
         return []
 
     # Construct the URL
     safe_query = urllib.parse.quote(query)
     url = f"https://api.twitterapi.io/twitter/tweet/advanced_search?query={safe_query}&queryType={query_type}"
     
-    print(f"🚀 Fetching search results for: '{query}'")
-    print(f"   Query Type: {query_type}")
-    print(f"{'─'*55}")
+    print(f"🚀 Fetching search results for: '{query}'", file=sys.stderr)
+    print(f"   Query Type: {query_type}", file=sys.stderr)
+    print(f"{'─'*55}", file=sys.stderr)
 
     req = urllib.request.Request(
         url, 
@@ -41,14 +41,14 @@ def scrape_twitter(query: str, query_type: str = "Top") -> list[dict]:
     )
     
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=15) as response:
             data = json.loads(response.read().decode('utf-8'))
     except Exception as e:
-        print(f"❌ Error fetching from Twitter: {e}")
+        print(f"❌ Error fetching from Twitter: {e}", file=sys.stderr)
         return []
 
-    print(f"✅ Fetched results successfully.")
-    print(f"{'─'*55}")
+    print(f"✅ Fetched results successfully.", file=sys.stderr)
+    print(f"{'─'*55}", file=sys.stderr)
 
     tweets_data = data.get("tweets", [])
     posts = []

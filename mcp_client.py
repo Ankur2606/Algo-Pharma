@@ -9,7 +9,7 @@ async def test():
     # Configure the MCP server command
     server_params = StdioServerParameters(
         command=sys.executable,
-        args=["mcp_server.py"]
+        args=["-u", "mcp_server.py"]
     )
     
     print(f"Connecting to server: {server_params.command} {' '.join(server_params.args)}")

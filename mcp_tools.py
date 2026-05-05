@@ -37,8 +37,9 @@ class RedditTool:
     async def execute(safe_query: str, project_id: int = 1) -> dict:
         """Execute Reddit crawler with keyword filtering."""
         try:
+            import asyncio
             from tasks.crawl_reddit import crawl_reddit
-            result = crawl_reddit(project_id=project_id, query=safe_query)
+            result = await asyncio.to_thread(crawl_reddit, project_id=project_id, query=safe_query)
             return {
                 "success": True,
                 "tool": "reddit_crawler",
@@ -80,8 +81,9 @@ class TwitterTool:
     async def execute(safe_query: str, project_id: int = 1) -> dict:
         """Execute Twitter crawler with keyword filtering."""
         try:
+            import asyncio
             from tasks.crawl_twitter import crawl_twitter
-            result = crawl_twitter(project_id=project_id, query=safe_query)
+            result = await asyncio.to_thread(crawl_twitter, project_id=project_id, query=safe_query)
             return {
                 "success": True,
                 "tool": "twitter_crawler",
@@ -123,8 +125,9 @@ class ForumOnboardingTool:
     async def execute(forum_url: str, project_id: int = 1) -> dict:
         """Execute forum onboarding analysis."""
         try:
+            import asyncio
             from agentic.forum_onboarding import onboard_forum
-            result = onboard_forum(forum_url)
+            result = await asyncio.to_thread(onboard_forum, forum_url)
             return {
                 "success": result.get("success", False),
                 "tool": "forum_onboarding",

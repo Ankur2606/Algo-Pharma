@@ -5,15 +5,11 @@ Layer 2: Indian ID regex (always runs)
 Layer 3: Regional language flag
 """
 
+import os
 import re
 import sys
 import hashlib
 import logging
-
-try:
-    import torch
-except ImportError:
-    torch = None  # Only needed when PII model is loaded (FAST_MODE=false)
 
 logger = logging.getLogger(__name__)
 
