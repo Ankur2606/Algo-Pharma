@@ -509,6 +509,146 @@ def ingest_twitter_json(project_id: int = 1) -> dict:
     }
 
 
+def process_unprocessed_raw_posts(project_id: int = 1) -> dict:
+    """
+    Phase 2 NLP for the chat-triggered pipeline.
+
+    The chat flow stores RawPosts immediately (Phase 1), then Celery calls
+    this function to run the full NLP pipeline on any RawPost that does
+    NOT yet have a ProcessedPost.  This avoids the double-insert skip problem
+    where ingest_reddit_json() would re-read the JSON and skip every post
+    because Phase 1 already stored them.
+    """
+    from database import SessionLocal
+    from models import RawPost, ProcessedPost
+    from nlp.pii_guard import redact_pii
+    from nlp.ae_detector import detect_ae
+    from nlp.thread_scorer import score_thread
+    from nlp.ner_pipeline import extract_entities
+    from nlp.sentiment import analyze_sentiment
+    from nlp.translator import translate_to_english
+    from sqlalchemy import outerjoin
+
+    ingested = 0
+    ae_flagged = 0
+    skipped = 0
+
+    with SessionLocal() as session:
+        # Find RawPosts for this project that have no ProcessedPost yet
+        unprocessed = (
+            session.query(RawPost)
+            .outerjoin(ProcessedPost, ProcessedPost.raw_post_id == RawPost.id)
+            .filter(
+                RawPost.project_id == project_id,
+                ProcessedPost.id == None,  # noqa: E711
+            )
+            .all()
+        )
+
+        total = len(unprocessed)
+        logger.info(f"[process_unprocessed] project={project_id} | unprocessed={total}")
+
+        # ── Extract medicine name from Project name as a fallback drug hint ──
+        # Project name is set by api/chat.py as "{medicine}_{source}[_{symptom}]_{ts}"
+        # We use it so that if NER misses the drug (common for brand names),
+        # we can still produce AE signals instead of returning "no_drug" for everything.
+        from models import Project as _Project
+        project_row = session.get(_Project, project_id)
+        medicine_hint: str | None = None
+        if project_row:
+            # Name format: "Cetrizen_reddit_20260507_045123"
+            parts = project_row.name.split("_")
+            if parts:
+                medicine_hint = parts[0].lower().strip()  # e.g. "cetrizen"
+                logger.info(f"[process_unprocessed] medicine_hint='{medicine_hint}' from project name")
+
+
+
+        for raw_post in unprocessed:
+            try:
+                text = raw_post.body or ""
+                lang = raw_post.lang or "en"
+
+                if not text.strip():
+                    skipped += 1
+                    continue
+
+                # Translate to English for downstream NLP
+                english_text = translate_to_english(text, lang)
+
+                # PII redaction on English text
+                pii_result = redact_pii(english_text, "en")
+                redacted = pii_result["redacted_text"]
+
+                # NLP pipeline
+                entities  = extract_entities(redacted)
+
+                # ── Medicine hint injection ──────────────────────────────────
+                # If NER finds no drugs, inject the queried medicine as a known
+                # drug entity so AE detection can still produce a signal.
+                # This handles brand names / misspellings NER models don't know.
+                if medicine_hint and not entities.get("drugs"):
+                    entities["drugs"] = [{"text": medicine_hint, "label": "DRUG", "score": 0.8, "source": "query_hint"}]
+                    logger.info(f"[process_unprocessed] [{raw_post.thread_id}] Drug hint injected: '{medicine_hint}'")
+
+                sentiment = analyze_sentiment(redacted, "en")
+                ae_result = detect_ae(redacted, "en", entities=entities, sentiment=sentiment)
+                thread_result = score_thread(ae_result, [])
+
+
+                logger.info(
+                    f"[process_unprocessed] [{raw_post.thread_id}] "
+                    f"AE={ae_result['ae_flag']} conf={ae_result['confidence']:.2f} "
+                    f"drugs={[d['text'] for d in entities['drugs']]} "
+                    f"symptoms={[s['text'] for s in entities['symptoms']]}"
+                )
+
+                processed = ProcessedPost(
+                    raw_post_id=raw_post.id,
+                    project_id=project_id,
+                    redacted_text=redacted,
+                    entities_json=json.dumps(entities, ensure_ascii=False),
+                    sentiment_json=json.dumps(sentiment, ensure_ascii=False),
+                    negation_json=json.dumps({
+                        "non_negated": ae_result.get("symptoms_non_negated", []),
+                        "negated":     ae_result.get("symptoms_negated", []),
+                    }),
+                    ae_flag=ae_result["ae_flag"],
+                    ae_confidence=ae_result["confidence"],
+                    ae_reason=ae_result["reason"],
+                    thread_score=thread_result["final_confidence"],
+                    thread_color=thread_result["color"],
+                    pii_entities_found=json.dumps(pii_result["pii_entities_found"]),
+                )
+                session.add(processed)
+                ingested += 1
+
+                if ae_result["ae_flag"]:
+                    ae_flagged += 1
+
+                if ingested % 10 == 0:
+                    session.commit()
+
+            except Exception as e:
+                logger.error(f"[process_unprocessed] Failed on raw_post {raw_post.id}: {e}")
+                skipped += 1
+                continue
+
+        session.commit()
+
+    logger.info(
+        f"[process_unprocessed] DONE | project={project_id} | "
+        f"processed={ingested} ae_flagged={ae_flagged} skipped={skipped}"
+    )
+    return {
+        "project_id": project_id,
+        "total_raw": total,
+        "processed": ingested,
+        "ae_flagged": ae_flagged,
+        "skipped": skipped,
+    }
+
+
 def ingest_all(project_id: int = 1) -> dict:
     """Ingest both Reddit and Twitter JSON files."""
     reddit = ingest_reddit_json(project_id)
@@ -519,6 +659,8 @@ def ingest_all(project_id: int = 1) -> dict:
         "total_ingested": reddit["ingested"] + twitter["ingested"],
         "total_ae_flagged": reddit["ae_flagged"] + twitter["ae_flagged"],
     }
+
+
 
 
 # ── Self-test ─────────────────────────────────────────────

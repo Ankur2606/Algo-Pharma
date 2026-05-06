@@ -44,9 +44,33 @@ celery_app.conf.update(
 
 @celery_app.task(name="algopharma.ingest_all")
 def task_ingest_all(project_id: int = 1) -> dict:
-    """Celery task wrapper for data ingestion."""
+    """Celery task wrapper for data ingestion (reads from JSON files)."""
     from tasks.ingest_existing import ingest_all
     return ingest_all(project_id)
+
+
+@celery_app.task(name="algopharma.process_unprocessed")
+def task_process_unprocessed(project_id: int = 1) -> dict:
+    """
+    Celery Phase 2 for the chat pipeline.
+    Finds RawPosts with no ProcessedPost and runs the full NLP pipeline on them.
+    Always triggers signal detection at the end, regardless of AE count.
+    """
+    from tasks.ingest_existing import process_unprocessed_raw_posts
+    result = process_unprocessed_raw_posts(project_id)
+
+    # Always run signal detection — even if ae_flagged=0, it should record empty
+    # so the frontend polling can resolve to 'complete' status.
+    try:
+        from nlp.signal_detector import detect_signals
+        signals = detect_signals(project_id)
+        result["signals_detected"] = len(signals)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Signal detection failed: {e}")
+        result["signals_detected"] = 0
+
+    return result
 
 
 @celery_app.task(name="algopharma.detect_signals")

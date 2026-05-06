@@ -8,6 +8,10 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from pathlib import Path
 
 from logger_config import setup_global_logging
 setup_global_logging()
@@ -44,28 +48,49 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# ── CORS (allow all origins for prototype) ───────────────
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ── Register routers ─────────────────────────────────────
 from api.projects import router as projects_router
 from api.signals import router as signals_router
 from api.health import router as health_router
+from api.chat import router as chat_router
+from api.results import router as results_router
 
 app.include_router(projects_router)
 app.include_router(signals_router)
 app.include_router(health_router)
+app.include_router(chat_router)
+app.include_router(results_router)
+
+# ── Serve frontend static files ───────────────────────────
+_static_dir = Path(__file__).parent / "static"
+_static_dir.mkdir(exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
 
 
 # ── Root endpoint ────────────────────────────────────────
 @app.get("/")
 def root():
+    """Serve the chatbot frontend."""
+    html_path = Path(__file__).parent / "static" / "index.html"
+    if html_path.exists():
+        return FileResponse(str(html_path))
+    # Fallback JSON if static file missing
     from config import get_settings
     settings = get_settings()
     return {
         "service": "AlgoPharma",
         "version": "0.1.0",
-        "description": "Real-time pharmacovigilance social listening platform",
-        "hackathon": "AI for Bharat — Theme 6",
-        "fast_mode": settings.FAST_MODE,
         "docs": "/docs",
+        "ui": "Place index.html in static/ directory",
     }
 
 

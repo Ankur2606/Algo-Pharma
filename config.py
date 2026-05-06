@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     NVIDIA_API_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
     NVIDIA_MODEL: str = "nvidia/nemotron-3-super-120b-a12b"
 
+    # ── Groq ──────────────────────────────────────────────
+    GROQ_API_KEY: str = ""
+
     # ── Sarvam AI ─────────────────────────────────────────
     SARVAM_API_KEY: str = ""
 

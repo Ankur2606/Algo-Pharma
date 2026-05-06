@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlgoPharma — Pharmacovigilance AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e1a;--bg2:#111827;--bg3:#1a2235;--border:#1e293b;
+  --accent:#6366f1;--accent2:#818cf8;--green:#10b981;--red:#ef4444;--yellow:#f59e0b;
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#475569;
+  --radius:12px;--glow:0 0 20px rgba(99,102,241,0.3);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── PHASES ── */
+.phase{display:none;min-height:100vh;animation:fadeIn .4s ease}
+.phase.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── HEADER ── */
+header{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 32px;
+  background:rgba(10,14,26,0.85);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.logo{font-size:1.2rem;font-weight:700;background:linear-gradient(135deg,#6366f1,#a78bfa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-size:.8rem;color:var(--text2);margin-top:2px}
+
+/* ── CHAT PHASE ── */
+#phase-chat{flex-direction:column;align-items:center;justify-content:center;padding:80px 16px 32px}
+.chat-container{width:100%;max-width:680px;display:flex;flex-direction:column;gap:16px}
+.chat-title{text-align:center;margin-bottom:8px}
+.chat-title h1{font-size:2rem;font-weight:700;background:linear-gradient(135deg,#6366f1,#a78bfa,#60a5fa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.chat-title p{color:var(--text2);margin-top:8px;font-size:.95rem}
+
+.chat-messages{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;min-height:280px;max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.msg{display:flex;gap:10px;animation:fadeIn .3s ease}
+.msg-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.8rem;font-weight:600;flex-shrink:0;margin-top:2px}
+.msg.bot .msg-avatar{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.msg.user .msg-avatar{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.msg.user{flex-direction:row-reverse}
+.msg-bubble{padding:10px 14px;border-radius:10px;max-width:85%;font-size:.9rem;line-height:1.5}
+.msg.bot .msg-bubble{background:var(--bg3);border:1px solid var(--border);color:var(--text)}
+.msg.user .msg-bubble{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff}
+
+.typing{display:flex;gap:4px;padding:8px 0}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--accent2);animation:bounce .8s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+.chat-input-row{display:flex;gap:8px}
+.chat-input-row input{flex:1;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:10px;color:var(--text);font-size:.95rem;outline:none;font-family:'Inter',sans-serif;
+  transition:border-color .2s}
+.chat-input-row input:focus{border-color:var(--accent)}
+.chat-input-row input::placeholder{color:var(--text3)}
+.btn-send{padding:12px 20px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;
+  border:none;border-radius:10px;cursor:pointer;font-weight:600;font-size:.9rem;
+  transition:opacity .2s,transform .15s;white-space:nowrap}
+.btn-send:hover{opacity:.9;transform:translateY(-1px)}
+.btn-send:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+.state-pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:500;
+  border:1px solid var(--border);background:var(--bg2);color:var(--text2);display:flex;gap:5px;align-items:center}
+.pill.filled{background:rgba(99,102,241,0.15);border-color:var(--accent);color:var(--accent2)}
+.pill.optional{border-style:dashed}
+
+/* ── PROCESSING PHASE ── */
+#phase-processing{align-items:center;justify-content:center;flex-direction:column;gap:32px;padding:80px 16px}
+.processing-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:40px;max-width:600px;width:100%;text-align:center}
+.spinner{width:56px;height:56px;border:3px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.processing-card h2{font-size:1.4rem;margin-bottom:8px}
+.processing-card p{color:var(--text2);font-size:.9rem}
+.pipeline-steps{margin-top:24px;display:flex;flex-direction:column;gap:8px;text-align:left}
+.step{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;
+  background:var(--bg3);font-size:.85rem;font-family:'JetBrains Mono',monospace;color:var(--text2)}
+.step .dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0}
+.step.done .dot{background:var(--green)}
+.step.active .dot{background:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── DASHBOARD PHASE ── */
+#phase-dashboard{flex-direction:column;padding:80px 24px 40px;max-width:1200px;margin:0 auto;width:100%}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+.dash-header h2{font-size:1.5rem;font-weight:700}
+.status-badge{padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:600}
+.status-badge.crawling{background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.3)}
+.status-badge.analysing{background:rgba(99,102,241,.15);color:var(--accent2);border:1px solid rgba(99,102,241,.3)}
+.status-badge.complete{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+
+.btn-new{padding:8px 18px;background:var(--bg2);border:1px solid var(--border);color:var(--text2);
+  border-radius:8px;cursor:pointer;font-size:.85rem;transition:all .2s}
+.btn-new:hover{border-color:var(--accent);color:var(--accent2)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:768px){.grid2{grid-template-columns:1fr}}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.card h3{font-size:1rem;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card h3 .count{padding:2px 8px;border-radius:10px;background:rgba(99,102,241,.2);
+  color:var(--accent2);font-size:.75rem;font-weight:600}
+
+.signal-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.signal-table th{text-align:left;padding:8px 10px;color:var(--text3);font-weight:500;
+  border-bottom:1px solid var(--border)}
+.signal-table td{padding:9px 10px;border-bottom:1px solid rgba(30,41,59,.5)}
+.signal-table tr:last-child td{border-bottom:none}
+.signal-table tr:hover td{background:rgba(255,255,255,.02)}
+.strength-badge{padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600}
+.strength-badge.STRONG{background:rgba(239,68,68,.15);color:var(--red)}
+.strength-badge.MODERATE{background:rgba(245,158,11,.15);color:var(--yellow)}
+.strength-badge.WEAK{background:rgba(16,185,129,.15);color:var(--green)}
+
+.post-list{display:flex;flex-direction:column;gap:10px;max-height:500px;overflow-y:auto}
+.post-item{padding:12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);
+  border-left:3px solid var(--border);transition:border-color .2s}
+.post-item.ae{border-left-color:var(--red)}
+.post-item.no-ae{border-left-color:var(--green)}
+.post-meta{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.post-platform{font-size:.75rem;padding:2px 8px;border-radius:4px;font-weight:500;
+  background:rgba(99,102,241,.15);color:var(--accent2)}
+.post-sentiment{font-size:.75rem;padding:2px 8px;border-radius:4px}
+.post-sentiment.NEGATIVE{background:rgba(239,68,68,.1);color:var(--red)}
+.post-sentiment.POSITIVE{background:rgba(16,185,129,.1);color:var(--green)}
+.post-sentiment.NEUTRAL{background:rgba(148,163,184,.1);color:var(--text2)}
+.post-text{font-size:.85rem;color:var(--text2);line-height:1.5}
+.post-conf{font-size:.75rem;color:var(--text3);margin-top:4px}
+
+.empty-state{text-align:center;padding:40px;color:var(--text3)}
+.empty-state .icon{font-size:2.5rem;margin-bottom:12px}
+
+.poll-indicator{display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--text3)}
+.poll-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">⬡ AlgoPharma</div>
+    <div class="logo-sub">Pharmacovigilance AI Platform</div>
+  </div>
+</header>
+
+<!-- ══ PHASE 1: CHAT ══════════════════════════════════ -->
+<div id="phase-chat" class="phase active">
+  <div class="chat-container">
+    <div class="chat-title">
+      <h1>Pharmacovigilance AI</h1>
+      <p>Tell me which medicine and source to analyse for adverse events</p>
+    </div>
+
+    <div class="state-pills">
+      <div class="pill" id="pill-medicine">💊 Medicine: <span>—</span></div>
+      <div class="pill" id="pill-source">🌐 Source: <span>—</span></div>
+      <div class="pill optional" id="pill-symptom">⚕️ Symptom: <span>optional</span></div>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg bot">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-bubble">
+          👋 Hello! I'm AlgoPharma's AI assistant. I'll help you search social media for adverse drug events.<br><br>
+          To get started, please tell me: <strong>which medicine</strong> would you like to investigate?
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off" />
+      <button class="btn-send" id="btn-send" onclick="sendMessage()">Send →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PHASE 2: PROCESSING ════════════════════════════ -->
+<div id="phase-processing" class="phase">
+  <div class="processing-card">
+    <div class="spinner"></div>
+    <h2>🔬 Analysis in Progress</h2>
+    <p id="processing-desc">Launching crawlers and NLP pipeline...</p>
+    <div class="pipeline-steps">
+      <div class="step active" id="step-crawl"><div class="dot"></div> Crawling source data...</div>
+      <div class="step" id="step-pii"><div class="dot"></div> PII redaction & language detection</div>
+      <div class="step" id="step-ner"><div class="dot"></div> Named entity recognition (drugs + symptoms)</div>
+      <div class="step" id="step-nlp"><div class="dot"></div> Sentiment + negation analysis</div>
+      <div class="step" id="step-ae"><div class="dot"></div> Adverse event detection</div>
+      <div class="step" id="step-signal"><div class="dot"></div> Signal detection (PRR / ROR / χ²)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PHASE 3: DASHBOARD ═════════════════════════════ -->
+<div id="phase-dashboard" class="phase">
+  <div class="dash-header">
+    <div>
+      <h2 id="dash-title">📊 Dashboard</h2>
+      <div id="dash-project" style="color:var(--text2);font-size:.85rem;margin-top:4px"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="poll-indicator" id="poll-indicator">
+        <div class="poll-dot"></div> Live polling
+      </div>
+      <span class="status-badge crawling" id="status-badge">Crawling</span>
+      <button class="btn-new" onclick="startNew()">+ New Analysis</button>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:20px">
+    <div class="card" style="grid-column:1/-1">
+      <h3>🚨 Detected Signals <span class="count" id="signal-count">0</span></h3>
+      <div id="signal-body">
+        <div class="empty-state"><div class="icon">⏳</div>Waiting for signal detection...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📋 Processed Posts <span class="count" id="post-count">0</span></h3>
+    <div class="post-list" id="post-list">
+      <div class="empty-state"><div class="icon">⏳</div>Posts will appear as they are processed...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────
+const API = 'http://localhost:8000';
+let chatState = {medicine: null, source: null, symptom: null};
+let projectId = null;
+let pollInterval = null;
+let pollCount = 0;
+
+// ── Utilities ────────────────────────────────────────────
+function showPhase(id) {
+  document.querySelectorAll('.phase').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function addMsg(text, role='bot') {
+  const box = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="msg-avatar">${role === 'bot' ? 'AI' : 'You'}</div>
+    <div class="msg-bubble">${text}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function addTyping() {
+  const box = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg bot'; div.id = 'typing-indicator';
+  div.innerHTML = `<div class="msg-avatar">AI</div>
+    <div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  box.appendChild(div); box.scrollTop = box.scrollHeight;
+  return div;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-indicator');
+  if (t) t.remove();
+}
+
+function updatePills(state) {
+  const pm = document.getElementById('pill-medicine');
+  const ps = document.getElementById('pill-source');
+  const psy = document.getElementById('pill-symptom');
+  const update = (el, val, label) => {
+    el.querySelector('span').textContent = val || '—';
+    el.classList.toggle('filled', !!val);
+    el.childNodes[0].textContent = `${label}: `;
+  };
+  update(pm, state.medicine, '💊 Medicine');
+  update(ps, state.source,   '🌐 Source');
+  psy.querySelector('span').textContent = state.symptom || 'optional';
+  psy.classList.toggle('filled', !!state.symptom);
+}
+
+// ── Chat ─────────────────────────────────────────────────
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  document.getElementById('btn-send').disabled = true;
+
+  addMsg(msg, 'user');
+  const typing = addTyping();
+
+  try {
+    const res = await fetch(`${API}/api/chat`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: msg, state: chatState})
+    });
+    const data = await res.json();
+    removeTyping();
+
+    chatState = data.state || chatState;
+    updatePills(chatState);
+
+    if (data.ready) {
+      projectId = data.project_id;
+      addMsg('✅ ' + data.bot_message);
+      setTimeout(() => startProcessingPhase(), 900);
+    } else {
+      addMsg(data.bot_message);
+    }
+  } catch (e) {
+    removeTyping();
+    addMsg(`⚠️ Could not reach the server. Make sure AlgoPharma API is running on port 8000.<br><small>${e.message}</small>`);
+  } finally {
+    document.getElementById('btn-send').disabled = false;
+  }
+}
+
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+// ── Processing Phase ─────────────────────────────────────
+const STEPS = ['step-crawl','step-pii','step-ner','step-nlp','step-ae','step-signal'];
+let stepIdx = 0;
+
+function advanceStep() {
+  if (stepIdx > 0) document.getElementById(STEPS[stepIdx-1]).classList.replace('active','done');
+  if (stepIdx < STEPS.length) {
+    document.getElementById(STEPS[stepIdx]).classList.add('active');
+    stepIdx++;
+  }
+}
+
+function startProcessingPhase() {
+  showPhase('phase-processing');
+  stepIdx = 0;
+  STEPS.forEach(s => { const el = document.getElementById(s); el.className = 'step'; });
+  advanceStep();
+  const si = setInterval(advanceStep, 3500);
+  setTimeout(() => { clearInterval(si); startDashboardPhase(); }, 8000);
+}
+
+// ── Dashboard Phase ───────────────────────────────────────
+function startDashboardPhase() {
+  showPhase('phase-dashboard');
+  document.getElementById('dash-title').textContent = `📊 Project #${projectId}`;
+  document.getElementById('dash-project').textContent = `Medicine: ${chatState.medicine} | Source: ${chatState.source}${chatState.symptom ? ' | Symptom: ' + chatState.symptom : ''}`;
+  pollCount = 0;
+  pollResults();
+  pollInterval = setInterval(pollResults, 4000);
+}
+
+async function pollResults() {
+  if (!projectId) return;
+  pollCount++;
+  const MAX_POLLS = 75; // 75 × 4s = 5 minutes max
+  try {
+    const res = await fetch(`${API}/api/results/${projectId}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    renderDashboard(data);
+
+    if (data.status === 'complete') {
+      clearInterval(pollInterval);
+      document.getElementById('poll-indicator').innerHTML = '✅ Analysis complete';
+    } else if (pollCount >= MAX_POLLS) {
+      clearInterval(pollInterval);
+      document.getElementById('poll-indicator').innerHTML = '⏰ Polling stopped (timeout)';
+    }
+  } catch (e) {
+    console.warn('Poll failed:', e);
+  }
+}
+
+function renderDashboard(data) {
+  // Status badge
+  const badge = document.getElementById('status-badge');
+  badge.textContent = {crawling:'🔄 Crawling', analysing:'⚙️ Analysing', complete:'✅ Complete'}[data.status] || data.status;
+  badge.className = `status-badge ${data.status}`;
+
+  // Signals
+  const sc = document.getElementById('signal-count');
+  const sb = document.getElementById('signal-body');
+  sc.textContent = data.signals.length;
+
+  if (data.signals.length === 0) {
+    sb.innerHTML = `<div class="empty-state"><div class="icon">⏳</div>No signals detected yet...</div>`;
+  } else {
+    sb.innerHTML = `<table class="signal-table">
+      <thead><tr><th>Drug</th><th>Symptom</th><th>Posts</th><th>PRR</th><th>ROR</th><th>χ²</th><th>Strength</th></tr></thead>
+      <tbody>${data.signals.map(s => `
+        <tr>
+          <td><strong>${s.drug}</strong></td>
+          <td>${s.symptom}</td>
+          <td>${s.post_count}</td>
+          <td>${s.prr}</td>
+          <td>${s.ror}</td>
+          <td>${s.chi_square}</td>
+          <td><span class="strength-badge ${s.strength}">${s.strength}</span></td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  }
+
+  // Posts
+  const pc = document.getElementById('post-count');
+  const pl = document.getElementById('post-list');
+  pc.textContent = data.posts.length;
+
+  if (data.posts.length === 0) {
+    pl.innerHTML = `<div class="empty-state"><div class="icon">⏳</div>Posts will appear as they are processed...</div>`;
+  } else {
+    pl.innerHTML = data.posts.map(p => `
+      <div class="post-item ${p.ae_flag ? 'ae' : 'no-ae'}">
+        <div class="post-meta">
+          <span class="post-platform">${p.platform}</span>
+          <span class="post-sentiment ${p.sentiment}">${p.sentiment}</span>
+          ${p.ae_flag ? '<span style="font-size:.75rem;color:var(--red)">⚠️ AE Flagged</span>' : ''}
+        </div>
+        ${p.title ? `<div style="font-size:.85rem;font-weight:500;margin-bottom:4px">${p.title}</div>` : ''}
+        <div class="post-text">${p.text}</div>
+        <div class="post-conf">Confidence: ${(p.ae_confidence*100).toFixed(1)}% | ${p.ae_reason || ''}</div>
+      </div>`).join('');
+  }
+}
+
+function startNew() {
+  clearInterval(pollInterval);
+  chatState = {medicine: null, source: null, symptom: null};
+  projectId = null;
+  pollCount = 0;
+  updatePills(chatState);
+  document.getElementById('chat-messages').innerHTML = `
+    <div class="msg bot">
+      <div class="msg-avatar">AI</div>
+      <div class="msg-bubble">👋 Welcome back! Which medicine would you like to investigate this time?</div>
+    </div>`;
+  showPhase('phase-chat');
+}
+</script>
+</body>
+</html>

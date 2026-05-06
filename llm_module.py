@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-async def llm_agent(user_prompt: str):
+async def llm_agent(user_prompt: str, project_id: int = 1):
     if not os.environ.get("GEMINI_API_KEY"):
         print("[-] GEMINI_API_KEY is not set.")
         return
@@ -87,21 +87,28 @@ async def llm_agent(user_prompt: str):
             tool_name = function_call.name
             tool_args = dict(function_call.args)  # Already a dict from Gemini
 
+            # Inject project_id so Celery workers tag all DB rows correctly
+            tool_args["project_id"] = project_id
+
             print(f"[*] Gemini chose tool: '{tool_name}' with args: {tool_args}")
 
             if tool_name not in valid_tool_names:
                 print(f"[-] Invalid tool name returned: {tool_name}")
-                return
+                return None
 
             # 5. Execute via MCP
             print(f"[*] Executing '{tool_name}' via MCP...")
             try:
                 result = await session.call_tool(tool_name, tool_args)
                 print("\n[+] Result from MCP:")
+                result_text = None
                 for content in result.content:
                     print(content.text)
+                    result_text = content.text
+                return result_text
             except Exception as e:
                 print(f"[-] Tool execution failed: {e}")
+                return None
 
 
 if __name__ == "__main__":
