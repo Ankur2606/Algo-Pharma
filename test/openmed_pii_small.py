@@ -5,7 +5,7 @@ print("=" * 50)
 print("  Testing Hindi PII Model (44M)")
 print("=" * 50)
 result = extract_pii(
-    "रोगी: अनीता शर्मा, जन्मतिथि: 15 जनवरी 1984, फोन: +91 9876543210",
+    "रोगी: अनीता शर्मा, जन्मतिथि: 15 जनवरी 1984, फोन: +91 9876543210 hi mere naam arjun h bhai",
     lang="hi",
     model_name="OpenMed/OpenMed-PII-Hindi-SuperClinical-Small-44M-v1",
     use_smart_merging=True,
@@ -16,7 +16,7 @@ for ent in result.entities:
 
 # De-identify Hindi text
 redacted = deidentify(
-    "रोगी: अनीता शर्मा, जन्मतिथि: 15 जनवरी 1984, फोन: +91 9876543210", 
+    "रोगी: अनीता शर्मा, जन्मतिथि: 15 जनवरी 1984, फोन: +91 9876543210 hi mere naam arjun h bhai", 
     lang="hi", 
     model_name="OpenMed/OpenMed-PII-Hindi-SuperClinical-Small-44M-v1",
     method="replace", 

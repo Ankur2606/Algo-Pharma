@@ -1,6 +1,11 @@
 """
 AlgoPharma — Ingest existing JSON data files into DB + run NLP pipeline.
-The most important file for the hackathon demo.
+
+Two-phase ingestion design (post NLP-decoupling refactor):
+  Phase 1 — *_raw() functions: store RawPosts only, no NLP/transformer calls.
+             Called directly by crawlers so MCP/FastAPI returns immediately.
+  Phase 2 — ingest_*_json() functions: load NLP models and run full pipeline.
+             Called exclusively by Celery workers (task_ingest_all).
 """
 
 import json
@@ -16,6 +21,202 @@ def _hash_author(author: str) -> str:
     """SHA-256 hash an author identifier."""
     return hashlib.sha256(author.encode("utf-8")).hexdigest()
 
+
+# ── Phase 1: Lightweight raw-storage functions ────────────────────────────
+# These functions are called by crawlers to store posts immediately.
+# They do NOT import any NLP modules — no transformers, no spaCy, no models.
+# Heavy NLP is dispatched asynchronously to Celery workers after these return.
+
+def ingest_reddit_json_raw(project_id: int = 1) -> dict:
+    """Phase 1 — Read reddit JSON → PII redact → store RawPosts only (no NLP).
+
+    Decoupled from heavy NLP so crawlers / MCP can return immediately.
+    The NLP pipeline (Phase 2) is triggered asynchronously via Celery.
+    """
+    from config import get_settings
+    from database import SessionLocal
+    from models import RawPost
+    from nlp.pii_guard import redact_pii  # lightweight regex-based PII only
+
+    settings = get_settings()
+    path = settings.REDDIT_JSON_PATH
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            posts = json.load(f)
+    except FileNotFoundError:
+        logger.error(f"Reddit JSON not found at {path}")
+        return {"source": "reddit", "total": 0, "stored": 0, "skipped": 0}
+
+    total = len(posts)
+    stored = 0
+    skipped = 0
+
+    with SessionLocal() as session:
+        for i, post in enumerate(posts):
+            url = post.get("permalink", post.get("url", ""))
+            thread_id = post.get("id", str(i))
+
+            # Deduplicate — skip posts already stored
+            existing = session.query(RawPost).filter(
+                RawPost.thread_id == thread_id,
+                RawPost.source_platform == "reddit"
+            ).first()
+            if existing:
+                skipped += 1
+                continue
+
+            title = post.get("title", "")
+            description = post.get("description", "")
+            text = f"{title} {description}".strip()
+
+            if not text:
+                skipped += 1
+                continue
+
+            # Language detection (fast, no model required)
+            try:
+                from langdetect import detect as lang_detect
+                lang = lang_detect(text)
+            except Exception:
+                lang = "en"
+
+            # PII redaction — regex-based, no heavy model needed in fast path
+            pii_result = redact_pii(text, lang)
+            redacted_text = pii_result["redacted_text"]
+
+            author_hash = _hash_author(post.get("author", "anonymous"))
+
+            posted_at = None
+            created_utc = post.get("created_utc")
+            if created_utc:
+                try:
+                    posted_at = datetime.fromtimestamp(float(created_utc), tz=timezone.utc)
+                except (ValueError, TypeError, OSError):
+                    pass
+
+            raw_post = RawPost(
+                project_id=project_id,
+                thread_id=thread_id,
+                url=url,
+                title=title,
+                body=redacted_text,
+                author_hash=author_hash,
+                lang=lang,
+                source_platform="reddit",
+                posted_at=posted_at,
+            )
+            session.add(raw_post)
+            stored += 1
+
+            # Batch commit every 50 to avoid large transactions
+            if stored % 50 == 0:
+                session.commit()
+
+        session.commit()
+
+    logger.info(f"[ingest_reddit_raw] stored={stored} skipped={skipped} total={total}")
+    return {"source": "reddit", "total": total, "stored": stored, "skipped": skipped}
+
+
+def ingest_twitter_json_raw(project_id: int = 1) -> dict:
+    """Phase 1 — Read twitter JSON → PII redact → store RawPosts only (no NLP).
+
+    Decoupled from heavy NLP so crawlers / MCP can return immediately.
+    The NLP pipeline (Phase 2) is triggered asynchronously via Celery.
+    """
+    from config import get_settings
+    from database import SessionLocal
+    from models import RawPost
+    from nlp.pii_guard import redact_pii  # lightweight regex-based PII only
+
+    settings = get_settings()
+    path = settings.TWITTER_JSON_PATH
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            posts = json.load(f)
+    except FileNotFoundError:
+        logger.error(f"Twitter JSON not found at {path}")
+        return {"source": "twitter", "total": 0, "stored": 0, "skipped": 0}
+
+    total = len(posts)
+    stored = 0
+    skipped = 0
+
+    with SessionLocal() as session:
+        for i, post in enumerate(posts):
+            url = post.get("url", post.get("permalink", ""))
+            thread_id = post.get("id", str(i))
+
+            # Deduplicate — skip posts already stored
+            existing = session.query(RawPost).filter(
+                RawPost.thread_id == thread_id,
+                RawPost.source_platform == "twitter"
+            ).first()
+            if existing:
+                skipped += 1
+                continue
+
+            title = post.get("title", "")
+            description = post.get("description", "")
+            text = f"{title} {description}".strip()
+
+            if not text:
+                skipped += 1
+                continue
+
+            # Language detection (fast, no model required)
+            try:
+                from langdetect import detect as lang_detect
+                lang = lang_detect(text)
+            except Exception:
+                lang = "en"
+
+            # PII redaction — regex-based, no heavy model needed in fast path
+            pii_result = redact_pii(text, lang)
+            redacted_text = pii_result["redacted_text"]
+
+            author_hash = _hash_author(post.get("author", "anonymous"))
+
+            posted_at = None
+            created_utc = post.get("created_utc", "")
+            if created_utc:
+                try:
+                    if isinstance(created_utc, (int, float)):
+                        posted_at = datetime.fromtimestamp(float(created_utc), tz=timezone.utc)
+                    else:
+                        posted_at = datetime.fromisoformat(str(created_utc).replace("Z", "+00:00"))
+                except (ValueError, TypeError, OSError):
+                    pass
+
+            raw_post = RawPost(
+                project_id=project_id,
+                thread_id=thread_id,
+                url=url,
+                title=title,
+                body=redacted_text,
+                author_hash=author_hash,
+                lang=lang,
+                source_platform="twitter",
+                posted_at=posted_at,
+            )
+            session.add(raw_post)
+            stored += 1
+
+            if stored % 50 == 0:
+                session.commit()
+
+        session.commit()
+
+    logger.info(f"[ingest_twitter_raw] stored={stored} skipped={skipped} total={total}")
+    return {"source": "twitter", "total": total, "stored": stored, "skipped": skipped}
+
+
+# ── Phase 2: Full NLP pipeline functions (Celery workers only) ────────────
+# These are called exclusively from Celery tasks (task_ingest_all).
+# They load transformers/spaCy models and perform full NLP inference.
+# Never call these from a crawler or MCP handler — they will block.
 
 def ingest_reddit_json(project_id: int = 1) -> dict:
     """Read reddit JSON → PII redact → NLP pipeline → store in DB."""
@@ -75,6 +276,13 @@ def ingest_reddit_json(project_id: int = 1) -> dict:
             # PII redaction
             pii_result = redact_pii(text, lang)
             redacted_text = pii_result["redacted_text"]
+            logger.info(f"[{thread_id}] [PII IN]: {text[:50]}... -> [PII OUT]: {redacted_text[:50]}...")
+
+            # Translate to English for downstream NLP
+            from nlp.translator import translate_to_english
+            english_text = translate_to_english(redacted_text, lang)
+            if english_text != redacted_text:
+                logger.info(f"[{thread_id}] [TRANS IN ({lang})]: {redacted_text[:50]}... -> [TRANS OUT (en)]: {english_text[:50]}...")
 
             # Hash author
             author_hash = _hash_author(post.get("author", "anonymous"))
@@ -88,7 +296,7 @@ def ingest_reddit_json(project_id: int = 1) -> dict:
                 except (ValueError, TypeError, OSError):
                     pass
 
-            # Insert RawPost
+            # Insert RawPost (store native language redacted text)
             raw_post = RawPost(
                 project_id=project_id,
                 thread_id=thread_id,
@@ -103,17 +311,23 @@ def ingest_reddit_json(project_id: int = 1) -> dict:
             session.add(raw_post)
             session.flush()  # get raw_post.id
 
-            # NLP pipeline
-            entities = extract_entities(redacted_text)
-            sentiment = analyze_sentiment(redacted_text, lang)
-            ae_result = detect_ae(redacted_text, lang, entities=entities, sentiment=sentiment)
+            # NLP pipeline (using English text)
+            entities = extract_entities(english_text)
+            logger.info(f"[{thread_id}] [NER OUT]: {len(entities['drugs'])} drugs, {len(entities['symptoms'])} symptoms")
+            
+            sentiment = analyze_sentiment(english_text, "en")
+            logger.info(f"[{thread_id}] [SENTIMENT OUT]: {sentiment['label']} ({sentiment['score']})")
+            
+            ae_result = detect_ae(english_text, "en", entities=entities, sentiment=sentiment)
+            logger.info(f"[{thread_id}] [AE OUT]: Flag={ae_result['ae_flag']}, Reason={ae_result['reason']}")
+            
             thread_result = score_thread(ae_result, [])  # no replies in current data
 
             # Insert ProcessedPost
             processed = ProcessedPost(
                 raw_post_id=raw_post.id,
                 project_id=project_id,
-                redacted_text=redacted_text,
+                redacted_text=english_text,
                 entities_json=json.dumps(entities, ensure_ascii=False),
                 sentiment_json=json.dumps(sentiment, ensure_ascii=False),
                 negation_json=json.dumps({
@@ -206,6 +420,13 @@ def ingest_twitter_json(project_id: int = 1) -> dict:
             # PII redaction
             pii_result = redact_pii(text, lang)
             redacted_text = pii_result["redacted_text"]
+            logger.info(f"[{thread_id}] [PII IN]: {text[:50]}... -> [PII OUT]: {redacted_text[:50]}...")
+
+            # Translate to English for downstream NLP
+            from nlp.translator import translate_to_english
+            english_text = translate_to_english(redacted_text, lang)
+            if english_text != redacted_text:
+                logger.info(f"[{thread_id}] [TRANS IN ({lang})]: {redacted_text[:50]}... -> [TRANS OUT (en)]: {english_text[:50]}...")
 
             # Hash author
             author_hash = _hash_author(post.get("author", "anonymous"))
@@ -238,17 +459,23 @@ def ingest_twitter_json(project_id: int = 1) -> dict:
             session.add(raw_post)
             session.flush()
 
-            # NLP pipeline
-            entities = extract_entities(redacted_text)
-            sentiment = analyze_sentiment(redacted_text, lang)
-            ae_result = detect_ae(redacted_text, lang, entities=entities, sentiment=sentiment)
+            # NLP pipeline (using English text)
+            entities = extract_entities(english_text)
+            logger.info(f"[{thread_id}] [NER OUT]: {len(entities['drugs'])} drugs, {len(entities['symptoms'])} symptoms")
+            
+            sentiment = analyze_sentiment(english_text, "en")
+            logger.info(f"[{thread_id}] [SENTIMENT OUT]: {sentiment['label']} ({sentiment['score']})")
+            
+            ae_result = detect_ae(english_text, "en", entities=entities, sentiment=sentiment)
+            logger.info(f"[{thread_id}] [AE OUT]: Flag={ae_result['ae_flag']}, Reason={ae_result['reason']}")
+            
             thread_result = score_thread(ae_result, [])
 
             # Insert ProcessedPost
             processed = ProcessedPost(
                 raw_post_id=raw_post.id,
                 project_id=project_id,
-                redacted_text=redacted_text,
+                redacted_text=english_text,
                 entities_json=json.dumps(entities, ensure_ascii=False),
                 sentiment_json=json.dumps(sentiment, ensure_ascii=False),
                 negation_json=json.dumps({
@@ -300,7 +527,7 @@ if __name__ == "__main__":
         sys.stdout.reconfigure(encoding="utf-8")
 
     import os
-    os.environ["FAST_MODE"] = "true"
+    os.environ["FAST_MODE"] = "false"
 
     from database import init_db
     init_db()

@@ -6,7 +6,7 @@ Each test is independent and prints PASS or FAIL with reason.
 import sys
 import os
 
-os.environ["FAST_MODE"] = "true"
+os.environ["FAST_MODE"] = "false"
 os.environ["DATABASE_URL"] = "sqlite:///./algopharma_test.db"
 
 

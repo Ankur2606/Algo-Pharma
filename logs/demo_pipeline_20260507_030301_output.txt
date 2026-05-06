@@ -1,0 +1,926 @@
+
+══════════════════════════════════════════════════════════════════════
+  AlgoPharma — Full Pipeline Demo
+══════════════════════════════════════════════════════════════════════
+  Query      : 'dolo 650 paracetamol side effects'
+  Posts/src  : 3
+  FAST_MODE  : false
+  Log file   : logs\demo_pipeline_20260507_030301.log
+  Start time : 2026-05-07 03:03:01
+
+══════════════════════════════════════════════════════════════════════
+  Phase 1: Loading NLP Models
+══════════════════════════════════════════════════════════════════════
+  Pre-loading all NLP models (this happens once)...
+  ✅ Models loaded — Mode: FULL (OpenMed NER + RoBERTa)
+
+══════════════════════════════════════════════════════════════════════
+  Phase 2: Data Acquisition (3 Sources)
+══════════════════════════════════════════════════════════════════════
+
+  ── Reddit Crawler — query: 'dolo 650 paracetamol side effects' 
+  Fetching up to 3 posts from Reddit API...
+  ✅ Got 3 posts with text content
+
+  ── Twitter Crawler — query: 'dolo 650 paracetamol side effects' 
+  Fetching up to 3 tweets from twitterapi.io...
+  ✅ Got 3 tweets with text content
+
+  ── Forum Crawler — 1mg.com Q&A (Firecrawl) ────────────────
+  Query    : dolo 650 paracetamol side effects
+  Target   : https://www.myupchar.com/medicine/dub-obsurge-p37086347
+  ✅ Scraped 3 content blocks from 1mg.com via Firecrawl
+
+  📊 Total posts fetched: 9
+     Reddit : 3 posts
+     Twitter: 3 posts
+     Forum  : 3 posts
+
+══════════════════════════════════════════════════════════════════════
+  Phase 3: NLP Pipeline (All Sources)
+══════════════════════════════════════════════════════════════════════
+
+  ── Source: REDDIT (3 posts) ───────────────────────────────
+
+  ─────────────────────────────────────────────────────────────────
+  [REDDIT #1] Take a photo of a medicine strip → your phone explains uses, side effects, safety. Is this a bad idea? Tell me in the comments👇👇👇
+  ─────────────────────────────────────────────────────────────────
+  URL: https://i.redd.it/j2a3h9quqg9g1.png
+
+  📍 Step 0: Language Detection & Translation
+     Detected Language : en
+     Language is English — no translation needed
+
+┌─[STEP: Language Detection]
+│  IN  → text='Is this a bad idea? Tell me in the comments👇👇👇'
+│  OUT → lang=en — no translation
+└────────────────────────────────────────────────────────────
+
+  📍 Step 1: PII Guard
+
+┌─[STEP: PII Guard]
+│  IN  → text='Is this a bad idea? Tell me in the comments👇👇👇'
+│  OUT → redacted='Is this a bad idea? Tell me in the comments👇👇👇' | entities=[]
+└────────────────────────────────────────────────────────────
+     Input  : Is this a bad idea? Tell me in the comments👇👇👇
+     Output : Is this a bad idea? Tell me in the comments👇👇👇
+     PII    : none detected
+
+  📍 Step 2: NER — Drug & Symptom Extraction
+
+┌─[STEP: NER Pipeline]
+│  IN  → text='Is this a bad idea? Tell me in the comments👇👇👇'
+│  OUT → drugs=[] | symptoms=[]
+└────────────────────────────────────────────────────────────
+     Input  : Is this a bad idea? Tell me in the comments👇👇👇
+     Drugs  : []
+     Sympts : []
+
+  📍 Step 3: Negation Detection
+     Skipped (no symptoms found)
+
+  📍 Step 4: Sentiment Analysis
+
+┌─[STEP: Sentiment]
+│  IN  → text='Is this a bad idea? Tell me in the comments👇👇👇'
+│  OUT → label=NEUTRAL | score=0.611 | model=cardiffnlp/twitter-roberta-base-sentiment-latest
+└────────────────────────────────────────────────────────────
+     Input  : Is this a bad idea? Tell me in the comments👇👇👇
+     Result : 🟡 NEUTRAL (score=0.611)
+     Model  : cardiffnlp/twitter-roberta-base-sentiment-latest
+
+  📍 Step 5: Adverse Event Detection
+
+┌─[STEP: AE Detector]
+│  IN  → drugs=[] | symptoms=[] | sentiment=NEUTRAL
+│  OUT → ae_flag=False | conf=0.0 | reason=no_drug
+└────────────────────────────────────────────────────────────
+     ✅ No AE — gate 1 failed
+     Reason      : no_drug
+
+  ─────────────────────────────────────────────────────────────────
+  [REDDIT #2] Side effects of Dolo 650 and paracetamol tablets on UC patients
+  ─────────────────────────────────────────────────────────────────
+  URL: https://www.reddit.com/r/UlcerativeColitis/comments/1ga2pl3/side_effects_of_dolo_650_and_paracetamol_tablets/
+
+  📍 Step 0: Language Detection & Translation
+     Detected Language : en
+     Language is English — no translation needed
+
+┌─[STEP: Language Detection]
+│  IN  → text='Does using some medicines cause any severe effects for UC patients? I got fever last week and had 1 Dolo 650 tablet in the night (as we do in india without any prescription 😭😭). Next day I shit like 10 times. It happened once before too.   
+So, does anyone know if using any paracetamol tablets have effects on UC patients.'
+│  OUT → lang=en — no translation
+└────────────────────────────────────────────────────────────
+
+  📍 Step 1: PII Guard
+
+┌─[STEP: PII Guard]
+│  IN  → text='Does using some medicines cause any severe effects for UC patients? I got fever last week and had 1 Dolo 650 tablet in the night (as we do in india without any prescription 😭😭). Next day I shit like 10 times. It happened once before too.   
+So, does anyone know if using any paracetamol tablets have effects on UC patients.'
+│  OUT → redacted='Does using some medicines cause any severe effects for UC patients? I got fever last week and had 1 Dolo 650 tablet in the night (as we do in Sanderschester without any prescription 😭😭). Next day I shit like 10 times. It happened once before too.   
+So, does anyone know if using any paracetamol tablets have effects on UC patients.' | entities=['country']
+└────────────────────────────────────────────────────────────
+     Input  : Does using some medicines cause any severe effects for UC patients? I got fever last week and had 1 Dolo 650 tablet in the night (as we do in india without any prescription 😭😭). Next day I shit like 10 times. It happened once before too.   
+So, does anyone know if using any paracetamol tablets have effects on UC patients.
+     Output : Does using some medicines cause any severe effects for UC patients? I got fever last week and had 1 Dolo 650 tablet in the night (as we do in Sanderschester without any prescription 😭😭). Next day I shit like 10 times. It happened once before too.   
+So, does anyone know if using any paracetamol tablets have effects on UC patients.
+     PII    : ['country']
+
+  📍 Step 2: NER — Drug & Symptom Extraction
+
+┌─[STEP: NER Pipeline]
+│  IN  → text='Does using some medicines cause any severe effects for UC patients? I got fever last week and had 1 Dolo 650 tablet in the night (as we do in Sanderschester without any prescription 😭😭). Next day I shit like 10 times. It happened once before too.   
+So, does anyone know if using any paracetamol tablets have effects on UC patients.'
+│  OUT → drugs=['Dolo 650', 'paracetamol', 'dolo'] | symptoms=['UC', 'fever']
+└────────────────────────────────────────────────────────────
+     Input  : Does using some medicines cause any severe effects for UC patients? I got fever last week and had 1 Dolo 650 tablet in the night (as we do in Sanderschester without any prescription 😭😭). Next day I shit like 10 times. It happened once before too.   
+So, does anyone know if using any paracetamol tablets have effects on UC patients.
+     Drugs  : ['Dolo 650', 'paracetamol', 'dolo']
+     Sympts : ['UC', 'fever']
+
+  📍 Step 3: Negation Detection
+
+┌─[STEP: Negation]
+│  IN  → symptoms=['UC', 'fever']
+│  OUT → negated=[] | active=['UC', 'fever']
+└────────────────────────────────────────────────────────────
+     Input  : symptoms=['UC', 'fever']
+     Active : ['UC', 'fever']
+     Negated: []
+
+  📍 Step 4: Sentiment Analysis
+
+┌─[STEP: Sentiment]
+│  IN  → text='Does using some medicines cause any severe effects for UC patients? I got fever last week and had 1 Dolo 650 tablet in the night (as we do in Sanderschester without any prescription 😭😭). Next day I shit like 10 times. It happened once before too.   
+So, does anyone know if using any paracetamol tablets have effects on UC patients.'
+│  OUT → label=NEGATIVE | score=0.773 | model=cardiffnlp/twitter-roberta-base-sentiment-latest
+└────────────────────────────────────────────────────────────
+     Input  : Does using some medicines cause any severe effects for UC patients? I got fever last week and had 1 Dolo 650 tablet in the night (as we do in Sanderschester without any prescription 😭😭). Next day I shit like 10 times. It happened once before too.   
+So, does anyone know if using any paracetamol tablets have effects on UC patients.
+     Result : 🔴 NEGATIVE (score=0.773)
+     Model  : cardiffnlp/twitter-roberta-base-sentiment-latest
+
+  📍 Step 5: Adverse Event Detection
+
+┌─[STEP: AE Detector]
+│  IN  → drugs=['Dolo 650', 'paracetamol', 'dolo'] | symptoms=['UC', 'fever'] | sentiment=NEGATIVE
+│  OUT → ae_flag=True | conf=0.6961 | reason=drug+symptom+negative_sentiment+no_negation
+└────────────────────────────────────────────────────────────
+     🚨 ADVERSE EVENT DETECTED
+     Drug        : Dolo 650
+     Symptoms    : ['UC', 'fever']
+     Confidence  : 0.696
+
+  ─────────────────────────────────────────────────────────────────
+  [REDDIT #3] Sore throat after taking Paracetamol
+  ─────────────────────────────────────────────────────────────────
+  URL: https://www.reddit.com/r/AskDocs/comments/xlwhfe/sore_throat_after_taking_paracetamol/
+
+  📍 Step 0: Language Detection & Translation
+     Detected Language : en
+     Language is English — no translation needed
+
+┌─[STEP: Language Detection]
+│  IN  → text='Hi!
+
+I’m 18F, 5'2", 80kgs. 
+
+Whenever I take Paracetamol tablets (Dolo 650, etc) or meds containing Paracetamol (Wikoryl, etc), I experience weird irritation in my throat (just like someone scratched there) after 1-2 hrs of taking that med. The irritation goes away some hrs later. However, continuous usage of Paracetamol for 2-4 days (1-2 tabs a day) causes sore throat and I tend to have dry cough for the next 3-4 days (even after stopping Paracetamol).
+
+I've been facing this issue for the last 4 years. Before that, I had no such reactions to having Paracetamol. In my family, my Granduncle faces a similar issue -  rashes appear all over his body after taking paracetamol. Except for that, no one from my immediate or extended family has this issue.
+
+Hence, my queries are - Is sore throat a known side-effect of having Paracetamol? What is the reason behind having such a reaction? Should I continue having Para during fevers? If not then what should I take instead of Para in case of fever?
+
+Thanks!'
+│  OUT → lang=en — no translation
+└────────────────────────────────────────────────────────────
+
+  📍 Step 1: PII Guard
+
+┌─[STEP: PII Guard]
+│  IN  → text='Hi!
+
+I’m 18F, 5'2", 80kgs. 
+
+Whenever I take Paracetamol tablets (Dolo 650, etc) or meds containing Paracetamol (Wikoryl, etc), I experience weird irritation in my throat (just like someone scratched there) after 1-2 hrs of taking that med. The irritation goes away some hrs later. However, continuous usage of Paracetamol for 2-4 days (1-2 tabs a day) causes sore throat and I tend to have dry cough for the next 3-4 days (even after stopping Paracetamol).
+
+I've been facing this issue for the last 4 years. Before that, I had no such reactions to having Paracetamol. In my family, my Granduncle faces a similar issue -  rashes appear all over his body after taking paracetamol. Except for that, no one from my immediate or extended family has this issue.
+
+Hence, my queries are - Is sore throat a known side-effect of having Paracetamol? What is the reason behind having such a reaction? Should I continue having Para during fevers? If not then what should I take instead of Para in case of fever?
+
+Thanks!'
+│  OUT → redacted='Hi!
+
+I’m 00:06:468F, 5'2", 80kgs. 
+
+Whenever I take Paracetamol tablets (Dolo 650, etc) or meds containing Paracetamol (Wikoryl, etc), I experience weird irritation in my throat (just like someone scratched there) after 00:06:46-2 hrs of taking that med. The irritation goes away some hrs later. However, continuous usage of Paracetamol for 2-4 days (00:06:46-2 tabs a day) causes sore throat and I tend to have dry cough for the next 3-4 days (even after stopping Paracetamol).
+
+I've been facing this issue for the last 4 years. Before that, I had no such reactions to having Paracetamol. In my family, my Granduncle faces a similar issue -  rashes appear all over his body after taking paracetamol. Except for that, no one from my immediate or extended family has this issue.
+
+Hence, my queries are - Is sore throat a known side-effect of having Paracetamol? What is the reason behind having such a reaction? Should I continue having Para during fevers? If not then what should I take instead of Para in case of fever?
+
+Thanks!' | entities=['time']
+└────────────────────────────────────────────────────────────
+     Input  : Hi!
+
+I’m 18F, 5'2", 80kgs. 
+
+Whenever I take Paracetamol tablets (Dolo 650, etc) or meds containing Paracetamol (Wikoryl, etc), I experience weird irritation in my throat (just like someone scratched there) after 1-2 hrs of taking that med. The irritation goes away some hrs later. However, continuous usage of Paracetamol for 2-4 days (1-2 tabs a day) causes sore throat and I tend to have dry cough for the next 3-4 days (even after stopping Paracetamol).
+
+I've been facing this issue for the last 4 years. Before that, I had no such reactions to having Paracetamol. In my family, my Granduncle faces a similar issue -  rashes appear all over his body after taking paracetamol. Except for that, no one from my immediate or extended family has this issue.
+
+Hence, my queries are - Is sore throat a known side-effect of having Paracetamol? What is the reason behind having such a reaction? Should I continue having Para during fevers? If not then what should I take instead of Para in case of fever?
+
+Thanks!
+     Output : Hi!
+
+I’m 00:06:468F, 5'2", 80kgs. 
+
+Whenever I take Paracetamol tablets (Dolo 650, etc) or meds containing Paracetamol (Wikoryl, etc), I experience weird irritation in my throat (just like someone scratched there) after 00:06:46-2 hrs of taking that med. The irritation goes away some hrs later. However, continuous usage of Paracetamol for 2-4 days (00:06:46-2 tabs a day) causes sore throat and I tend to have dry cough for the next 3-4 days (even after stopping Paracetamol).
+
+I've been facing this issue for the last 4 years. Before that, I had no such reactions to having Paracetamol. In my family, my Granduncle faces a similar issue -  rashes appear all over his body after taking paracetamol. Except for that, no one from my immediate or extended family has this issue.
+
+Hence, my queries are - Is sore throat a known side-effect of having Paracetamol? What is the reason behind having such a reaction? Should I continue having Para during fevers? If not then what should I take instead of Para in case of fever?
+
+Thanks!
+     PII    : ['time']
+
+  📍 Step 2: NER — Drug & Symptom Extraction
+
+┌─[STEP: NER Pipeline]
+│  IN  → text='Hi!
+
+I’m 00:06:468F, 5'2", 80kgs. 
+
+Whenever I take Paracetamol tablets (Dolo 650, etc) or meds containing Paracetamol (Wikoryl, etc), I experience weird irritation in my throat (just like someone scratched there) after 00:06:46-2 hrs of taking that med. The irritation goes away some hrs later. However, continuous usage of Paracetamol for 2-4 days (00:06:46-2 tabs a day) causes sore throat and I tend to have dry cough for the next 3-4 days (even after stopping Paracetamol).
+
+I've been facing this issue for the last 4 years. Before that, I had no such reactions to having Paracetamol. In my family, my Granduncle faces a similar issue -  rashes appear all over his body after taking paracetamol. Except for that, no one from my immediate or extended family has this issue.
+
+Hence, my queries are - Is sore throat a known side-effect of having Paracetamol? What is the reason behind having such a reaction? Should I continue having Para during fevers? If not then what should I take instead of Para in case of fever?
+
+Thanks!'
+│  OUT → drugs=['Paracetamol tablets', 'Dolo 650', 'Paracetamol', 'dolo'] | symptoms=['irritation in my throat', 'sore throat', 'dry cough', 'fever', 'rash']
+└────────────────────────────────────────────────────────────
+     Input  : Hi!
+
+I’m 00:06:468F, 5'2", 80kgs. 
+
+Whenever I take Paracetamol tablets (Dolo 650, etc) or meds containing Paracetamol (Wikoryl, etc), I experience weird irritation in my throat (just like someone scratched there) after 00:06:46-2 hrs of taking that med. The irritation goes away some hrs later. However, continuous usage of Paracetamol for 2-4 days (00:06:46-2 tabs a day) causes sore throat and I tend to have dry cough for the next 3-4 days (even after stopping Paracetamol).
+
+I've been facing this issue for the last 4 years. Before that, I had no such reactions to having Paracetamol. In my family, my Granduncle faces a similar issue -  rashes appear all over his body after taking paracetamol. Except for that, no one from my immediate or extended family has this issue.
+
+Hence, my queries are - Is sore throat a known side-effect of having Paracetamol? What is the reason behind having such a reaction? Should I continue having Para during fevers? If not then what should I take instead of Para in case of fever?
+
+Thanks!
+     Drugs  : ['Paracetamol tablets', 'Dolo 650', 'Paracetamol', 'dolo']
+     Sympts : ['irritation in my throat', 'sore throat', 'dry cough', 'fever', 'rash']
+
+  📍 Step 3: Negation Detection
+
+┌─[STEP: Negation]
+│  IN  → symptoms=['irritation in my throat', 'sore throat', 'dry cough', 'fever', 'rash']
+│  OUT → negated=[] | active=['irritation in my throat', 'sore throat', 'dry cough', 'fever', 'rash']
+└────────────────────────────────────────────────────────────
+     Input  : symptoms=['irritation in my throat', 'sore throat', 'dry cough', 'fever', 'rash']
+     Active : ['irritation in my throat', 'sore throat', 'dry cough', 'fever', 'rash']
+     Negated: []
+
+  📍 Step 4: Sentiment Analysis
+
+┌─[STEP: Sentiment]
+│  IN  → text='Hi!
+
+I’m 00:06:468F, 5'2", 80kgs. 
+
+Whenever I take Paracetamol tablets (Dolo 650, etc) or meds containing Paracetamol (Wikoryl, etc), I experience weird irritation in my throat (just like someone scratched there) after 00:06:46-2 hrs of taking that med. The irritation goes away some hrs later. However, continuous usage of Paracetamol for 2-4 days (00:06:46-2 tabs a day) causes sore throat and I tend to have dry cough for the next 3-4 days (even after stopping Paracetamol).
+
+I've been facing this issue for the last 4 years. Before that, I had no such reactions to having Paracetamol. In my family, my Granduncle faces a similar issue -  rashes appear all over his body after taking paracetamol. Except for that, no one from my immediate or extended family has this issue.
+
+Hence, my queries are - Is sore throat a known side-effect of having Paracetamol? What is the reason behind having such a reaction? Should I continue having Para during fevers? If not then what should I take instead of Para in case of fever?
+
+Thanks!'
+│  OUT → label=NEUTRAL | score=0.609 | model=cardiffnlp/twitter-roberta-base-sentiment-latest
+└────────────────────────────────────────────────────────────
+     Input  : Hi!
+
+I’m 00:06:468F, 5'2", 80kgs. 
+
+Whenever I take Paracetamol tablets (Dolo 650, etc) or meds containing Paracetamol (Wikoryl, etc), I experience weird irritation in my throat (just like someone scratched there) after 00:06:46-2 hrs of taking that med. The irritation goes away some hrs later. However, continuous usage of Paracetamol for 2-4 days (00:06:46-2 tabs a day) causes sore throat and I tend to have dry cough for the next 3-4 days (even after stopping Paracetamol).
+
+I've been facing this issue for the last 4 years. Before that, I had no such reactions to having Paracetamol. In my family, my Granduncle faces a similar issue -  rashes appear all over his body after taking paracetamol. Except for that, no one from my immediate or extended family has this issue.
+
+Hence, my queries are - Is sore throat a known side-effect of having Paracetamol? What is the reason behind having such a reaction? Should I continue having Para during fevers? If not then what should I take instead of Para in case of fever?
+
+Thanks!
+     Result : 🟡 NEUTRAL (score=0.609)
+     Model  : cardiffnlp/twitter-roberta-base-sentiment-latest
+
+  📍 Step 5: Adverse Event Detection
+
+┌─[STEP: AE Detector]
+│  IN  → drugs=['Paracetamol tablets', 'Dolo 650', 'Paracetamol', 'dolo'] | symptoms=['irritation in my throat', 'sore throat', 'dry cough', 'fever', 'rash'] | sentiment=NEUTRAL
+│  OUT → ae_flag=False | conf=0.0 | reason=not_negative (got NEUTRAL)
+└────────────────────────────────────────────────────────────
+     ✅ No AE — gate 3 failed
+     Reason      : not_negative (got NEUTRAL)
+
+  ── Source: TWITTER (3 posts) ──────────────────────────────
+
+  ─────────────────────────────────────────────────────────────────
+  [TWITTER #1] Topic: dolo 650 paracetamol side effects
+  ─────────────────────────────────────────────────────────────────
+  URL: https://x.com/nervemed/status/2051875834672414996
+
+  📍 Step 0: Language Detection & Translation
+     Detected Language : en
+     Language is English — no translation needed
+
+┌─[STEP: Language Detection]
+│  IN  → text='Fever still 101°F after taking 1 g Paracetamol? 
+
+Do not panic immediately. Paracetamol generally begins to act within 30–60 minutes, with peak effect occurring after 1–2 hours. Persistence of fever early after administration does not necessarily indicate treatment failure.
+
+Possible reasons for persistent fever:
+🔹Insufficient time for the drug to achieve peak effect
+🔹High inflammatory burden due to viral or bacterial infection
+🔹Ongoing infection not yet adequately controlled
+🔹Dehydration or excessive clothing
+🔹Inadequate absorption or dosing issues
+
+What should be done:
+🔹Do NOT repeat paracetamol immediately
+🔹Wait at least 4–6 hours before the next dose
+🔹Reassess temperature after some time
+🔹Maintain adequate hydration
+🔹Tepid sponging may help if the patient is uncomfortable
+🔹Monitor for warning signs such as hypotension, altered sensorium, respiratory distress, or persistent tachycardia
+
+Adult dosage:
+🔹500 mg–1 g every 6–8 hours
+🔹Maximum daily dose: 4 g/day
+
+Remember: Fever reduction is not equivalent to treatment of the underlying disease. Persistent fever should always prompt evaluation for the underlying cause.'
+│  OUT → lang=en — no translation
+└────────────────────────────────────────────────────────────
+
+  📍 Step 1: PII Guard
+
+┌─[STEP: PII Guard]
+│  IN  → text='Fever still 101°F after taking 1 g Paracetamol? 
+
+Do not panic immediately. Paracetamol generally begins to act within 30–60 minutes, with peak effect occurring after 1–2 hours. Persistence of fever early after administration does not necessarily indicate treatment failure.
+
+Possible reasons for persistent fever:
+🔹Insufficient time for the drug to achieve peak effect
+🔹High inflammatory burden due to viral or bacterial infection
+🔹Ongoing infection not yet adequately controlled
+🔹Dehydration or excessive clothing
+🔹Inadequate absorption or dosing issues
+
+What should be done:
+🔹Do NOT repeat paracetamol immediately
+🔹Wait at least 4–6 hours before the next dose
+🔹Reassess temperature after some time
+🔹Maintain adequate hydration
+🔹Tepid sponging may help if the patient is uncomfortable
+🔹Monitor for warning signs such as hypotension, altered sensorium, respiratory distress, or persistent tachycardia
+
+Adult dosage:
+🔹500 mg–1 g every 6–8 hours
+🔹Maximum daily dose: 4 g/day
+
+Remember: Fever reduction is not equivalent to treatment of the underlying disease. Persistent fever should always prompt evaluation for the underlying cause.'
+│  OUT → redacted='Fever still 00:06:46000:06:46°F after taking 00:06:46 g Paracetamol? 
+
+Do not panic immediately. Paracetamol generally begins to act within 09:46:00:06:464, with peak effect occurring after 00:06:46–2 22:00:06:468:04. Persistence of fever early after administration does not necessarily indicate treatment failure.
+
+Possible reasons for persistent fever:
+🔹Insufficient time for the drug to achieve peak effect
+🔹High inflammatory burden due to viral or bacterial infection
+🔹Ongoing infection not yet adequately controlled
+🔹Dehydration or excessive clothing
+🔹Inadequate absorption or dosing issues
+
+What should be done:
+🔹Do NOT repeat paracetamol immediately
+🔹Wait at least 4–6 22:00:06:468:04 before the next dose
+🔹Reassess temperature after some time
+🔹Maintain adequate hydration
+🔹Tepid sponging may help if the patient is uncomfortable
+🔹Monitor for warning signs such as hypotension, altered sensorium, respiratory distress, or persistent tachycardia
+
+Adult dosage:
+🔹500 mg–00:06:46 g every 6–8 22:00:06:468:04
+🔹Maximum daily dose: 4 g/day
+
+Remember: Fever reduction is not equivalent to treatment of the underlying disease. Persistent fever should always prompt evaluation for the underlying cause.' | entities=['time', 'time', 'time']
+└────────────────────────────────────────────────────────────
+     Input  : Fever still 101°F after taking 1 g Paracetamol? 
+
+Do not panic immediately. Paracetamol generally begins to act within 30–60 minutes, with peak effect occurring after 1–2 hours. Persistence of fever early after administration does not necessarily indicate treatment failure.
+
+Possible reasons for persistent fever:
+🔹Insufficient time for the drug to achieve peak effect
+🔹High inflammatory burden due to viral or bacterial infection
+🔹Ongoing infection not yet adequately controlled
+🔹Dehydration or excessive clothing
+🔹Inadequate absorption or dosing issues
+
+What should be done:
+🔹Do NOT repeat paracetamol immediately
+🔹Wait at least 4–6 hours before the next dose
+🔹Reassess temperature after some time
+🔹Maintain adequate hydration
+🔹Tepid sponging may help if the patient is uncomfortable
+🔹Monitor for warning signs such as hypotension, altered sensorium, respiratory distress, or persistent tachycardia
+
+Adult dosage:
+🔹500 mg–1 g every 6–8 hours
+🔹Maximum daily dose: 4 g/day
+
+Remember: Fever reduction is not equivalent to treatment of the underlying disease. Persistent fever should always prompt evaluation for the underlying cause.
+     Output : Fever still 00:06:46000:06:46°F after taking 00:06:46 g Paracetamol? 
+
+Do not panic immediately. Paracetamol generally begins to act within 09:46:00:06:464, with peak effect occurring after 00:06:46–2 22:00:06:468:04. Persistence of fever early after administration does not necessarily indicate treatment failure.
+
+Possible reasons for persistent fever:
+🔹Insufficient time for the drug to achieve peak effect
+🔹High inflammatory burden due to viral or bacterial infection
+🔹Ongoing infection not yet adequately controlled
+🔹Dehydration or excessive clothing
+🔹Inadequate absorption or dosing issues
+
+What should be done:
+🔹Do NOT repeat paracetamol immediately
+🔹Wait at least 4–6 22:00:06:468:04 before the next dose
+🔹Reassess temperature after some time
+🔹Maintain adequate hydration
+🔹Tepid sponging may help if the patient is uncomfortable
+🔹Monitor for warning signs such as hypotension, altered sensorium, respiratory distress, or persistent tachycardia
+
+Adult dosage:
+🔹500 mg–00:06:46 g every 6–8 22:00:06:468:04
+🔹Maximum daily dose: 4 g/day
+
+Remember: Fever reduction is not equivalent to treatment of the underlying disease. Persistent fever should always prompt evaluation for the underlying cause.
+     PII    : ['time', 'time', 'time']
+
+  📍 Step 2: NER — Drug & Symptom Extraction
+
+┌─[STEP: NER Pipeline]
+│  IN  → text='Fever still 00:06:46000:06:46°F after taking 00:06:46 g Paracetamol? 
+
+Do not panic immediately. Paracetamol generally begins to act within 09:46:00:06:464, with peak effect occurring after 00:06:46–2 22:00:06:468:04. Persistence of fever early after administration does not necessarily indicate treatment failure.
+
+Possible reasons for persistent fever:
+🔹Insufficient time for the drug to achieve peak effect
+🔹High inflammatory burden due to viral or bacterial infection
+🔹Ongoing infection not yet adequately controlled
+🔹Dehydration or excessive clothing
+🔹Inadequate absorption or dosing issues
+
+What should be done:
+🔹Do NOT repeat paracetamol immediately
+🔹Wait at least 4–6 22:00:06:468:04 before the next dose
+🔹Reassess temperature after some time
+🔹Maintain adequate hydration
+🔹Tepid sponging may help if the patient is uncomfortable
+🔹Monitor for warning signs such as hypotension, altered sensorium, respiratory distress, or persistent tachycardia
+
+Adult dosage:
+🔹500 mg–00:06:46 g every 6–8 22:00:06:468:04
+🔹Maximum daily dose: 4 g/day
+
+Remember: Fever reduction is not equivalent to treatment of the underlying disease. Persistent fever should always prompt evaluation for the underlying cause.'
+│  OUT → drugs=['Paracetamol'] | symptoms=['Fever', 'viral or bacterial infection', 'infection']
+└────────────────────────────────────────────────────────────
+     Input  : Fever still 00:06:46000:06:46°F after taking 00:06:46 g Paracetamol? 
+
+Do not panic immediately. Paracetamol generally begins to act within 09:46:00:06:464, with peak effect occurring after 00:06:46–2 22:00:06:468:04. Persistence of fever early after administration does not necessarily indicate treatment failure.
+
+Possible reasons for persistent fever:
+🔹Insufficient time for the drug to achieve peak effect
+🔹High inflammatory burden due to viral or bacterial infection
+🔹Ongoing infection not yet adequately controlled
+🔹Dehydration or excessive clothing
+🔹Inadequate absorption or dosing issues
+
+What should be done:
+🔹Do NOT repeat paracetamol immediately
+🔹Wait at least 4–6 22:00:06:468:04 before the next dose
+🔹Reassess temperature after some time
+🔹Maintain adequate hydration
+🔹Tepid sponging may help if the patient is uncomfortable
+🔹Monitor for warning signs such as hypotension, altered sensorium, respiratory distress, or persistent tachycardia
+
+Adult dosage:
+🔹500 mg–00:06:46 g every 6–8 22:00:06:468:04
+🔹Maximum daily dose: 4 g/day
+
+Remember: Fever reduction is not equivalent to treatment of the underlying disease. Persistent fever should always prompt evaluation for the underlying cause.
+     Drugs  : ['Paracetamol']
+     Sympts : ['Fever', 'viral or bacterial infection', 'infection']
+
+  📍 Step 3: Negation Detection
+
+┌─[STEP: Negation]
+│  IN  → symptoms=['Fever', 'viral or bacterial infection', 'infection']
+│  OUT → negated=[] | active=['Fever', 'viral or bacterial infection', 'infection']
+└────────────────────────────────────────────────────────────
+     Input  : symptoms=['Fever', 'viral or bacterial infection', 'infection']
+     Active : ['Fever', 'viral or bacterial infection', 'infection']
+     Negated: []
+
+  📍 Step 4: Sentiment Analysis
+
+┌─[STEP: Sentiment]
+│  IN  → text='Fever still 00:06:46000:06:46°F after taking 00:06:46 g Paracetamol? 
+
+Do not panic immediately. Paracetamol generally begins to act within 09:46:00:06:464, with peak effect occurring after 00:06:46–2 22:00:06:468:04. Persistence of fever early after administration does not necessarily indicate treatment failure.
+
+Possible reasons for persistent fever:
+🔹Insufficient time for the drug to achieve peak effect
+🔹High inflammatory burden due to viral or bacterial infection
+🔹Ongoing infection not yet adequately controlled
+🔹Dehydration or excessive clothing
+🔹Inadequate absorption or dosing issues
+
+What should be done:
+🔹Do NOT repeat paracetamol immediately
+🔹Wait at least 4–6 22:00:06:468:04 before the next dose
+🔹Reassess temperature after some time
+🔹Maintain adequate hydration
+🔹Tepid sponging may help if the patient is uncomfortable
+🔹Monitor for warning signs such as hypotension, altered sensorium, respiratory distress, or persistent tachycardia
+
+Adult dosage:
+🔹500 mg–00:06:46 g every 6–8 22:00:06:468:04
+🔹Maximum daily dose: 4 g/day
+
+Remember: Fever reduction is not equivalent to treatment of the underlying disease. Persistent fever should always prompt evaluation for the underlying cause.'
+│  OUT → label=NEUTRAL | score=0.640 | model=cardiffnlp/twitter-roberta-base-sentiment-latest
+└────────────────────────────────────────────────────────────
+     Input  : Fever still 00:06:46000:06:46°F after taking 00:06:46 g Paracetamol? 
+
+Do not panic immediately. Paracetamol generally begins to act within 09:46:00:06:464, with peak effect occurring after 00:06:46–2 22:00:06:468:04. Persistence of fever early after administration does not necessarily indicate treatment failure.
+
+Possible reasons for persistent fever:
+🔹Insufficient time for the drug to achieve peak effect
+🔹High inflammatory burden due to viral or bacterial infection
+🔹Ongoing infection not yet adequately controlled
+🔹Dehydration or excessive clothing
+🔹Inadequate absorption or dosing issues
+
+What should be done:
+🔹Do NOT repeat paracetamol immediately
+🔹Wait at least 4–6 22:00:06:468:04 before the next dose
+🔹Reassess temperature after some time
+🔹Maintain adequate hydration
+🔹Tepid sponging may help if the patient is uncomfortable
+🔹Monitor for warning signs such as hypotension, altered sensorium, respiratory distress, or persistent tachycardia
+
+Adult dosage:
+🔹500 mg–00:06:46 g every 6–8 22:00:06:468:04
+🔹Maximum daily dose: 4 g/day
+
+Remember: Fever reduction is not equivalent to treatment of the underlying disease. Persistent fever should always prompt evaluation for the underlying cause.
+     Result : 🟡 NEUTRAL (score=0.640)
+     Model  : cardiffnlp/twitter-roberta-base-sentiment-latest
+
+  📍 Step 5: Adverse Event Detection
+
+┌─[STEP: AE Detector]
+│  IN  → drugs=['Paracetamol'] | symptoms=['Fever', 'viral or bacterial infection', 'infection'] | sentiment=NEUTRAL
+│  OUT → ae_flag=False | conf=0.0 | reason=not_negative (got NEUTRAL)
+└────────────────────────────────────────────────────────────
+     ✅ No AE — gate 3 failed
+     Reason      : not_negative (got NEUTRAL)
+
+  ─────────────────────────────────────────────────────────────────
+  [TWITTER #2] Topic: dolo 650 paracetamol side effects
+  ─────────────────────────────────────────────────────────────────
+  URL: https://x.com/Rx_Kashim/status/2050110902418972880
+
+  📍 Step 0: Language Detection & Translation
+     Detected Language : en
+     Language is English — no translation needed
+
+┌─[STEP: Language Detection]
+│  IN  → text='Side effects are mainly due to fluid and electrolyte imbalance, including dizziness, weakness, dehydration, and a risk of high potassium, along with low sodium, low blood pressure, muscle cramps, and possible blood sugar changes.'
+│  OUT → lang=en — no translation
+└────────────────────────────────────────────────────────────
+
+  📍 Step 1: PII Guard
+
+┌─[STEP: PII Guard]
+│  IN  → text='Side effects are mainly due to fluid and electrolyte imbalance, including dizziness, weakness, dehydration, and a risk of high potassium, along with low sodium, low blood pressure, muscle cramps, and possible blood sugar changes.'
+│  OUT → redacted='Side effects are mainly due to fluid and electrolyte imbalance, including dizziness, weakness, dehydration, and a risk of high potassium, along with low sodium, low blood pressure, muscle cramps, and possible blood sugar changes.' | entities=[]
+└────────────────────────────────────────────────────────────
+     Input  : Side effects are mainly due to fluid and electrolyte imbalance, including dizziness, weakness, dehydration, and a risk of high potassium, along with low sodium, low blood pressure, muscle cramps, and possible blood sugar changes.
+     Output : Side effects are mainly due to fluid and electrolyte imbalance, including dizziness, weakness, dehydration, and a risk of high potassium, along with low sodium, low blood pressure, muscle cramps, and possible blood sugar changes.
+     PII    : none detected
+
+  📍 Step 2: NER — Drug & Symptom Extraction
+
+┌─[STEP: NER Pipeline]
+│  IN  → text='Side effects are mainly due to fluid and electrolyte imbalance, including dizziness, weakness, dehydration, and a risk of high potassium, along with low sodium, low blood pressure, muscle cramps, and possible blood sugar changes.'
+│  OUT → drugs=['potassium', 'sodium'] | symptoms=['dizziness, weakness, dehydration', 'low blood pressure, muscle cramps', 'dizziness', 'weakness']
+└────────────────────────────────────────────────────────────
+     Input  : Side effects are mainly due to fluid and electrolyte imbalance, including dizziness, weakness, dehydration, and a risk of high potassium, along with low sodium, low blood pressure, muscle cramps, and possible blood sugar changes.
+     Drugs  : ['potassium', 'sodium']
+     Sympts : ['dizziness, weakness, dehydration', 'low blood pressure, muscle cramps', 'dizziness', 'weakness']
+
+  📍 Step 3: Negation Detection
+
+┌─[STEP: Negation]
+│  IN  → symptoms=['dizziness, weakness, dehydration', 'low blood pressure, muscle cramps', 'dizziness', 'weakness']
+│  OUT → negated=[] | active=['dizziness, weakness, dehydration', 'low blood pressure, muscle cramps', 'dizziness', 'weakness']
+└────────────────────────────────────────────────────────────
+     Input  : symptoms=['dizziness, weakness, dehydration', 'low blood pressure, muscle cramps', 'dizziness', 'weakness']
+     Active : ['dizziness, weakness, dehydration', 'low blood pressure, muscle cramps', 'dizziness', 'weakness']
+     Negated: []
+
+  📍 Step 4: Sentiment Analysis
+
+┌─[STEP: Sentiment]
+│  IN  → text='Side effects are mainly due to fluid and electrolyte imbalance, including dizziness, weakness, dehydration, and a risk of high potassium, along with low sodium, low blood pressure, muscle cramps, and possible blood sugar changes.'
+│  OUT → label=NEGATIVE | score=0.695 | model=cardiffnlp/twitter-roberta-base-sentiment-latest
+└────────────────────────────────────────────────────────────
+     Input  : Side effects are mainly due to fluid and electrolyte imbalance, including dizziness, weakness, dehydration, and a risk of high potassium, along with low sodium, low blood pressure, muscle cramps, and possible blood sugar changes.
+     Result : 🔴 NEGATIVE (score=0.695)
+     Model  : cardiffnlp/twitter-roberta-base-sentiment-latest
+
+  📍 Step 5: Adverse Event Detection
+
+┌─[STEP: AE Detector]
+│  IN  → drugs=['potassium', 'sodium'] | symptoms=['dizziness, weakness, dehydration', 'low blood pressure, muscle cramps', 'dizziness', 'weakness'] | sentiment=NEGATIVE
+│  OUT → ae_flag=True | conf=0.6259 | reason=drug+symptom+negative_sentiment+no_negation
+└────────────────────────────────────────────────────────────
+     🚨 ADVERSE EVENT DETECTED
+     Drug        : potassium
+     Symptoms    : ['dizziness, weakness, dehydration', 'low blood pressure, muscle cramps', 'dizziness', 'weakness']
+     Confidence  : 0.626
+
+  ─────────────────────────────────────────────────────────────────
+  [TWITTER #3] Topic: dolo 650 paracetamol side effects
+  ─────────────────────────────────────────────────────────────────
+  URL: https://x.com/Darla2024/status/2051429914117918767
+
+  📍 Step 0: Language Detection & Translation
+     Detected Language : en
+     Language is English — no translation needed
+
+┌─[STEP: Language Detection]
+│  IN  → text='@Francinean35966 @ick_real It can cause migraines, breathing difficulties etc.'
+│  OUT → lang=en — no translation
+└────────────────────────────────────────────────────────────
+
+  📍 Step 1: PII Guard
+
+┌─[STEP: PII Guard]
+│  IN  → text='@Francinean35966 @ick_real It can cause migraines, breathing difficulties etc.'
+│  OUT → redacted='@leronald @collierrobert@example.org It can cause migraines, breathing difficulties etc.' | entities=['user_name', 'email']
+└────────────────────────────────────────────────────────────
+     Input  : @Francinean35966 @ick_real It can cause migraines, breathing difficulties etc.
+     Output : @leronald @collierrobert@example.org It can cause migraines, breathing difficulties etc.
+     PII    : ['user_name', 'email']
+
+  📍 Step 2: NER — Drug & Symptom Extraction
+
+┌─[STEP: NER Pipeline]
+│  IN  → text='@leronald @collierrobert@example.org It can cause migraines, breathing difficulties etc.'
+│  OUT → drugs=[] | symptoms=['migraines, breathing difficulties']
+└────────────────────────────────────────────────────────────
+     Input  : @leronald @collierrobert@example.org It can cause migraines, breathing difficulties etc.
+     Drugs  : []
+     Sympts : ['migraines, breathing difficulties']
+
+  📍 Step 3: Negation Detection
+
+┌─[STEP: Negation]
+│  IN  → symptoms=['migraines, breathing difficulties']
+│  OUT → negated=[] | active=['migraines, breathing difficulties']
+└────────────────────────────────────────────────────────────
+     Input  : symptoms=['migraines, breathing difficulties']
+     Active : ['migraines, breathing difficulties']
+     Negated: []
+
+  📍 Step 4: Sentiment Analysis
+
+┌─[STEP: Sentiment]
+│  IN  → text='@leronald @collierrobert@example.org It can cause migraines, breathing difficulties etc.'
+│  OUT → label=NEGATIVE | score=0.661 | model=cardiffnlp/twitter-roberta-base-sentiment-latest
+└────────────────────────────────────────────────────────────
+     Input  : @leronald @collierrobert@example.org It can cause migraines, breathing difficulties etc.
+     Result : 🔴 NEGATIVE (score=0.661)
+     Model  : cardiffnlp/twitter-roberta-base-sentiment-latest
+
+  📍 Step 5: Adverse Event Detection
+
+┌─[STEP: AE Detector]
+│  IN  → drugs=[] | symptoms=['migraines, breathing difficulties'] | sentiment=NEGATIVE
+│  OUT → ae_flag=False | conf=0.0 | reason=no_drug
+└────────────────────────────────────────────────────────────
+     ✅ No AE — gate 1 failed
+     Reason      : no_drug
+
+  ── Source: FORUM (3 posts) ────────────────────────────────
+
+  ─────────────────────────────────────────────────────────────────
+  [FORUM #1] 1mg User Review #1
+  ─────────────────────────────────────────────────────────────────
+  URL: https://www.myupchar.com/medicine/dub-obsurge-p37086347
+
+  📍 Step 0: Language Detection & Translation
+     Detected Language : en
+     Language is English — no translation needed
+
+┌─[STEP: Language Detection]
+│  IN  → text='- [![Cart](<Base64-Image-Removed>)0](https://www.myupchar.com/orders/details "Cart")'
+│  OUT → lang=en — no translation
+└────────────────────────────────────────────────────────────
+
+  📍 Step 1: PII Guard
+
+┌─[STEP: PII Guard]
+│  IN  → text='- [![Cart](<Base64-Image-Removed>)0](https://www.myupchar.com/orders/details "Cart")'
+│  OUT → redacted='- [![Cart](<Base64-Image-Removed>)0](https://russell.org/ "Cart")' | entities=['url']
+└────────────────────────────────────────────────────────────
+     Input  : - [![Cart](<Base64-Image-Removed>)0](https://www.myupchar.com/orders/details "Cart")
+     Output : - [![Cart](<Base64-Image-Removed>)0](https://russell.org/ "Cart")
+     PII    : ['url']
+
+  📍 Step 2: NER — Drug & Symptom Extraction
+
+┌─[STEP: NER Pipeline]
+│  IN  → text='- [![Cart](<Base64-Image-Removed>)0](https://russell.org/ "Cart")'
+│  OUT → drugs=[] | symptoms=[]
+└────────────────────────────────────────────────────────────
+     Input  : - [![Cart](<Base64-Image-Removed>)0](https://russell.org/ "Cart")
+     Drugs  : []
+     Sympts : []
+
+  📍 Step 3: Negation Detection
+     Skipped (no symptoms found)
+
+  📍 Step 4: Sentiment Analysis
+
+┌─[STEP: Sentiment]
+│  IN  → text='- [![Cart](<Base64-Image-Removed>)0](https://russell.org/ "Cart")'
+│  OUT → label=NEUTRAL | score=0.874 | model=cardiffnlp/twitter-roberta-base-sentiment-latest
+└────────────────────────────────────────────────────────────
+     Input  : - [![Cart](<Base64-Image-Removed>)0](https://russell.org/ "Cart")
+     Result : 🟡 NEUTRAL (score=0.874)
+     Model  : cardiffnlp/twitter-roberta-base-sentiment-latest
+
+  📍 Step 5: Adverse Event Detection
+
+┌─[STEP: AE Detector]
+│  IN  → drugs=[] | symptoms=[] | sentiment=NEUTRAL
+│  OUT → ae_flag=False | conf=0.0 | reason=no_drug
+└────────────────────────────────────────────────────────────
+     ✅ No AE — gate 1 failed
+     Reason      : no_drug
+
+  ─────────────────────────────────────────────────────────────────
+  [FORUM #2] 1mg User Review #2
+  ─────────────────────────────────────────────────────────────────
+  URL: https://www.myupchar.com/medicine/dub-obsurge-p37086347
+
+  📍 Step 0: Language Detection & Translation
+     Detected Language : hi
+     Translating from 'hi' → English via Sarvam AI...
+
+┌─[STEP: Language+Translation]
+│  IN  → lang=hi | original='- [![](<Base64-Image-Removed>) ऐप डाउनलोड करें](https://play.google.com/store/apps/details?id=com.myupchar.user)'
+│  OUT → translated='- [!Download the app [here](https://play.google.com/store/apps/details?id=com.myupchar.user)'
+└────────────────────────────────────────────────────────────
+     Original   : - [![](<Base64-Image-Removed>) ऐप डाउनलोड करें](https://play.google.com/store/apps/details?id=com.myupchar.user)
+     Translated : - [!Download the app [here](https://play.google.com/store/apps/details?id=com.myupchar.user)
+
+  📍 Step 1: PII Guard
+
+┌─[STEP: PII Guard]
+│  IN  → text='- [!Download the app [here](https://play.google.com/store/apps/details?id=com.myupchar.user)'
+│  OUT → redacted='- [!Download the app [here](http://srkaar-jhaadv.info/.com/store/apps/details?id=http://www.chetrii.com/.user)' | entities=['url', 'url', 'REGIONAL_LANGUAGE_FLAG']
+└────────────────────────────────────────────────────────────
+     Input  : - [!Download the app [here](https://play.google.com/store/apps/details?id=com.myupchar.user)
+     Output : - [!Download the app [here](http://srkaar-jhaadv.info/.com/store/apps/details?id=http://www.chetrii.com/.user)
+     PII    : ['url', 'url']
+
+  📍 Step 2: NER — Drug & Symptom Extraction
+
+┌─[STEP: NER Pipeline]
+│  IN  → text='- [!Download the app [here](http://srkaar-jhaadv.info/.com/store/apps/details?id=http://www.chetrii.com/.user)'
+│  OUT → drugs=[] | symptoms=[]
+└────────────────────────────────────────────────────────────
+     Input  : - [!Download the app [here](http://srkaar-jhaadv.info/.com/store/apps/details?id=http://www.chetrii.com/.user)
+     Drugs  : []
+     Sympts : []
+
+  📍 Step 3: Negation Detection
+     Skipped (no symptoms found)
+
+  📍 Step 4: Sentiment Analysis
+
+┌─[STEP: Sentiment]
+│  IN  → text='- [!Download the app [here](http://srkaar-jhaadv.info/.com/store/apps/details?id=http://www.chetrii.com/.user)'
+│  OUT → label=NEUTRAL | score=0.850 | model=cardiffnlp/twitter-roberta-base-sentiment-latest
+└────────────────────────────────────────────────────────────
+     Input  : - [!Download the app [here](http://srkaar-jhaadv.info/.com/store/apps/details?id=http://www.chetrii.com/.user)
+     Result : 🟡 NEUTRAL (score=0.850)
+     Model  : cardiffnlp/twitter-roberta-base-sentiment-latest
+
+  📍 Step 5: Adverse Event Detection
+
+┌─[STEP: AE Detector]
+│  IN  → drugs=[] | symptoms=[] | sentiment=NEUTRAL
+│  OUT → ae_flag=False | conf=0.0 | reason=no_drug
+└────────────────────────────────────────────────────────────
+     ✅ No AE — gate 1 failed
+     Reason      : no_drug
+
+  ─────────────────────────────────────────────────────────────────
+  [FORUM #3] 1mg User Review #3
+  ─────────────────────────────────────────────────────────────────
+  URL: https://www.myupchar.com/medicine/dub-obsurge-p37086347
+
+  📍 Step 0: Language Detection & Translation
+     Detected Language : hi
+     Translating from 'hi' → English via Sarvam AI...
+
+┌─[STEP: Language+Translation]
+│  IN  → lang=hi | original='स्वास्थ्य समस्याएँ](https://www.myupchar.com/medicine/dub-obsurge-p37086347)  - [पुरुष समस्याएं](https://www.myupchar.com/package/sexual_health)'
+│  OUT → translated='Health Issues](https://www.myupchar.com/medicine/dub-obsurge-p37086347)  - [Male Issues](https://www.myupchar.com/package/sexual_health)'
+└────────────────────────────────────────────────────────────
+     Original   : स्वास्थ्य समस्याएँ](https://www.myupchar.com/medicine/dub-obsurge-p37086347)  - [पुरुष समस्याएं](https://www.myupchar.com/package/sexual_health)
+     Translated : Health Issues](https://www.myupchar.com/medicine/dub-obsurge-p37086347)  - [Male Issues](https://www.myupchar.com/package/sexual_health)
+
+  📍 Step 1: PII Guard
+
+┌─[STEP: PII Guard]
+│  IN  → text='Health Issues](https://www.myupchar.com/medicine/dub-obsurge-p37086347)  - [Male Issues](https://www.myupchar.com/package/sexual_health)'
+│  OUT → redacted='Health Issues](https://deshpaandde-thaapaa.com/)  - [Male Issues](http://www.pillii.com/)' | entities=['url', 'url', 'REGIONAL_LANGUAGE_FLAG']
+└────────────────────────────────────────────────────────────
+     Input  : Health Issues](https://www.myupchar.com/medicine/dub-obsurge-p37086347)  - [Male Issues](https://www.myupchar.com/package/sexual_health)
+     Output : Health Issues](https://deshpaandde-thaapaa.com/)  - [Male Issues](http://www.pillii.com/)
+     PII    : ['url', 'url']
+
+  📍 Step 2: NER — Drug & Symptom Extraction
+
+┌─[STEP: NER Pipeline]
+│  IN  → text='Health Issues](https://deshpaandde-thaapaa.com/)  - [Male Issues](http://www.pillii.com/)'
+│  OUT → drugs=[] | symptoms=['Health Issues', 'Male Issues']
+└────────────────────────────────────────────────────────────
+     Input  : Health Issues](https://deshpaandde-thaapaa.com/)  - [Male Issues](http://www.pillii.com/)
+     Drugs  : []
+     Sympts : ['Health Issues', 'Male Issues']
+
+  📍 Step 3: Negation Detection
+
+┌─[STEP: Negation]
+│  IN  → symptoms=['Health Issues', 'Male Issues']
+│  OUT → negated=[] | active=['Health Issues', 'Male Issues']
+└────────────────────────────────────────────────────────────
+     Input  : symptoms=['Health Issues', 'Male Issues']
+     Active : ['Health Issues', 'Male Issues']
+     Negated: []
+
+  📍 Step 4: Sentiment Analysis
+
+┌─[STEP: Sentiment]
+│  IN  → text='Health Issues](https://deshpaandde-thaapaa.com/)  - [Male Issues](http://www.pillii.com/)'
+│  OUT → label=NEUTRAL | score=0.815 | model=cardiffnlp/twitter-roberta-base-sentiment-latest
+└────────────────────────────────────────────────────────────
+     Input  : Health Issues](https://deshpaandde-thaapaa.com/)  - [Male Issues](http://www.pillii.com/)
+     Result : 🟡 NEUTRAL (score=0.815)
+     Model  : cardiffnlp/twitter-roberta-base-sentiment-latest
+
+  📍 Step 5: Adverse Event Detection
+
+┌─[STEP: AE Detector]
+│  IN  → drugs=[] | symptoms=['Health Issues', 'Male Issues'] | sentiment=NEUTRAL
+│  OUT → ae_flag=False | conf=0.0 | reason=no_drug
+└────────────────────────────────────────────────────────────
+     ✅ No AE — gate 1 failed
+     Reason      : no_drug
+
+══════════════════════════════════════════════════════════════════════
+  Phase 4: Summary
+══════════════════════════════════════════════════════════════════════
+  Posts processed : 9
+  AE events found : 2
+  Time elapsed    : 61.6s
+  Full log saved  : logs\demo_pipeline_20260507_030301.log
+  Raw output saved: logs\demo_pipeline_20260507_030301_output.txt
+
+  🚨 Adverse Events Detected:
+     [REDDIT] Drug: Dolo 650 | Symptoms: ['UC', 'fever'] | Conf: 0.696
+       → https://www.reddit.com/r/UlcerativeColitis/comments/1ga2pl3/side_effects_of_dolo
+     [TWITTER] Drug: potassium | Symptoms: ['dizziness, weakness, dehydration', 'low blood pressure, muscle cramps', 'dizziness', 'weakness'] | Conf: 0.626
+       → https://x.com/Rx_Kashim/status/2050110902418972880
+
+──────────────────────────────────────────────────────────────────────
+  Demo complete. Full structured log → logs\demo_pipeline_20260507_030301.log
+──────────────────────────────────────────────────────────────────────

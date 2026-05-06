@@ -13,7 +13,7 @@ def run_demo():
         sys.stdout.reconfigure(encoding="utf-8")
 
     if "FAST_MODE" not in os.environ:
-        os.environ["FAST_MODE"] = "true"
+        os.environ["FAST_MODE"] = "false"
 
     print()
     print("╔══════════════════════════════════════════════════════╗")

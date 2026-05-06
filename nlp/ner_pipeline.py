@@ -72,6 +72,37 @@ def _keyword_search(text: str, keywords: list[str], already_found: set) -> list[
     return results
 
 
+def _merge_subwords(raw_entities: list[dict], text: str) -> list[dict]:
+    """Merge adjacent subword tokens based on start/end indices to fix broken aggregation."""
+    if not raw_entities:
+        return []
+        
+    sorted_ents = sorted([e for e in raw_entities if e.get("score", 0) > 0.60], key=lambda x: x.get("start", 0))
+    if not sorted_ents:
+        return []
+        
+    merged = []
+    current = sorted_ents[0].copy()
+    
+    for i in range(1, len(sorted_ents)):
+        ent = sorted_ents[i]
+        # Merge if they are adjacent or separated by a single space/punctuation
+        if ent.get("start", 0) <= current.get("end", 0) + 1:
+            current["end"] = max(current["end"], ent.get("end", 0))
+            current["score"] = min(current["score"], ent.get("score", 0))
+        else:
+            merged.append(current)
+            current = ent.copy()
+            
+    merged.append(current)
+    
+    # Extract clean text from the original string using the merged indices
+    for m in merged:
+        m["word"] = text[m["start"]:m["end"]].strip()
+        
+    return merged
+
+
 def extract_entities(text: str) -> dict:
     """
     Extract drugs and symptoms from text.
@@ -93,18 +124,18 @@ def extract_entities(text: str) -> dict:
     if drug_ner is not None:
         try:
             raw = drug_ner(truncated)
-            for ent in raw:
-                if ent.get("score", 0) > 0.75:
-                    ent_text = ent.get("word", "").strip()
-                    if ent_text and ent_text.lower() not in found_drugs:
-                        drugs.append({
-                            "text": ent_text,
-                            "score": round(ent["score"], 4),
-                            "start": ent.get("start", 0),
-                            "end": ent.get("end", 0),
-                            "source": "model",
-                        })
-                        found_drugs.add(ent_text.lower())
+            merged = _merge_subwords(raw, truncated)
+            for ent in merged:
+                ent_text = ent.get("word", "")
+                if ent_text and ent_text.lower() not in found_drugs:
+                    drugs.append({
+                        "text": ent_text,
+                        "score": round(float(ent["score"]), 4),
+                        "start": ent.get("start", 0),
+                        "end": ent.get("end", 0),
+                        "source": "model",
+                    })
+                    found_drugs.add(ent_text.lower())
         except Exception as e:
             logger.warning(f"Drug NER model error: {e}")
 
@@ -112,18 +143,18 @@ def extract_entities(text: str) -> dict:
     if disease_ner is not None:
         try:
             raw = disease_ner(truncated)
-            for ent in raw:
-                if ent.get("score", 0) > 0.75:
-                    ent_text = ent.get("word", "").strip()
-                    if ent_text and ent_text.lower() not in found_symptoms:
-                        symptoms.append({
-                            "text": ent_text,
-                            "score": round(ent["score"], 4),
-                            "start": ent.get("start", 0),
-                            "end": ent.get("end", 0),
-                            "source": "model",
-                        })
-                        found_symptoms.add(ent_text.lower())
+            merged = _merge_subwords(raw, truncated)
+            for ent in merged:
+                ent_text = ent.get("word", "")
+                if ent_text and ent_text.lower() not in found_symptoms:
+                    symptoms.append({
+                        "text": ent_text,
+                        "score": round(float(ent["score"]), 4),
+                        "start": ent.get("start", 0),
+                        "end": ent.get("end", 0),
+                        "source": "model",
+                    })
+                    found_symptoms.add(ent_text.lower())
         except Exception as e:
             logger.warning(f"Disease NER model error: {e}")
 
@@ -140,7 +171,7 @@ if __name__ == "__main__":
         sys.stdout.reconfigure(encoding="utf-8")
 
     import os
-    os.environ["FAST_MODE"] = "true"
+    os.environ["FAST_MODE"] = "false"
 
     tests = [
         "I took Dolo 650 and got severe nausea and headache",
