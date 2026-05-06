@@ -4,6 +4,11 @@ Uses Redis as broker. Optional — system works without Celery via BackgroundTas
 """
 
 import sys
+import os
+
+# Add current directory to sys.path so Celery worker can import 'tasks' and 'nlp' modules
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
 from celery import Celery
 from config import get_settings
 from logger_config import setup_global_logging
@@ -27,6 +32,13 @@ celery_app.conf.update(
     task_track_started=True,
     task_acks_late=True,
     worker_prefetch_multiplier=1,
+    # Fail fast when Redis is unavailable — the crawlers catch this exception
+    # gracefully and continue without NLP queuing.  Without these two settings
+    # Celery retries 20 times (~20 seconds) and floods stdout with retry lines
+    # which corrupt the MCP JSONRPC stream.
+    broker_connection_retry=False,
+    broker_connection_retry_on_startup=False,
+    broker_connection_timeout=2,
 )
 
 

@@ -276,6 +276,13 @@ def ingest_reddit_json(project_id: int = 1) -> dict:
             # PII redaction
             pii_result = redact_pii(text, lang)
             redacted_text = pii_result["redacted_text"]
+            logger.info(f"[{thread_id}] [PII IN]: {text[:50]}... -> [PII OUT]: {redacted_text[:50]}...")
+
+            # Translate to English for downstream NLP
+            from nlp.translator import translate_to_english
+            english_text = translate_to_english(redacted_text, lang)
+            if english_text != redacted_text:
+                logger.info(f"[{thread_id}] [TRANS IN ({lang})]: {redacted_text[:50]}... -> [TRANS OUT (en)]: {english_text[:50]}...")
 
             # Hash author
             author_hash = _hash_author(post.get("author", "anonymous"))
@@ -289,7 +296,7 @@ def ingest_reddit_json(project_id: int = 1) -> dict:
                 except (ValueError, TypeError, OSError):
                     pass
 
-            # Insert RawPost
+            # Insert RawPost (store native language redacted text)
             raw_post = RawPost(
                 project_id=project_id,
                 thread_id=thread_id,
@@ -304,17 +311,23 @@ def ingest_reddit_json(project_id: int = 1) -> dict:
             session.add(raw_post)
             session.flush()  # get raw_post.id
 
-            # NLP pipeline
-            entities = extract_entities(redacted_text)
-            sentiment = analyze_sentiment(redacted_text, lang)
-            ae_result = detect_ae(redacted_text, lang, entities=entities, sentiment=sentiment)
+            # NLP pipeline (using English text)
+            entities = extract_entities(english_text)
+            logger.info(f"[{thread_id}] [NER OUT]: {len(entities['drugs'])} drugs, {len(entities['symptoms'])} symptoms")
+            
+            sentiment = analyze_sentiment(english_text, "en")
+            logger.info(f"[{thread_id}] [SENTIMENT OUT]: {sentiment['label']} ({sentiment['score']})")
+            
+            ae_result = detect_ae(english_text, "en", entities=entities, sentiment=sentiment)
+            logger.info(f"[{thread_id}] [AE OUT]: Flag={ae_result['ae_flag']}, Reason={ae_result['reason']}")
+            
             thread_result = score_thread(ae_result, [])  # no replies in current data
 
             # Insert ProcessedPost
             processed = ProcessedPost(
                 raw_post_id=raw_post.id,
                 project_id=project_id,
-                redacted_text=redacted_text,
+                redacted_text=english_text,
                 entities_json=json.dumps(entities, ensure_ascii=False),
                 sentiment_json=json.dumps(sentiment, ensure_ascii=False),
                 negation_json=json.dumps({
@@ -407,6 +420,13 @@ def ingest_twitter_json(project_id: int = 1) -> dict:
             # PII redaction
             pii_result = redact_pii(text, lang)
             redacted_text = pii_result["redacted_text"]
+            logger.info(f"[{thread_id}] [PII IN]: {text[:50]}... -> [PII OUT]: {redacted_text[:50]}...")
+
+            # Translate to English for downstream NLP
+            from nlp.translator import translate_to_english
+            english_text = translate_to_english(redacted_text, lang)
+            if english_text != redacted_text:
+                logger.info(f"[{thread_id}] [TRANS IN ({lang})]: {redacted_text[:50]}... -> [TRANS OUT (en)]: {english_text[:50]}...")
 
             # Hash author
             author_hash = _hash_author(post.get("author", "anonymous"))
@@ -439,17 +459,23 @@ def ingest_twitter_json(project_id: int = 1) -> dict:
             session.add(raw_post)
             session.flush()
 
-            # NLP pipeline
-            entities = extract_entities(redacted_text)
-            sentiment = analyze_sentiment(redacted_text, lang)
-            ae_result = detect_ae(redacted_text, lang, entities=entities, sentiment=sentiment)
+            # NLP pipeline (using English text)
+            entities = extract_entities(english_text)
+            logger.info(f"[{thread_id}] [NER OUT]: {len(entities['drugs'])} drugs, {len(entities['symptoms'])} symptoms")
+            
+            sentiment = analyze_sentiment(english_text, "en")
+            logger.info(f"[{thread_id}] [SENTIMENT OUT]: {sentiment['label']} ({sentiment['score']})")
+            
+            ae_result = detect_ae(english_text, "en", entities=entities, sentiment=sentiment)
+            logger.info(f"[{thread_id}] [AE OUT]: Flag={ae_result['ae_flag']}, Reason={ae_result['reason']}")
+            
             thread_result = score_thread(ae_result, [])
 
             # Insert ProcessedPost
             processed = ProcessedPost(
                 raw_post_id=raw_post.id,
                 project_id=project_id,
-                redacted_text=redacted_text,
+                redacted_text=english_text,
                 entities_json=json.dumps(entities, ensure_ascii=False),
                 sentiment_json=json.dumps(sentiment, ensure_ascii=False),
                 negation_json=json.dumps({
@@ -501,7 +527,7 @@ if __name__ == "__main__":
         sys.stdout.reconfigure(encoding="utf-8")
 
     import os
-    os.environ["FAST_MODE"] = "true"
+    os.environ["FAST_MODE"] = "false"
 
     from database import init_db
     init_db()

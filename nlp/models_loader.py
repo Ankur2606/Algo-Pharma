@@ -12,6 +12,11 @@ from logging.handlers import RotatingFileHandler
 
 _models: dict = {}
 from pathlib import Path
+import transformers
+
+# Suppress expected pooler weight warnings for RoBERTa
+transformers.logging.set_verbosity_error()
+
  
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
@@ -24,11 +29,16 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
     handlers=[
         logging.FileHandler(LOG_FILE, encoding="utf-8"),
-        logging.StreamHandler(sys.stdout),
+        logging.StreamHandler(sys.stderr),  # MUST be stderr — stdout is reserved for MCP JSONRPC
     ],
 )
 
 logger = logging.getLogger(__name__)
+
+# Suppress noisy third-party HTTP and file lock logs
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("filelock").setLevel(logging.WARNING)
+logging.getLogger("huggingface_hub").setLevel(logging.WARNING)
  
 
 def load_all_models() -> dict:
@@ -40,6 +50,9 @@ def load_all_models() -> dict:
     fast_mode = os.getenv("FAST_MODE", "false").lower() in ("true", "1", "yes")
 
     # ── 1. spaCy (always needed for negation) ─────────────
+    # en_core_web_sm  =  12 MB  (tok2vec + parser + NER) ← SMALLEST viable option
+    # en_core_web_md  =  43 MB  (adds word vectors)
+    # en_core_web_lg  = 741 MB  ← do NOT use
     try:
         import spacy
         _models["spacy"] = spacy.load("en_core_web_sm")
@@ -59,8 +72,6 @@ def load_all_models() -> dict:
 
     if fast_mode:
         logger.info("⚡ FAST_MODE active — lightweight models only")
-        _models["pii_model"] = None
-        _models["pii_tokenizer"] = None
         _models["drug_ner"] = None
         _models["disease_ner"] = None
         _models["sentiment_model"] = None
@@ -69,31 +80,9 @@ def load_all_models() -> dict:
 
     _models["fast_mode"] = False
 
-    # ── 2. OpenMed Nemotron PII ──────────────────────────
-    try:
-        from transformers import AutoModelForTokenClassification, AutoTokenizer
-        # Swapped from GPU-heavy OpenMed/privacy-filter-nemotron to CPU-friendly piiranha for faster startup
-        pii_model_id = "iiiorg/piiranha-v1-detect-personal-information"
-        try:
-            _models["pii_tokenizer"] = AutoTokenizer.from_pretrained(pii_model_id, trust_remote_code=True)
-            _models["pii_model"] = AutoModelForTokenClassification.from_pretrained(
-                pii_model_id, trust_remote_code=True
-            )
-            _models["pii_model"].to("cpu")
-            logger.info("✅ PII model loaded")
-        except Exception as e:
-            logger.warning(f"⚠️ Primary PII model failed, trying fallback: {e}")
-            fallback_id = "OpenMed/OpenMed-PII-SuperClinical-Small-44M-v1"
-            _models["pii_tokenizer"] = AutoTokenizer.from_pretrained(fallback_id, trust_remote_code=True)
-            _models["pii_model"] = AutoModelForTokenClassification.from_pretrained(
-                fallback_id, trust_remote_code=True
-            )
-            _models["pii_model"].to("cpu")
-            logger.info("✅ Fallback PII model loaded")
-    except Exception as e:
-        logger.warning(f"⚠️  PII model unavailable (regex-only PII will run): {e}")
-        _models["pii_model"] = None
-        _models["pii_tokenizer"] = None
+    # ── 2. OpenMed PII (Handled dynamically in pii_guard.py) ──────────────
+    # OpenMed manages its own cache and conditional CPU/GPU loading per-language
+    # so we no longer pre-load it here in the central models_loader.
 
     # ── 3. Drug NER ──────────────────────────────────────
     try:

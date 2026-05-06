@@ -117,7 +117,7 @@ if __name__ == "__main__":
         sys.stdout.reconfigure(encoding="utf-8")
 
     import os
-    os.environ["FAST_MODE"] = "true"
+    os.environ["FAST_MODE"] = "flase"
 
     tests = [
         # (text, expected_ae_flag, expected_gate_or_None)

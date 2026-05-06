@@ -3,7 +3,7 @@ import sys
 import os
 
 # Enable FAST_MODE to prevent downloading 2GB+ of HuggingFace models during MCP tool calls
-os.environ["FAST_MODE"] = "true"
+os.environ["FAST_MODE"] = "false"
 
 # Redirect stderr to a file to prevent OS pipe deadlocks on Windows
 # We use Python-level redirection as os.dup2 can fail with 'Invalid Handle' in some Windows environments

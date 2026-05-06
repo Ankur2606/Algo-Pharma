@@ -103,7 +103,7 @@ if __name__ == "__main__":
         sys.stdout.reconfigure(encoding="utf-8")
 
     import os
-    os.environ["FAST_MODE"] = "true"
+    os.environ["FAST_MODE"] = "false"
 
     tests = [
         ("no nausea", [{"text": "nausea", "start": 3}], True),

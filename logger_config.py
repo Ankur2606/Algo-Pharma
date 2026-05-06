@@ -13,8 +13,8 @@ def setup_global_logging():
 
     formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
     
-    # Console handler
-    ch = logging.StreamHandler(sys.stdout)
+    # Console handler — MUST use stderr; stdout is reserved for MCP JSONRPC
+    ch = logging.StreamHandler(sys.stderr)
     ch.setFormatter(formatter)
     root_logger.addHandler(ch)
     

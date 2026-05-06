@@ -25,14 +25,14 @@ if __name__ == "__main__":
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 SEARCH_QUERY = "dolo 365 medicine side effects"      # your search term
-MAX_ITEMS    = 100                       # max items to fetch (max 100 per request)
+MAX_ITEMS    = 20                       # max items to fetch (max 100 per request)
 SORT         = "relevance"              # relevance | new | top | comments
 TIME_FILTER  = "all"                    # all | year | month | week | day | hour
 OUTPUT_FILE  = "reddit_dolo365_results.json"
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-def scrape_reddit(query: str, max_items: int = 100) -> list[dict]:
+def scrape_reddit(query: str, max_items: int = 20) -> list[dict]:
     print(f"🔗 Connecting directly to Reddit API...", file=sys.stderr)
     
     # Construct the URL

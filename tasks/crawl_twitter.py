@@ -5,9 +5,23 @@ Calls twitter_crawler.py and ingests results into the DB.
 
 import sys
 import json
+import socket
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def _redis_reachable(url: str, timeout: float = 0.1) -> bool:
+    """Return True only if Redis TCP port is open — 100ms probe, no Celery import."""
+    try:
+        from urllib.parse import urlparse
+        p = urlparse(url)
+        host = p.hostname or "localhost"
+        port = p.port or 6379
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
 
 
 def crawl_twitter(project_id: int = 1, query: str = "dolo 650 medicine side effects") -> dict:
@@ -49,17 +63,32 @@ def crawl_twitter(project_id: int = 1, query: str = "dolo 650 medicine side effe
 
         # ── Phase 2: Dispatch NLP + signal detection asynchronously ─────────
         # Heavy transformer inference runs in a Celery worker, not here.
-        # If Celery / Redis is unavailable we log and continue — NLP can be
-        # triggered manually later via task_ingest_all / task_detect_signals.
-        try:
-            from celery_app import task_ingest_all, task_detect_signals
-            task_ingest_all.delay(project_id)
-            task_detect_signals.delay(project_id)
-            logger.info("✅ NLP tasks queued asynchronously via Celery")
-        except Exception as celery_err:
-            logger.warning(
-                f"⚠️  Celery unavailable — NLP deferred (run task_ingest_all manually): {celery_err}"
-            )
+        # Fast 100ms TCP probe avoids the 2s Celery timeout when Redis is down.
+        from config import get_settings as _gs
+        if _redis_reachable(_gs().REDIS_URL):
+            try:
+                from celery_app import task_ingest_all, task_detect_signals
+                res_ingest = task_ingest_all.delay(project_id)
+                res_detect = task_detect_signals.delay(project_id)
+                logger.info("✅ NLP tasks queued asynchronously via Celery")
+                
+                import threading
+                def _track_celery(res, name):
+                    try:
+                        logger.info(f"⏳ Tracking Celery [{name}] in background...")
+                        data = res.get(timeout=300)
+                        logger.info(f"✅ Celery [{name}] COMPLETE: {data}")
+                    except Exception as e:
+                        logger.error(f"❌ Celery [{name}] FAILED/TIMEOUT: {e}")
+                        
+                threading.Thread(target=_track_celery, args=(res_ingest, "ingest_all"), daemon=True).start()
+                threading.Thread(target=_track_celery, args=(res_detect, "detect_signals"), daemon=True).start()
+            except Exception as celery_err:
+                logger.warning(
+                    f"⚠️  Celery dispatch failed: {celery_err}"
+                )
+        else:
+            logger.info("ℹ️  Redis not running — NLP skipped (run task_ingest_all manually)")
 
         with SessionLocal() as session:
             log = session.get(CrawlLog, log_id)
@@ -88,7 +117,7 @@ if __name__ == "__main__":
         sys.stdout.reconfigure(encoding="utf-8")
 
     import os
-    os.environ["FAST_MODE"] = "true"
+    os.environ["FAST_MODE"] = "false"
 
     from database import init_db
     init_db()
