@@ -6,6 +6,9 @@ Uses Redis as broker. Optional — system works without Celery via BackgroundTas
 import sys
 import os
 
+# Force FULL mode for Celery workers (they need all NLP models)
+os.environ["FAST_MODE"] = "false"
+
 # Add current directory to sys.path so Celery worker can import 'tasks' and 'nlp' modules
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
@@ -22,6 +25,16 @@ celery_app = Celery(
     broker=settings.REDIS_URL,
     backend=settings.REDIS_URL,
 )
+
+# Configure SSL for Upstash Redis
+if settings.REDIS_URL.startswith("rediss://"):
+    import ssl
+    celery_app.conf.broker_use_ssl = {
+        'ssl_cert_reqs': ssl.CERT_REQUIRED
+    }
+    celery_app.conf.redis_backend_use_ssl = {
+        'ssl_cert_reqs': ssl.CERT_REQUIRED
+    }
 
 celery_app.conf.update(
     task_serializer="json",
@@ -40,6 +53,29 @@ celery_app.conf.update(
     broker_connection_retry_on_startup=False,
     broker_connection_timeout=2,
 )
+
+
+# Pre-load NLP models when worker starts
+@celery_app.on_after_configure.connect
+def setup_models(sender, **kwargs):
+    """Load all NLP models when Celery worker starts."""
+    # Only load models if we're actually running as a Celery worker
+    # Not when celery_app is imported by other processes (like MCP server)
+    import sys
+    if 'celery' not in sys.argv[0].lower() and 'worker' not in ' '.join(sys.argv):
+        return
+    
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info("🔄 Loading NLP models for Celery worker...")
+    
+    try:
+        from nlp.models_loader import load_all_models
+        models = load_all_models()
+        logger.info(f"✅ NLP models loaded | keys={list(models.keys())}")
+    except Exception as e:
+        logger.error(f"❌ Failed to load models: {e}")
+        raise
 
 
 @celery_app.task(name="algopharma.ingest_all")
@@ -100,5 +136,31 @@ if __name__ == "__main__":
 
     print("✅ Celery app configured")
     print(f"  Broker: {settings.REDIS_URL}")
+    
+    # Test Redis connection
+    try:
+        import redis
+        from urllib.parse import urlparse
+        
+        parsed = urlparse(settings.REDIS_URL)
+        is_ssl = parsed.scheme == "rediss"
+        
+        r = redis.Redis(
+            host=parsed.hostname,
+            port=parsed.port or 6379,
+            password=parsed.password,
+            ssl=is_ssl,
+            ssl_cert_reqs="required" if is_ssl else None,
+            decode_responses=True,
+            socket_connect_timeout=5
+        )
+        r.ping()
+        print("  ✅ Redis connection: SUCCESS")
+        print(f"     Host: {parsed.hostname}")
+        print(f"     Port: {parsed.port or 6379}")
+        print(f"     SSL: {'Enabled' if is_ssl else 'Disabled'}")
+    except Exception as e:
+        print(f"  ❌ Redis connection: FAILED - {e}")
+    
     print(f"  Tasks registered: {list(celery_app.tasks.keys())}")
     print("  Start worker: celery -A celery_app worker --loglevel=info")

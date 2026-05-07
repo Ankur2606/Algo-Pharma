@@ -57,10 +57,11 @@ def ingest_reddit_json_raw(project_id: int = 1) -> dict:
             url = post.get("permalink", post.get("url", ""))
             thread_id = post.get("id", str(i))
 
-            # Deduplicate — skip posts already stored
+            # Deduplicate — skip posts already stored for THIS project
             existing = session.query(RawPost).filter(
                 RawPost.thread_id == thread_id,
-                RawPost.source_platform == "reddit"
+                RawPost.source_platform == "reddit",
+                RawPost.project_id == project_id
             ).first()
             if existing:
                 skipped += 1
@@ -149,10 +150,11 @@ def ingest_twitter_json_raw(project_id: int = 1) -> dict:
             url = post.get("url", post.get("permalink", ""))
             thread_id = post.get("id", str(i))
 
-            # Deduplicate — skip posts already stored
+            # Deduplicate — skip posts already stored for THIS project
             existing = session.query(RawPost).filter(
                 RawPost.thread_id == thread_id,
-                RawPost.source_platform == "twitter"
+                RawPost.source_platform == "twitter",
+                RawPost.project_id == project_id
             ).first()
             if existing:
                 skipped += 1
@@ -249,10 +251,11 @@ def ingest_reddit_json(project_id: int = 1) -> dict:
             url = post.get("permalink", post.get("url", ""))
             thread_id = post.get("id", str(i))
 
-            # Deduplicate
+            # Deduplicate per project
             existing = session.query(RawPost).filter(
                 RawPost.thread_id == thread_id,
-                RawPost.source_platform == "reddit"
+                RawPost.source_platform == "reddit",
+                RawPost.project_id == project_id
             ).first()
             if existing:
                 skipped += 1
@@ -393,10 +396,11 @@ def ingest_twitter_json(project_id: int = 1) -> dict:
             url = post.get("url", post.get("permalink", ""))
             thread_id = post.get("id", str(i))
 
-            # Deduplicate
+            # Deduplicate per project
             existing = session.query(RawPost).filter(
                 RawPost.thread_id == thread_id,
-                RawPost.source_platform == "twitter"
+                RawPost.source_platform == "twitter",
+                RawPost.project_id == project_id
             ).first()
             if existing:
                 skipped += 1
