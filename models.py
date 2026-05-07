@@ -9,7 +9,7 @@ from sqlalchemy import (
     String, Integer, Float, Boolean, Text, DateTime, ForeignKey, JSON,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-
+from sqlalchemy.dialects.postgresql import JSONB
 
 def _utcnow():
     return datetime.now(timezone.utc)
@@ -25,6 +25,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(20), default="viewer")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
@@ -35,6 +36,7 @@ class Project(Base):
     __tablename__ = "projects"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
     description: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
@@ -50,7 +52,7 @@ class Keyword(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     project_id: Mapped[int] = mapped_column(Integer, ForeignKey("projects.id"), nullable=False)
     term: Mapped[str] = mapped_column(String(200), nullable=False)
-    synonyms: Mapped[str] = mapped_column(Text, default="")  # JSON list as text
+    synonyms: Mapped[list] = mapped_column(JSONB, default=list)  # JSON list
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     project = relationship("Project", back_populates="keywords")
@@ -64,7 +66,7 @@ class Source(Base):
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     platform: Mapped[str] = mapped_column(String(50), nullable=False)  # reddit, twitter, forum
     url: Mapped[str] = mapped_column(String(500), default="")
-    config_json: Mapped[str] = mapped_column(Text, default="{}")
+    config_json: Mapped[dict] = mapped_column(JSONB, default=dict)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
@@ -121,15 +123,15 @@ class ProcessedPost(Base):
     raw_post_id: Mapped[int] = mapped_column(Integer, ForeignKey("raw_posts.id"), unique=True, nullable=False)
     project_id: Mapped[int] = mapped_column(Integer, ForeignKey("projects.id"), nullable=False)
     redacted_text: Mapped[str] = mapped_column(Text, default="")
-    entities_json: Mapped[str] = mapped_column(Text, default="{}")    # JSON: {drugs:[], symptoms:[]}
-    sentiment_json: Mapped[str] = mapped_column(Text, default="{}")   # JSON: {label, score, model}
-    negation_json: Mapped[str] = mapped_column(Text, default="{}")    # JSON: {symptom: bool}
+    entities_json: Mapped[dict] = mapped_column(JSONB, default=dict)    # JSON: {drugs:[], symptoms:[]}
+    sentiment_json: Mapped[dict] = mapped_column(JSONB, default=dict)   # JSON: {label, score, model}
+    negation_json: Mapped[dict] = mapped_column(JSONB, default=dict)    # JSON: {symptom: bool}
     ae_flag: Mapped[bool] = mapped_column(Boolean, default=False)
     ae_confidence: Mapped[float] = mapped_column(Float, default=0.0)
     ae_reason: Mapped[str] = mapped_column(Text, default="")
     thread_score: Mapped[float] = mapped_column(Float, default=0.0)
     thread_color: Mapped[str] = mapped_column(String(10), default="red")
-    pii_entities_found: Mapped[str] = mapped_column(Text, default="[]")
+    pii_entities_found: Mapped[list] = mapped_column(JSONB, default=list)
     processed_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     raw_post = relationship("RawPost", back_populates="processed")
@@ -148,7 +150,7 @@ class Signal(Base):
     ror: Mapped[float] = mapped_column(Float, default=0.0)
     chi_square: Mapped[float] = mapped_column(Float, default=0.0)
     strength: Mapped[str] = mapped_column(String(20), default="WEAK")  # STRONG / MODERATE / WEAK
-    supporting_post_ids: Mapped[str] = mapped_column(Text, default="[]")  # JSON list of post IDs
+    supporting_post_ids: Mapped[list] = mapped_column(JSONB, default=list)  # JSON list of post IDs
     first_seen: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     last_updated: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 

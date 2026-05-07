@@ -2,7 +2,6 @@
 AlgoPharma — Health & agentic API router.
 """
 
-import json
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -53,7 +52,7 @@ def approve_forum(body: ForumApproveRequest, db: Session = Depends(get_db)):
     # Save approved forum config to sources table
     existing = db.query(Source).filter(Source.url == body.url).first()
     if existing:
-        existing.config_json = json.dumps(body.config)
+        existing.config_json = body.config  # JSONB — pass dict directly
         existing.is_active = True
         db.commit()
         return {"status": "updated", "source_id": existing.id}
@@ -62,7 +61,7 @@ def approve_forum(body: ForumApproveRequest, db: Session = Depends(get_db)):
         name=body.config.get("forum_type", "custom") + " forum",
         platform="forum",
         url=body.url,
-        config_json=json.dumps(body.config),
+        config_json=body.config,  # JSONB — pass dict directly
         is_active=True,
     )
     db.add(source)

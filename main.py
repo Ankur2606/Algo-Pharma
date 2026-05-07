@@ -6,34 +6,47 @@ Lifespan startup: init DB + load NLP models.
 import sys
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from pathlib import Path
 
 from logger_config import setup_global_logging
+
+# ─────────────────────────────────────────────────────────────
+# LOGGING
+# ─────────────────────────────────────────────────────────────
 setup_global_logging()
 
-import logging
 logger = logging.getLogger(__name__)
 
 
+# ─────────────────────────────────────────────────────────────
+# APP LIFESPAN
+# ─────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Startup: create tables and load models."""
+    """Startup: initialize DB + load NLP models."""
+
     if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
         sys.stdout.reconfigure(encoding="utf-8")
 
     logger.info("🚀 AlgoPharma starting up...")
 
+    # Initialize database tables
     from database import init_db
+
     init_db()
+
     logger.info("✅ Database tables ready")
 
+    # Load NLP models
     from nlp.models_loader import load_all_models
+
     load_all_models()
+
     logger.info("✅ NLP models loaded")
 
     yield
@@ -41,6 +54,9 @@ async def lifespan(app: FastAPI):
     logger.info("👋 AlgoPharma shutting down")
 
 
+# ─────────────────────────────────────────────────────────────
+# FASTAPI APP
+# ─────────────────────────────────────────────────────────────
 app = FastAPI(
     title="AlgoPharma",
     description="Real-time pharmacovigilance social listening platform",
@@ -48,7 +64,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ── CORS (allow all origins for prototype) ───────────────
+
+# ─────────────────────────────────────────────────────────────
+# CORS
+# ─────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -57,52 +76,86 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Register routers ─────────────────────────────────────
+
+# ─────────────────────────────────────────────────────────────
+# REGISTER ROUTERS
+# ─────────────────────────────────────────────────────────────
+from api.user_auth import router as auth_router
 from api.projects import router as projects_router
 from api.signals import router as signals_router
 from api.health import router as health_router
 from api.chat import router as chat_router
 from api.results import router as results_router
+from api.analytics import router as analytics_router
 
+# Public auth endpoints
+app.include_router(auth_router)
+
+# Protected/business endpoints
 app.include_router(projects_router)
 app.include_router(signals_router)
 app.include_router(health_router)
 app.include_router(chat_router)
 app.include_router(results_router)
+app.include_router(analytics_router)
 
-# ── Serve frontend static files ───────────────────────────
+
+# ─────────────────────────────────────────────────────────────
+# STATIC FILES
+# ─────────────────────────────────────────────────────────────
 _static_dir = Path(__file__).parent / "static"
+
 _static_dir.mkdir(exist_ok=True)
-app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
+
+app.mount(
+    "/static",
+    StaticFiles(directory=str(_static_dir)),
+    name="static"
+)
 
 
-# ── Root endpoint ────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+# ROOT ENDPOINT
+# ─────────────────────────────────────────────────────────────
 @app.get("/")
 def root():
-    """Serve the chatbot frontend."""
+    """Serve frontend UI."""
+
     html_path = Path(__file__).parent / "static" / "index.html"
+
     if html_path.exists():
         return FileResponse(str(html_path))
-    # Fallback JSON if static file missing
-    from config import get_settings
-    settings = get_settings()
+
     return {
         "service": "AlgoPharma",
         "version": "0.1.0",
         "docs": "/docs",
-        "ui": "Place index.html in static/ directory",
+        "status": "running",
     }
 
 
-# ── Demo endpoint ───────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+# DEMO PIPELINE ENDPOINT
+# ─────────────────────────────────────────────────────────────
 @app.get("/api/demo/run")
 def run_demo():
-    """Run full ingestion + signal detection pipeline and return summary."""
+    """
+    Run full ingestion + signal detection pipeline.
+    Useful for testing/debugging.
+    """
+
     from tasks.ingest_existing import ingest_all
     from nlp.signal_detector import detect_signals
 
+    logger.info("🚀 Starting demo pipeline")
+
     ingestion = ingest_all()
+
+    logger.info("✅ Ingestion completed")
+
     signals = detect_signals()
+
+    logger.info(f"✅ Signal detection completed: {len(signals)} signals found")
 
     return {
         "ingestion": ingestion,
@@ -111,17 +164,37 @@ def run_demo():
     }
 
 
-# ── Crawl trigger ───────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+# MANUAL CRAWL TRIGGER
+# ─────────────────────────────────────────────────────────────
 @app.post("/api/crawl/trigger/{project_id}")
 def trigger_crawl(project_id: int, background_tasks: BackgroundTasks):
-    """Manually trigger ingestion as a background task."""
+    """
+    Trigger ingestion pipeline manually in background.
+    """
+
     from tasks.ingest_existing import ingest_all
 
+    logger.info(f"🚀 Crawl triggered for project {project_id}")
+
     background_tasks.add_task(ingest_all, project_id)
-    return {"task_started": True, "message": f"Ingestion started for project {project_id}"}
+
+    return {
+        "task_started": True,
+        "project_id": project_id,
+        "message": f"Ingestion started for project {project_id}",
+    }
 
 
-# ── Run server ───────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+# SERVER ENTRYPOINT
+# ─────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+    )

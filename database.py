@@ -6,7 +6,7 @@ Synchronous engine, SQLite, check_same_thread=False.
 import sys
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, Session
-
+from sqlalchemy.dialects.postgresql import JSONB
 from config import get_settings
 
 
@@ -55,3 +55,4 @@ if __name__ == "__main__":
         result = session.execute(__import__("sqlalchemy").text("SELECT 1"))
         assert result.scalar() == 1
     print("✅ Database engine OK — tables created")
+

@@ -1,0 +1,1 @@
+{"timestamp_utc": "2026-05-07T14:26:51.511807+00:00", "request": {"method": "GET", "path": "/", "headers": {}, "params": null, "json": null, "data": null, "timeout": null}, "expected_status_codes": [200], "response": null, "error": "ConnectError('[WinError 10061] No connection could be made because the target machine actively refused it')"}

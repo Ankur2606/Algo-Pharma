@@ -59,6 +59,7 @@ def ingest_reddit_json_raw(project_id: int = 1) -> dict:
 
             # Deduplicate — skip posts already stored
             existing = session.query(RawPost).filter(
+                RawPost.project_id == project_id,
                 RawPost.thread_id == thread_id,
                 RawPost.source_platform == "reddit"
             ).first()
@@ -151,6 +152,7 @@ def ingest_twitter_json_raw(project_id: int = 1) -> dict:
 
             # Deduplicate — skip posts already stored
             existing = session.query(RawPost).filter(
+                RawPost.project_id == project_id,
                 RawPost.thread_id == thread_id,
                 RawPost.source_platform == "twitter"
             ).first()
@@ -251,6 +253,7 @@ def ingest_reddit_json(project_id: int = 1) -> dict:
 
             # Deduplicate
             existing = session.query(RawPost).filter(
+                RawPost.project_id == project_id,
                 RawPost.thread_id == thread_id,
                 RawPost.source_platform == "reddit"
             ).first()
@@ -395,6 +398,7 @@ def ingest_twitter_json(project_id: int = 1) -> dict:
 
             # Deduplicate
             existing = session.query(RawPost).filter(
+                RawPost.project_id == project_id,
                 RawPost.thread_id == thread_id,
                 RawPost.source_platform == "twitter"
             ).first()

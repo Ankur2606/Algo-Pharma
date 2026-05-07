@@ -46,9 +46,13 @@ def detect_signals(project_id: int = 1) -> list[dict]:
         all_symptoms = set()
 
         for pp in ae_posts:
-            try:
-                entities = json.loads(pp.entities_json)
-            except (json.JSONDecodeError, TypeError):
+            entities = pp.entities_json or {}
+            if isinstance(entities, str):
+                try:
+                    entities = json.loads(entities)
+                except Exception:
+                    continue
+            if not isinstance(entities, dict):
                 continue
 
             drugs = [d["text"].lower().strip() for d in entities.get("drugs", [])]
@@ -122,7 +126,7 @@ def detect_signals(project_id: int = 1) -> list[dict]:
                     existing.ror = round(ror, 4)
                     existing.chi_square = round(chi2_val, 4)
                     existing.strength = strength
-                    existing.supporting_post_ids = json.dumps(post_ids[:50])
+                    existing.supporting_post_ids = post_ids[:50]
                     existing.last_updated = datetime.now(timezone.utc)
                 else:
                     sig = Signal(
@@ -134,7 +138,7 @@ def detect_signals(project_id: int = 1) -> list[dict]:
                         ror=round(ror, 4),
                         chi_square=round(chi2_val, 4),
                         strength=strength,
-                        supporting_post_ids=json.dumps(post_ids[:50]),
+                        supporting_post_ids=post_ids[:50],
                     )
                     session.add(sig)
 
