@@ -1,98 +1,82 @@
-# AlgoPharma Setup Guide
+AlgoPharma Setup Guide
 
 This guide will walk you through setting up the AlgoPharma project on your local machine.
 
-## Prerequisites
+Prerequisites
 
 - Python 3.x
 - Node.js and npm
 - Docker
 - Git
 
-## Installation Steps
+Installation Steps
 
-### 1. Clone the Repository
+1. Clone the Repository
 
-```bash
 git clone https://github.com/Ankur2606/Algo-Pharma
 cd Algo-Pharma
-```
 
-### 2. Install UV Package Manager
+2. Install UV Package Manager
 
-```bash
 pip install uv
-```
 
-### 3. Sync Python Dependencies
+3. Sync Python Dependencies
 
-```bash
 uv sync
-```
 
-### 4. Setup Redis (Docker)
+4. Setup Redis (Docker)
 
 Start a Redis container with a custom name:
 
-```bash
 docker run -d --name redis-algopharma -p 6379:6379 redis:alpine
-```
 
-**Managing Redis Container:**
+Managing Redis Container:
 
-- Stop: `docker stop redis-algopharma`
-- Start: `docker start redis-algopharma`
-- View logs: `docker logs redis-algopharma`
+- Stop: docker stop redis-algopharma
+- Start: docker start redis-algopharma
+- View logs: docker logs redis-algopharma
 
-### 5. Setup Frontend
+5. Setup Frontend
 
 Navigate to the frontend directory and install dependencies:
 
-```bash
 cd frontend
 npm install
-```
 
-## Running the Application
+Running the Application
 
 You'll need to run three services simultaneously. Open separate terminal windows for each:
 
-### Terminal 1: Backend API Server
+Terminal 1: Backend API Server
 
-```bash
 uv run uvicorn main:app --reload --port 8000
-```
 
-The API will be available at `http://localhost:8000`
+The API will be available at http://localhost:8000
 
-### Terminal 2: Celery Worker
+Terminal 2: Celery Worker
 
-```bash
 uv run celery -A celery_app worker --loglevel=info --pool=solo
-```
 
-### Terminal 3: Frontend Development Server
+Terminal 3: Frontend Development Server
 
-```bash
 cd frontend
 npm run dev
-```
 
-The frontend will be available at the URL shown in the terminal (typically `http://localhost:5173`)
+The frontend will be available at the URL shown in the terminal (typically http://localhost:5173)
 
-## Access Points
+Access Points
 
-- **Backend API**: `http://localhost:8000` - API interaction and documentation
-- **Frontend**: Check terminal output for the dev server URL
-- **Redis**: `localhost:6379`
+- Backend API: http://localhost:8000 - API interaction and documentation
+- Frontend: Check terminal output for the dev server URL
+- Redis: localhost:6379
 
-## Notes
+Notes
 
 - The backend at port 8000 is fully functional for API interactions
 - Make sure Redis is running before starting the Celery worker
 - All three services (API, Celery, Frontend) need to be running for full functionality
 
-## Troubleshooting
+Troubleshooting
 
 - If Redis fails to start, check if port 6379 is already in use
 - If the frontend fails to start, ensure all npm dependencies are installed
