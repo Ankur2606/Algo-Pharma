@@ -3,7 +3,7 @@ import sys
 import os
 
 # Enable FAST_MODE to prevent downloading 2GB+ of HuggingFace models during MCP tool calls
-os.environ["FAST_MODE"] = "false"
+os.environ["FAST_MODE"] = "true"
 
 # Redirect stderr to a file to prevent OS pipe deadlocks on Windows
 # We use Python-level redirection as os.dup2 can fail with 'Invalid Handle' in some Windows environments
@@ -45,9 +45,8 @@ if __name__ == "__main__":
     import sys
     print("[*] AlgoPharma MCP Server Starting...", file=sys.stderr)
     
-    # Pre-load models in main thread to prevent import deadlocks in asyncio.to_thread
-    print("[*] Initializing NLP models...", file=sys.stderr)
-    from nlp.models_loader import load_all_models
-    load_all_models()
+    # MCP server does NOT need to load models - crawlers only do Phase 1 (raw data collection)
+    # Phase 2 (NLP processing) happens in Celery workers
+    print("[*] MCP server ready (models will be loaded by Celery workers)", file=sys.stderr)
     
     asyncio.run(main())
