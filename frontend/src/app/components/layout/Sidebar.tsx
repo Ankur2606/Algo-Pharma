@@ -284,7 +284,7 @@ export function Sidebar() {
               className="truncate"
               style={{ fontSize: "12px", fontWeight: 500, color: "rgba(255,255,255,0.78)" }}
             >
-              Dr. Priya Sharma
+              Admin
             </p>
             <p className="truncate" style={{ fontSize: "10px", color: "rgba(255,255,255,0.32)" }}>
               PV Analyst

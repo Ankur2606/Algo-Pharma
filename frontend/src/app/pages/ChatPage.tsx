@@ -335,7 +335,7 @@ export function ChatPage() {
             }}>
               <User className="w-3 h-3" style={{ color: "#7ec8e3" }} />
             </div>
-            <span style={{ fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.72)" }}>Enigma</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.72)" }}>Admin</span>
           </button>
           {userMenuOpen && (
             <div style={{
