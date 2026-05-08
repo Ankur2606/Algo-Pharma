@@ -62,33 +62,25 @@ def crawl_twitter(project_id: int = 1, query: str = "dolo 650 medicine side effe
         raw_result = ingest_twitter_json_raw(project_id)
 
         # ── Phase 2: Dispatch NLP + signal detection asynchronously ─────────
-        # Heavy transformer inference runs in a Celery worker, not here.
-        # Fast 100ms TCP probe avoids the 2s Celery timeout when Redis is down.
-        from config import get_settings as _gs
-        if _redis_reachable(_gs().REDIS_URL):
-            try:
-                from celery_app import task_ingest_all, task_detect_signals
-                res_ingest = task_ingest_all.delay(project_id)
-                res_detect = task_detect_signals.delay(project_id)
-                logger.info("✅ NLP tasks queued asynchronously via Celery")
-                
-                import threading
-                def _track_celery(res, name):
-                    try:
-                        logger.info(f"⏳ Tracking Celery [{name}] in background...")
-                        data = res.get(timeout=300)
-                        logger.info(f"✅ Celery [{name}] COMPLETE: {data}")
-                    except Exception as e:
-                        logger.error(f"❌ Celery [{name}] FAILED/TIMEOUT: {e}")
-                        
-                threading.Thread(target=_track_celery, args=(res_ingest, "ingest_all"), daemon=True).start()
-                threading.Thread(target=_track_celery, args=(res_detect, "detect_signals"), daemon=True).start()
-            except Exception as celery_err:
-                logger.warning(
-                    f"⚠️  Celery dispatch failed: {celery_err}"
-                )
-        else:
-            logger.info("ℹ️  Redis not running — NLP skipped (run task_ingest_all manually)")
+        try:
+            from celery_app import task_ingest_all, task_detect_signals
+            res_ingest = task_ingest_all.delay(project_id)
+            res_detect = task_detect_signals.delay(project_id)
+            logger.info("✅ NLP tasks queued asynchronously via Celery")
+            
+            import threading
+            def _track_celery(res, name):
+                try:
+                    logger.info(f"⏳ Tracking Celery [{name}] in background...")
+                    data = res.get(timeout=300)
+                    logger.info(f"✅ Celery [{name}] COMPLETE: {data}")
+                except Exception as e:
+                    logger.error(f"❌ Celery [{name}] FAILED/TIMEOUT: {e}")
+                    
+            threading.Thread(target=_track_celery, args=(res_ingest, "ingest_all"), daemon=True).start()
+            threading.Thread(target=_track_celery, args=(res_detect, "detect_signals"), daemon=True).start()
+        except Exception as celery_err:
+            logger.warning(f"⚠️  Celery dispatch failed: {celery_err}")
 
         with SessionLocal() as session:
             log = session.get(CrawlLog, log_id)
