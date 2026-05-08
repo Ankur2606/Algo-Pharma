@@ -17,9 +17,15 @@ const API = 'http://localhost:8000';
 
 // Real backend call to multi-turn chat endpoint
 async function callChatEndpoint(message: string, state: PVRequest): Promise<{ bot_message: string; state: PVRequest; ready?: boolean; project_id?: string }> {
+  const token = localStorage.getItem("token") || "";
+  const headers: HeadersInit = { "Content-Type": "application/json" };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API}/api/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify({ message, state }),
   });
   if (!res.ok) throw new Error("Failed to fetch from API");

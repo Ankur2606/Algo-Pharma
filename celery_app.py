@@ -40,6 +40,7 @@ celery_app.conf.update(
     task_serializer="json",
     result_serializer="json",
     accept_content=["json"],
+    task_default_queue="algopharma_ankur_queue",
     timezone="UTC",
     enable_utc=True,
     task_track_started=True,

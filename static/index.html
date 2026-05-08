@@ -240,6 +240,33 @@ let chatState = {medicine: null, source: null, symptom: null};
 let projectId = null;
 let pollInterval = null;
 let pollCount = 0;
+let authToken = null;
+
+// ── Auto-Login ───────────────────────────────────────────
+async function autoLogin() {
+  try {
+    const formData = new URLSearchParams();
+    formData.append("username", "admin@example.com");
+    formData.append("password", "dummy");
+
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData,
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      authToken = data.access_token;
+      console.log("Auto-login successful");
+    } else {
+      console.warn("Auto-login failed. Make sure an admin user exists.");
+    }
+  } catch (e) {
+    console.error("Auto-login error:", e);
+  }
+}
+autoLogin();
 
 // ── Utilities ────────────────────────────────────────────
 function showPhase(id) {
@@ -300,9 +327,12 @@ async function sendMessage() {
   const typing = addTyping();
 
   try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
     const res = await fetch(`${API}/api/chat`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: headers,
       body: JSON.stringify({message: msg, state: chatState})
     });
     const data = await res.json();
@@ -366,7 +396,10 @@ async function pollResults() {
   pollCount++;
   const MAX_POLLS = 75; // 75 × 4s = 5 minutes max
   try {
-    const res = await fetch(`${API}/api/results/${projectId}`);
+    const headers = {};
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    
+    const res = await fetch(`${API}/api/results/${projectId}`, { headers });
     if (!res.ok) return;
     const data = await res.json();
     renderDashboard(data);

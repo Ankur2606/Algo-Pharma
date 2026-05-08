@@ -38,7 +38,7 @@ settings = get_settings()
 
 # ── Crypto config ─────────────────────────────────────────
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
@@ -104,9 +104,16 @@ def decode_token(token: str) -> dict:
 
 # ── Auth dependency — use this in every protected endpoint ─
 def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    token: Annotated[str | None, Depends(oauth2_scheme)],
     db: Session = Depends(get_db),
 ) -> User:
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     payload = decode_token(token)
     user_id = int(payload.get("sub", 0))
     user = db.get(User, user_id)

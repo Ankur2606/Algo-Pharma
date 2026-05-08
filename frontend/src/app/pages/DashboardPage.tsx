@@ -147,7 +147,12 @@ export function DashboardPage() {
     let pollCount = 0;
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`${API}/api/results/${projectId}`);
+        const token = localStorage.getItem("token") || "";
+        const headers: HeadersInit = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        const res = await fetch(`${API}/api/results/${projectId}`, { headers });
         if (!res.ok) return;
         const data = await res.json();
         

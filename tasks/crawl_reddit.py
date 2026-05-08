@@ -11,8 +11,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def _redis_reachable(url: str, timeout: float = 0.1) -> bool:
-    """Return True only if Redis TCP port is open — 100ms probe, no Celery import."""
+def _redis_reachable(url: str, timeout: float = 3.0) -> bool:
+    """Return True only if Redis TCP port is open — 3.0s probe, no Celery import."""
     try:
         # Parse host/port from redis://host:port/db
         from urllib.parse import urlparse
@@ -37,10 +37,15 @@ def crawl_reddit(project_id: int = 1, query: str = "dolo 650 medicine side effec
     # Log crawl start
     with SessionLocal() as session:
         source = session.query(Source).filter(Source.platform == "reddit").first()
-        source_id = source.id if source else None
+        if not source:
+            source = Source(name="Reddit", platform="reddit")
+            session.add(source)
+            session.commit()
+            session.refresh(source)
+        source_id = source.id
 
         log = CrawlLog(
-            source_id=source_id or 0,
+            source_id=source_id,
             project_id=project_id,
             status="started",
         )
