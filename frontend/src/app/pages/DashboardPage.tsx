@@ -25,7 +25,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-const API = 'http://localhost:8000';
+const API = '';
 
 interface Signal { id: string; drug: string; symptom: string; ror: number; prr: number; chi2: number; postCount: number; strength: "STRONG" | "MODERATE" | "WEAK"; status: string }
 interface Post { platform: string; sentiment: string; ae_flag: boolean; text: string; ae_confidence: number; ae_reason: string }
