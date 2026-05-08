@@ -11,8 +11,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def _redis_reachable(url: str, timeout: float = 0.1) -> bool:
-    """Return True only if Redis TCP port is open — 100ms probe, no Celery import."""
+def _redis_reachable(url: str, timeout: float = 3.0) -> bool:
+    """Return True only if Redis TCP port is open — 3.0s probe for cloud Redis (e.g. Upstash)."""
     try:
         from urllib.parse import urlparse
         p = urlparse(url)

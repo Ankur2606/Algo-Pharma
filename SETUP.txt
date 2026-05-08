@@ -1,83 +1,107 @@
-AlgoPharma Setup Guide
+================================================================================
+  ALGOPHARMA — END-TO-END SETUP GUIDE
+================================================================================
 
-This guide will walk you through setting up the AlgoPharma project on your local machine.
+This guide covers the complete setup of the AlgoPharma Pharmacovigilance AI.
+It uses a Python backend (FastAPI + Celery), a React-inspired vanilla JS frontend 
+(served via FastAPI), Upstash Redis for message brokering, and SQLite for storage.
 
-Prerequisites
-
-- Python 3.x
-- Node.js and npm
-- Docker
+--------------------------------------------------------------------------------
+ 1. SYSTEM REQUIREMENTS
+--------------------------------------------------------------------------------
+- Python 3.12 or higher
+- uv (blazing fast Python package manager): `pip install uv`
 - Git
 
-Installation Steps
-
-1. Clone the Repository
-
-git clone https://github.com/Ankur2606/Algo-Pharma
+--------------------------------------------------------------------------------
+ 2. CLONE THE REPOSITORY
+--------------------------------------------------------------------------------
+git clone https://github.com/Ankur2606/Algo-Pharma.git
 cd Algo-Pharma
 
-2. Install UV Package Manager
+--------------------------------------------------------------------------------
+ 3. CONFIGURE ENVIRONMENT (.env)
+--------------------------------------------------------------------------------
+Copy the example config:
+  cp .env.example .env  (or manually copy/paste if on Windows)
 
-pip install uv
+Open `.env` and configure the essential keys:
+- GROQ_API_KEY: (Required) for the main agentic loop. Get it from console.groq.com
+- REDIS_URL: (Required) The broker for Celery. You MUST use an Upstash Redis URL
+             starting with `rediss://...` (TLS). Get it from console.upstash.com
+- SECRET_KEY: (Required) Generate one or use a secure random string.
+- DATABASE_URL: (Optional) Defaults to `sqlite:///./algopharma.db`.
 
-3. Sync Python Dependencies
+--------------------------------------------------------------------------------
+ 4. INSTALL DEPENDENCIES & MODELS
+--------------------------------------------------------------------------------
+Install all Python dependencies via `uv`:
+  uv sync
 
-uv sync
+Download the required spaCy model (English core web small):
+  uv run python -m spacy download en_core_web_sm
 
-4. Setup Redis (Docker)
+(Optional but recommended) Pre-download HuggingFace NLP models to avoid 
+delays on the first run:
+  uv run python setup_models.py
 
-Start a Redis container with a custom name:
+--------------------------------------------------------------------------------
+ 5. INITIALISE THE DATABASE & CREATE ADMIN
+--------------------------------------------------------------------------------
+Create the database tables and insert a default admin user (admin@example.com / admin123).
+Run this python snippet in your terminal:
 
-docker run -d --name redis-algopharma -p 6379:6379 redis:alpine
+uv run python -c "from database import Base, engine, SessionLocal; from models import User; from passlib.context import CryptContext; Base.metadata.create_all(engine); pwd = CryptContext(schemes=['bcrypt']); db = SessionLocal(); user = db.query(User).filter_by(email='admin@example.com').first(); db.add(User(email='admin@example.com', hashed_password=pwd.hash('admin123'), is_active=True)) if not user else None; db.commit(); print('Admin created: admin@example.com / admin123')"
 
-Managing Redis Container:
+--------------------------------------------------------------------------------
+ 6. RUN THE APPLICATION (3 TERMINALS REQUIRED)
+--------------------------------------------------------------------------------
 
-- Stop: docker stop redis-algopharma
-- Start: docker start redis-algopharma
-- View logs: docker logs redis-algopharma
+You must run the FastAPI backend and the Celery worker concurrently.
 
-5. Setup Frontend
+TERMINAL 1: FastAPI Backend & Frontend UI
+-----------------------------------------
+This serves the API on port 8000 and the UI at http://localhost:8000/
+  uv run uvicorn main:app --reload --port 8000
 
-Navigate to the frontend directory and install dependencies:
+TERMINAL 2: Celery NLP Worker
+-----------------------------------------
+This processes the NLP pipeline in the background using Upstash Redis.
+  uv run celery -A celery_app worker --loglevel=info --pool=solo
 
-cd frontend
-npm install
+  * Note: --pool=solo is required on Windows. On Linux/Mac, you can omit it.
+  * Note: The worker uses a dedicated queue (`algopharma_ankur_queue`) to 
+    prevent other developers on the shared Upstash instance from stealing tasks.
 
-Running the Application
+TERMINAL 3: Agentic Forum Onboarding (Optional)
+-----------------------------------------
+If you want to test the interactive CLI agent for creating scraper configurations:
+  uv run python agentic/forum_onboarding.py
 
-You'll need to run three services simultaneously. Open separate terminal windows for each:
+--------------------------------------------------------------------------------
+ 7. HOW TO USE THE DASHBOARD
+--------------------------------------------------------------------------------
+1. Open your browser and navigate to: http://localhost:8000
+2. Log in using the admin credentials:
+   - Name: Your Name
+   - Email: admin@example.com
+   - Password: admin123
+3. In the chat interface, provide a prompt. For example:
+   "Find side effects of ciplox on reddit"
+4. The backend will:
+   - Use Groq to extract the drug ("ciplox") and source ("reddit").
+   - Execute the Reddit crawler tool.
+   - Queue the raw posts into Upstash Redis.
+   - The Celery worker will pick them up, run PII redaction, NER, and Sentiment.
+   - The UI will automatically poll every 4 seconds and render the live dashboard.
 
-Terminal 1: Backend API Server
-
-uv run uvicorn main:app --reload --port 8000
-
-The API will be available at http://localhost:8000
-
-Terminal 2: Celery Worker
-
-uv run celery -A celery_app worker --loglevel=info --pool=solo
-
-Terminal 3: Frontend Development Server
-
-cd frontend
-npm run dev
-
-The frontend will be available at the URL shown in the terminal (typically http://localhost:5173)
-
-Access Points
-
-- Backend API: http://localhost:8000 - API interaction and documentation
-- Frontend: Check terminal output for the dev server URL
-- Redis: localhost:6379
-
-Notes
-
-- The backend at port 8000 is fully functional for API interactions
-- Make sure Redis is running before starting the Celery worker
-- All three services (API, Celery, Frontend) need to be running for full functionality
-
-Troubleshooting
-
-- If Redis fails to start, check if port 6379 is already in use
-- If the frontend fails to start, ensure all npm dependencies are installed
-- Check individual service logs for specific error messages
+--------------------------------------------------------------------------------
+ 8. TROUBLESHOOTING
+--------------------------------------------------------------------------------
+- "No module named psycopg2": Run `uv add psycopg2-binary`
+- Celery worker misses heartbeat: This is common with free-tier Upstash Redis 
+  if the connection drops. Restart the celery worker.
+- "model_not_found" in Chat: Ensure your GROQ_API_KEY is valid.
+- Dashboard stuck on "Crawling": Ensure the Celery worker (Terminal 2) is 
+  running and connected to the EXACT same REDIS_URL as FastAPI.
+================================================================================
