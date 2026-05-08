@@ -51,7 +51,7 @@ delays on the first run:
 Create the database tables and insert a default admin user (admin@example.com / admin123).
 Run this python snippet in your terminal:
 
-uv run python -c "from database import Base, engine, SessionLocal; from models import User; from passlib.context import CryptContext; Base.metadata.create_all(engine); pwd = CryptContext(schemes=['bcrypt']); db = SessionLocal(); user = db.query(User).filter_by(email='admin@example.com').first(); db.add(User(email='admin@example.com', hashed_password=pwd.hash('admin123'), is_active=True)) if not user else None; db.commit(); print('Admin created: admin@example.com / admin123')"
+uv run python -c "from database import Base, engine, SessionLocal; from models import User; from passlib.context import CryptContext; Base.metadata.create_all(engine); pwd = CryptContext(schemes=['bcrypt']); db = SessionLocal(); user = db.query(User).filter_by(username='admin@example.com').first(); db.add(User(username='admin@example.com', hashed_password=pwd.hash('admin123'), is_active=True)) if not user else None; db.commit(); print('Admin created: admin@example.com / admin123')"
 
 --------------------------------------------------------------------------------
  6. RUN THE APPLICATION (3 TERMINALS REQUIRED)

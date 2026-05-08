@@ -63,7 +63,9 @@ from api.signals import router as signals_router
 from api.health import router as health_router
 from api.chat import router as chat_router
 from api.results import router as results_router
+from api.user_auth import router as auth_router
 
+app.include_router(auth_router)
 app.include_router(projects_router)
 app.include_router(signals_router)
 app.include_router(health_router)

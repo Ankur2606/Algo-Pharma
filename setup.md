@@ -120,8 +120,8 @@ from models import User
 from passlib.context import CryptContext
 pwd = CryptContext(schemes=['bcrypt'])
 with SessionLocal() as db:
-    if not db.query(User).filter_by(email='admin@example.com').first():
-        db.add(User(email='admin@example.com', hashed_password=pwd.hash('admin123'), is_active=True))
+    if not db.query(User).filter_by(username='admin@example.com').first():
+        db.add(User(username='admin@example.com', hashed_password=pwd.hash('admin123'), role='admin'))
         db.commit()
         print('Admin user created: admin@example.com / admin123')
     else:
