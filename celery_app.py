@@ -20,6 +20,11 @@ setup_global_logging()
 
 settings = get_settings()
 
+# Isolate HF Space tasks from local dev workers.
+# Set CELERY_TASK_QUEUE=hf_algopharma_queue in HF Space secrets.
+# Local dev uses the default 'celery' queue, so tasks never cross-contaminate.
+_task_queue = os.environ.get("CELERY_TASK_QUEUE", "celery")
+
 celery_app = Celery(
     "algopharma",
     broker=settings.REDIS_URL,
@@ -45,6 +50,7 @@ celery_app.conf.update(
     task_track_started=True,
     task_acks_late=True,
     worker_prefetch_multiplier=1,
+    task_default_queue=_task_queue,
     # Fail fast when Redis is unavailable — the crawlers catch this exception
     # gracefully and continue without NLP queuing.  Without these two settings
     # Celery retries 20 times (~20 seconds) and floods stdout with retry lines
