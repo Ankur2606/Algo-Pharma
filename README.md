@@ -13,6 +13,8 @@ AlgoPharma is an end-to-end agentic workflow and NLP pipeline designed to proact
 
 ## 🏗️ Architecture & Data Flow
 
+<img width="2048" height="2048" alt="image (3)" src="https://github.com/user-attachments/assets/98f75875-f0a2-45ba-afac-622ad124e966" />
+<br>
 The platform is designed around a decoupled, event-driven architecture to handle high-latency web scraping and heavy machine learning inference without blocking the user interface.
 
 ### 1. The Interaction Layer (FastAPI + JS)
