@@ -1,0 +1,178 @@
+{
+  "project_id": 20,
+  "project_name": "Avandia_reddit_20260512_192039",
+  "status": "complete",
+  "total_raw": 20,
+  "processed": 10,
+  "ae_flagged": 4,
+  "signals": [],
+  "posts": [
+    {
+      "id": 361,
+      "platform": "reddit",
+      "title": "Avandia and Related Drugs Pulled from Shelves Due to Dangers",
+      "text": "Avandia and Related Drugs Pulled from Shelves Due to Dangers",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "no_symptom",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "Avandia"
+      ],
+      "symptoms": []
+    },
+    {
+      "id": 362,
+      "platform": "reddit",
+      "title": "GLF - Avandia Recall - 2010 - 391-5000",
+      "text": "GLF - Avandia Recall - 2010 - 391-5000",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "no_symptom",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "GLF"
+      ],
+      "symptoms": []
+    },
+    {
+      "id": 363,
+      "platform": "reddit",
+      "title": "GlaxoSmithKline tried to conceal evidence linking its blockbuster multibillion-dollar diabetes drug, Avandia, to heart a",
+      "text": "GlaxoSmithKline tried to conceal evidence linking its blockbuster multibillion-dollar diabetes drug, Avandia, to heart attacks that \"resulted in serious injury or death in 50,000 to 200,000 patients.\"",
+      "ae_flag": true,
+      "ae_confidence": 0.725,
+      "ae_reason": "drug+symptom+negative_sentiment+no_negation",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "Avandia"
+      ],
+      "symptoms": [
+        "diabetes",
+        "heart attacks"
+      ]
+    },
+    {
+      "id": 364,
+      "platform": "reddit",
+      "title": "Avandia |mobile art work| i made a random world.",
+      "text": "Kelsey |mobile art work| i made a random world.",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "no_symptom",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "avandia"
+      ],
+      "symptoms": []
+    },
+    {
+      "id": 365,
+      "platform": "reddit",
+      "title": "4 drugs, if prescribed, that should cause you to question the motivations of your doctor.  Lovasa,  Sular, Bystolic, and",
+      "text": "4 drugs, if prescribed, that should cause you to question the motivations of your doctor.  Sims,  Sular, Bystolic, and Avandia.  (An Contracting civil engineer explains why)",
+      "ae_flag": true,
+      "ae_confidence": 0.504,
+      "ae_reason": "drug+symptom+negative_sentiment+no_negation",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "avandia"
+      ],
+      "symptoms": [
+        "Bystolic"
+      ]
+    },
+    {
+      "id": 366,
+      "platform": "reddit",
+      "title": "Federal government allows Vioxx, Avandia, melamine, aspartame, and genetically modified foods on the market but not unpr",
+      "text": "Federal government allows Vioxx, Avandia, melamine, aspartame, and genetically modified foods on the market but not unprocessed milk",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "no_symptom",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "Vioxx, Avandia, melamine, aspartame"
+      ],
+      "symptoms": []
+    },
+    {
+      "id": 367,
+      "platform": "reddit",
+      "title": "This game is a piece of my childhood. I saw it at a store again today, and just like old times, I had to buy it.”",
+      "text": "This game is a piece of my childhood. I saw it at a store again today, and just like old times, I had to buy it.” Best game ever made ever, ever, ever",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "no_symptom",
+      "sentiment": "POSITIVE",
+      "drugs": [
+        "avandia"
+      ],
+      "symptoms": []
+    },
+    {
+      "id": 368,
+      "platform": "reddit",
+      "title": "Diabetes Drug Avandia causes 300 deaths a month. Imagine if herbs or vitamin supplements caused as many deaths as pharma",
+      "text": "Diabetes Drug Avandia causes 300 deaths a month. Imagine if herbs or vitamin supplements caused as many deaths as pharmaceuticals do...",
+      "ae_flag": true,
+      "ae_confidence": 0.806,
+      "ae_reason": "drug+symptom+negative_sentiment+no_negation",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "Avandia"
+      ],
+      "symptoms": [
+        "Diabetes",
+        "deaths"
+      ]
+    },
+    {
+      "id": 369,
+      "platform": "reddit",
+      "title": "GlaxoSmithKline tried to conceal evidence linking its blockbuster multibillion-dollar diabetes drug, Avandia, to heart a",
+      "text": "GlaxoSmithKline tried to conceal evidence linking its blockbuster multibillion-dollar diabetes drug, Avandia, to heart attacks that \"resulted in serious injury or death in 50,000 to 200,000 patients.\"",
+      "ae_flag": true,
+      "ae_confidence": 0.725,
+      "ae_reason": "drug+symptom+negative_sentiment+no_negation",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "Avandia"
+      ],
+      "symptoms": [
+        "diabetes",
+        "heart attacks"
+      ]
+    },
+    {
+      "id": 370,
+      "platform": "reddit",
+      "title": "[Health] - Exploring ways that a drug like Avandia can be made safer | ScienceDaily",
+      "text": "[Health] - Exploring ways that a drug like Avandia can be made safer | ScienceDaily",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "no_symptom",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "Avandia"
+      ],
+      "symptoms": []
+    }
+  ],
+  "crawl_logs": [
+    {
+      "source_id": 0,
+      "status": "success",
+      "posts_found": 20,
+      "started_at": "2026-05-12 19:20:44.035319",
+      "finished_at": "2026-05-12 19:20:46.744106"
+    }
+  ],
+  "counts": {
+    "signals": 0,
+    "processed_posts": 10,
+    "crawl_logs": 1,
+    "total_raw": 20,
+    "ae_flagged": 4
+  }
+}

@@ -17,11 +17,30 @@ GET /api/results/list
 
 import json
 import logging
+import os
+from pathlib import Path
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/results", tags=["results"])
+
+# ── JSON result logging ──────────────────────────────────────
+_LOGS_DIR = Path(__file__).parent.parent / "logs" / "results"
+_LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+def _save_result_log(project_id: int, data: dict):
+    """Save each poll result to logs/results/projectid_N.json (incrementing)."""
+    try:
+        existing = sorted(_LOGS_DIR.glob(f"{project_id}_*.json"))
+        next_idx = len(existing) + 1
+        filepath = _LOGS_DIR / f"{project_id}_{next_idx}.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False, default=str)
+        logger.debug(f"[results] Saved log: {filepath}")
+    except Exception as e:
+        logger.warning(f"[results] Failed to save log: {e}")
 
 
 def _serialize_post(pp, raw) -> dict:
@@ -107,9 +126,22 @@ def get_results(project_id: int):
             .count()
         )
 
+        # Count ALL processed posts for this project (not just the limited 50)
+        total_processed = (
+            session.query(ProcessedPost)
+            .filter(ProcessedPost.project_id == project_id)
+            .count()
+        )
+
+        ae_flagged_count = (
+            session.query(ProcessedPost)
+            .filter(ProcessedPost.project_id == project_id, ProcessedPost.ae_flag == True)
+            .count()
+        )
+
         if signals:
             status = "complete"
-        elif processed_posts and len(processed_posts) >= min(total_raw, 1):
+        elif total_processed >= min(total_raw, 1) and total_raw > 0:
             # NLP has finished processing all available posts → complete even if 0 signals
             status = "complete"
         elif processed_posts:
@@ -152,16 +184,29 @@ def get_results(project_id: int):
             for cl in crawl_logs[:5]
         ]
 
-        return {
+        response = {
             "project_id":   project_id,
             "project_name": project.name,
             "status":       status,
+            # ── Top-level stats for frontend dashboard ────────────
+            "total_raw":    total_raw,
+            "processed":    total_processed,
+            "ae_flagged":   ae_flagged_count,
+            # ──────────────────────────────────────────────────────
             "signals":      signal_data,
             "posts":        post_data,
             "crawl_logs":   crawl_summary,
             "counts": {
                 "signals":         len(signals),
-                "processed_posts": len(processed_posts),
+                "processed_posts": total_processed,
                 "crawl_logs":      len(crawl_logs),
+                "total_raw":       total_raw,
+                "ae_flagged":      ae_flagged_count,
             },
         }
+
+        # Save result log only when status changes or periodically
+        if status == "complete" or total_processed > 0:
+            _save_result_log(project_id, response)
+
+        return response

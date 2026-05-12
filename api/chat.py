@@ -42,7 +42,7 @@ def _build_query(state: dict) -> str:
     source = state["source"]
     symp   = state.get("symptom")
 
-    q = f"Find side effects of {med} on {source}"
+    q = f"{med} on {source}"
     if symp:
         q += f" focusing on {symp}"
     return q

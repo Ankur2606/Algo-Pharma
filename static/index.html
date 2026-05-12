@@ -183,6 +183,11 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;backgro
 .ae-flag-badge{font-size:.72rem;color:var(--red);font-weight:600;padding:2px 8px;background:rgba(239,68,68,.1);border-radius:5px}
 .post-title{font-size:.85rem;font-weight:600;margin-bottom:5px;color:var(--text)}
 .post-text{font-size:.83rem;color:var(--text2);line-height:1.5}
+.post-entities{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.entity-tag{font-size:.68rem;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-weight:500}
+.entity-tag.drug{background:rgba(99,102,241,.12);color:var(--accent3);border:1px solid rgba(99,102,241,.25)}
+.entity-tag.symptom{background:rgba(245,158,11,.1);color:var(--yellow);border:1px solid rgba(245,158,11,.2)}
+.entity-tag.reason{background:rgba(148,163,184,.08);color:var(--text3);border:1px solid rgba(148,163,184,.15);font-style:italic}
 .conf-bar{margin-top:8px;display:flex;align-items:center;gap:8px}
 .conf-track{flex:1;height:4px;background:var(--bg4);border-radius:3px;overflow:hidden}
 .conf-fill{height:100%;border-radius:3px;transition:width .6s ease}
@@ -571,15 +576,40 @@ async function pollResults(){
     const res=await fetch(`${API}/api/results/${projectId}`,{headers});
     if(!res.ok) return;
     const data=await res.json();
+
+    // ── Detailed console logging ─────────────────────
+    console.group(`📊 [Poll #${pollCount}] Project #${projectId} | Status: ${data.status}`);
+    console.log(`📦 Raw: ${data.total_raw} | Processed: ${data.processed} | AE Flagged: ${data.ae_flagged} | Signals: ${(data.signals||[]).length}`);
+    if ((data.posts||[]).length) {
+      console.group('📝 Posts Detail:');
+      (data.posts||[]).forEach((p, i) => {
+        console.log(
+          `  [${i+1}] ${p.ae_flag ? '🔴 AE' : '🟢 OK'} | ${p.sentiment} | ` +
+          `Drugs: [${(p.drugs||[]).join(', ')}] | Symptoms: [${(p.symptoms||[]).join(', ')}] | ` +
+          `Conf: ${(p.ae_confidence*100).toFixed(1)}% | Reason: ${p.ae_reason || 'n/a'}`
+        );
+      });
+      console.groupEnd();
+    }
+    if ((data.signals||[]).length) {
+      console.group('🔔 Signals:');
+      console.table(data.signals);
+      console.groupEnd();
+    }
+    console.log('📋 Full response:', data);
+    console.groupEnd();
+
     renderDashboard(data);
     if(data.status==='complete'){
       clearInterval(pollInterval);
       document.getElementById('poll-dot').style.background='var(--green)';
       document.getElementById('poll-dot').style.animation='none';
       document.getElementById('poll-label').textContent='Analysis complete';
+      console.log('✅ Analysis complete — polling stopped.');
     } else if(pollCount>=MAX){
       clearInterval(pollInterval);
       document.getElementById('poll-label').textContent='Polling stopped (timeout)';
+      console.warn('⏰ Polling stopped (timeout)');
     }
   } catch(e){ console.warn('Poll failed:',e); }
 }
@@ -693,6 +723,9 @@ function renderDashboard(data){
       const conf=p.ae_confidence||0;
       const confPct=(conf*100).toFixed(1);
       const confClass=conf>=0.7?'high':conf>=0.4?'med':'low';
+      const drugTags = (p.drugs||[]).map(d => `<span class="entity-tag drug">💊 ${d}</span>`).join('');
+      const symptomTags = (p.symptoms||[]).map(s => `<span class="entity-tag symptom">⚕ ${s}</span>`).join('');
+      const reasonTag = p.ae_reason ? `<span class="entity-tag reason">${p.ae_reason}</span>` : '';
       return `<div class="post-item ${p.ae_flag?'ae':'no-ae'}">
         <div class="post-meta">
           <span class="post-platform">${p.platform}</span>
@@ -701,6 +734,9 @@ function renderDashboard(data){
         </div>
         ${p.title?`<div class="post-title">${p.title}</div>`:''}
         <div class="post-text">${p.text}</div>
+        <div class="post-entities">
+          ${drugTags}${symptomTags}${reasonTag}
+        </div>
         <div class="conf-bar">
           <div class="conf-track"><div class="conf-fill ${confClass}" style="width:${confPct}%"></div></div>
           <span class="conf-label">${confPct}% confidence</span>
