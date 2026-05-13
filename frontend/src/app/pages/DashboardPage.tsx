@@ -1,64 +1,542 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
-import { Header } from "../components/layout/Header";
-import { SeverityBadge } from "../components/shared/SeverityBadge";
-import { StatusBadge } from "../components/shared/StatusBadge";
-import { signals, timelineData, activityFeed } from "../data/mockData";
-import {
-  AlertTriangle,
-  TrendingUp,
-  FileText,
-  Activity,
-  ChevronRight,
-  ExternalLink,
-  ArrowUpRight,
-  Loader2,
-} from "lucide-react";
+import React, { useEffect, useState, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Activity, AlertTriangle, CheckCircle2, Clock, 
+  Database, ShieldAlert, FileText, ArrowRight, XCircle
+} from 'lucide-react';
+import { 
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend 
+} from 'recharts';
+import { useAlgoPharmaAPI, DashboardData } from '../hooks/useAlgoPharmaAPI';
 
-const API = '';
+const COLORS = {
+  positive: '#10b981',
+  neutral: '#64748b',
+  negative: '#ef4444',
+  ae: '#f59e0b',
+  non_ae: '#0d1220',
+  bars: ['#6366f1', '#06b6d4', '#f59e0b', '#10b981', '#ef4444']
+};
 
-interface Signal { id: string; drug: string; symptom: string; ror: number; prr: number; chi2: number; postCount: number; strength: "STRONG" | "MODERATE" | "WEAK"; status: string }
-interface Post { platform: string; sentiment: string; ae_flag: boolean; text: string; ae_confidence: number; ae_reason: string }
+export function DashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const { fetchDashboardData, logout } = useAlgoPharmaAPI();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const projectId = location.state?.projectId || localStorage.getItem('current_project_id');
 
+  useEffect(() => {
+    if (!projectId) {
+      navigate('/chat');
+      return;
+    }
+
+    let polling = true;
+    let pollCount = 0;
+    const MAX_POLLS = 75; // 75 * 4s = 5 minutes timeout
+
+    const loadData = async () => {
+      if (!polling) return;
+      
+      const res = await fetchDashboardData(projectId);
+      
+      // Stop polling if we hit an error (e.g. 404) or reached max timeout
+      if (!res || pollCount >= MAX_POLLS) {
+        polling = false;
+        if (!res) {
+          // If the project doesn't exist anymore, clear it and go back to chat
+          localStorage.removeItem('current_project_id');
+          navigate('/chat');
+        }
+        return;
+      }
+
+      setData(res);
+      
+      if (res.status === 'complete' || res.status === 'failed') {
+        polling = false;
+      }
+
+      if (polling) {
+        pollCount++;
+        setTimeout(loadData, 4000);
+      }
+    };
+
+    loadData();
+
+    return () => {
+      polling = false;
+    };
+  }, [projectId, fetchDashboardData, navigate]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // Memoized Chart Data
+  const sentimentData = useMemo(() => {
+    if (!data) return [];
+    return [
+      { name: 'Positive', value: data.sentiment_distribution.positive || 0, color: COLORS.positive },
+      { name: 'Neutral', value: data.sentiment_distribution.neutral || 0, color: COLORS.neutral },
+      { name: 'Negative', value: data.sentiment_distribution.negative || 0, color: COLORS.negative },
+    ].filter(d => d.value > 0);
+  }, [data?.sentiment_distribution]);
+
+  const aeRate = useMemo(() => {
+    if (!data || data.processed === 0) return 0;
+    return ((data.ae_flagged / data.processed) * 100);
+  }, [data]);
+
+  const aeData = useMemo(() => {
+    if (!data) return [];
+    return [
+      { name: 'Adverse Events', value: data.ae_flagged, color: aeRate >= 50 ? '#ef4444' : aeRate >= 20 ? '#f59e0b' : '#10b981' },
+      { name: 'Non-AE', value: Math.max(0, data.processed - data.ae_flagged), color: 'rgba(26,34,53,0.8)' },
+    ].filter(d => d.value > 0);
+  }, [data?.ae_flagged, data?.processed, aeRate]);
+
+  const sourceData = useMemo(() => {
+    if (!data) return [];
+    return Object.entries(data.sources).map(([name, value]) => ({ name, value }));
+  }, [data?.sources]);
+
+  const topDrugs = useMemo(() => {
+    if (!data) return [];
+    return Object.entries(data.drug_counts).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 5);
+  }, [data?.drug_counts]);
+
+  const topSymptoms = useMemo(() => {
+    if (!data) return [];
+    return Object.entries(data.symptom_counts).sort((a, b) => (b[1] as number) - (a[1] as number)).slice(0, 5);
+  }, [data?.symptom_counts]);
+
+  const relationalRisk = useMemo(() => {
+    if (!data || data.signals.length === 0) return null;
+    const drugSymptoms: Record<string, Set<string>> = {};
+    data.signals.forEach(sig => {
+      if (!drugSymptoms[sig.drug]) drugSymptoms[sig.drug] = new Set();
+      drugSymptoms[sig.drug].add(sig.symptom);
+    });
+    
+    let maxDrug = '';
+    let maxCount = 0;
+    Object.entries(drugSymptoms).forEach(([drug, symptoms]) => {
+      if (symptoms.size > maxCount) {
+        maxCount = symptoms.size;
+        maxDrug = drug;
+      }
+    });
+
+    return { drug: maxDrug, count: maxCount };
+  }, [data?.signals]);
+
+  const aeGates = useMemo(() => {
+    if (!data) return [];
+    const gates = {ae: 0, no_drug: 0, no_symptom: 0, not_negative: 0, all_negated: 0, other: 0};
+    data.live_posts.forEach((p: any) => {
+      if (p.ae_flag) { gates.ae++; return; }
+      const r = p.ae_reason || '';
+      if (r.includes('no_drug')) gates.no_drug++;
+      else if (r.includes('no_symptom')) gates.no_symptom++;
+      else if (r.includes('not_negative')) gates.not_negative++;
+      else if (r.includes('all_negated')) gates.all_negated++;
+      else gates.other++;
+    });
+    return [
+      { label: 'No symptom', count: gates.no_symptom, color: 'bg-rose-500' },
+      { label: 'Not negative', count: gates.not_negative, color: 'bg-rose-500' },
+      { label: 'AE Confirmed', count: gates.ae, color: 'bg-emerald-500' },
+    ];
+  }, [data]);
+
+  if (!data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#070b14]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center animate-pulse">
+            <Activity className="w-6 h-6 text-cyan-400" />
+          </div>
+          <p className="text-slate-400 font-medium">Loading intelligence dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col p-4 md:p-8 space-y-6 relative bg-[#070b14]">
+      {/* Background radial gradients matching index.html */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[30%] w-[80%] h-[80%] bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.08),transparent_70%)]" />
+        <div className="absolute top-[40%] left-[60%] w-[60%] h-[60%] bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.05),transparent_70%)]" />
+      </div>
+
+      {/* Header */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 z-10 glass-panel p-5 rounded-2xl border border-white/5 shadow-2xl bg-[#0d1220]/80 backdrop-blur-xl">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+            <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-sm shadow-lg">⬡</span>
+            Intelligence Dashboard
+          </h1>
+          <div className="flex items-center gap-3 mt-2 text-xs font-medium">
+            <span className="text-slate-400">Project ID: <span className="font-mono text-cyan-400">#{projectId}</span></span>
+            <span className="text-slate-600">•</span>
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${data.status === 'complete' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)] animate-pulse'}`} />
+              <span className={`${data.status === 'complete' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                {data.status === 'complete' ? 'Surveillance Complete' : 'Active Polling...'}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/chat')} className="px-4 py-2 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 transition-colors border border-white/10 text-sm font-medium shadow-md">
+            New Query
+          </button>
+          <button onClick={handleLogout} className="px-4 py-2 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-colors border border-rose-500/20 text-sm font-medium shadow-md">
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <main className="flex-1 flex flex-col gap-6 z-10 w-full max-w-7xl mx-auto">
+        
+        {/* Top Metrics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <MetricCard title="Posts Crawled" value={data.total_raw} subtext="raw data collected" color="text-indigo-400" glow="bg-indigo-500" icon={<Database className="w-4 h-4 text-indigo-400/50" />} />
+          <MetricCard title="Processed" value={data.processed} subtext="NLP analysed" color="text-emerald-400" glow="bg-emerald-500" icon={<CheckCircle2 className="w-4 h-4 text-emerald-400/50" />} />
+          <MetricCard 
+            title="Adverse Event Rate" 
+            value={`${aeRate.toFixed(1)}%`} 
+            subtext={`${data.ae_flagged} of ${data.processed} flagged`} 
+            color="text-amber-400"
+            glow="bg-amber-500"
+            icon={<AlertTriangle className="w-4 h-4 text-amber-400/50" />} 
+          />
+          <MetricCard 
+            title="Relational Risk" 
+            value={relationalRisk ? relationalRisk.drug : 'N/A'} 
+            subtext={relationalRisk ? `${relationalRisk.count} associated symptoms` : 'Gathering relations...'} 
+            color={relationalRisk && relationalRisk.count > 3 ? 'text-rose-400' : 'text-cyan-400'}
+            glow={relationalRisk && relationalRisk.count > 3 ? 'bg-rose-500' : 'bg-cyan-500'}
+            icon={<ShieldAlert className={`w-4 h-4 ${relationalRisk && relationalRisk.count > 3 ? 'text-rose-400 animate-pulse' : 'text-cyan-400/50'}`} />} 
+          />
+        </div>
+
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="glass-panel p-6 rounded-2xl h-72 flex flex-col bg-[#111827]/60 border border-white/5 relative">
+            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-rose-500" /> AE Probability
+            </h3>
+            <div className="flex-1 min-h-0 relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={aeData} innerRadius="65%" outerRadius="85%" dataKey="value" stroke="none">
+                    {aeData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className={`text-3xl font-mono font-bold ${aeRate >= 50 ? 'text-rose-500' : aeRate >= 20 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                  {aeRate.toFixed(1)}%
+                </span>
+                <span className="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Adverse Events</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-panel p-6 rounded-2xl h-72 flex flex-col bg-[#111827]/60 border border-white/5">
+            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-cyan-400" /> Sentiment Split
+            </h3>
+            <div className="flex-1 min-h-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={sentimentData} innerRadius="55%" outerRadius="80%" dataKey="value" stroke="none">
+                    {sentimentData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend verticalAlign="middle" align="right" layout="vertical" iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#94a3b8' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="glass-panel p-6 rounded-2xl h-72 flex flex-col bg-[#111827]/60 border border-white/5">
+            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-indigo-500" /> Platform
+            </h3>
+            <div className="flex-1 min-h-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sourceData} layout="vertical" margin={{ top: 0, right: 20, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
+                  <XAxis type="number" stroke="#ffffff40" fontSize={10} tickLine={false} axisLine={false} />
+                  <YAxis type="category" dataKey="name" stroke="#ffffff80" fontSize={11} tickLine={false} axisLine={false} />
+                  <Tooltip cursor={{fill: '#ffffff05'}} content={<CustomTooltip />} />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                    {sourceData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS.bars[index % COLORS.bars.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Big Chart: Signal Strength */}
+        <div className="glass-panel p-6 rounded-2xl bg-[#111827]/60 border border-white/5 h-80 flex flex-col">
+          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-6 flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-amber-500" /> Signal Strength Distribution & PRR Scores
+          </h3>
+          <div className="flex-1 min-h-0">
+            {data.signals.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-slate-500 text-sm">
+                Waiting for signal detection...
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.signals} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                  <XAxis dataKey={(sig) => `${sig.drug}/${sig.symptom}`} stroke="#ffffff40" fontSize={9} tickLine={false} axisLine={false} tickMargin={10} interval={0} angle={-15} textAnchor="end" />
+                  <YAxis stroke="#ffffff40" fontSize={10} tickLine={false} axisLine={false} />
+                  <Tooltip cursor={{fill: '#ffffff05'}} content={<CustomTooltip />} />
+                  <Legend verticalAlign="top" height={36} iconType="square" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#94a3b8' }} />
+                  <Bar dataKey="prr" name="PRR" fill="#6366f1" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="ror" name="ROR" fill="#06b6d4" radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        {/* Infographics Row */}
+        {data.processed > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="glass-panel p-5 rounded-2xl bg-[#111827]/60 border border-white/5">
+              <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">AE Gate Analysis</h3>
+              <div className="space-y-3.5">
+                {aeGates.map(gate => (
+                  <div key={gate.label} className="space-y-1.5">
+                    <div className="flex justify-between text-[11px] text-slate-300">
+                      <span className="flex items-center gap-1.5 uppercase tracking-wide">
+                        {gate.label === 'AE Confirmed' ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <XCircle className="w-3.5 h-3.5 text-rose-500" />} 
+                        {gate.label}
+                      </span>
+                      <span className="font-mono text-slate-500">{gate.count} / {Math.round((gate.count / data.processed) * 100)}%</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-[#1e293b]/50 rounded-full overflow-hidden">
+                      <div className={`h-full ${gate.color} transition-all duration-700`} style={{ width: `${(gate.count / data.processed) * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-panel p-5 rounded-2xl bg-[#111827]/60 border border-white/5">
+              <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Top Drugs Detected</h3>
+              <div className="space-y-3.5">
+                {topDrugs.map(([d, c]) => (
+                  <div key={d} className="space-y-1.5">
+                    <div className="flex justify-between text-[11px] text-slate-300">
+                      <span className="flex items-center gap-1.5 lowercase">💊 {d}</span>
+                      <span className="font-mono text-slate-500">{c as number} posts</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-[#1e293b]/50 rounded-full overflow-hidden">
+                      <div className="h-full bg-indigo-500 transition-all duration-700" style={{ width: `${((c as number) / data.processed) * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass-panel p-5 rounded-2xl bg-[#111827]/60 border border-white/5">
+              <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Top Symptoms Detected</h3>
+              <div className="space-y-3.5">
+                {topSymptoms.map(([s, c]) => (
+                  <div key={s} className="space-y-1.5">
+                    <div className="flex justify-between text-[11px] text-slate-300">
+                      <span className="flex items-center gap-1.5 lowercase">⚕ {s}</span>
+                      <span className="font-mono text-slate-500">{c as number} posts</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-[#1e293b]/50 rounded-full overflow-hidden">
+                      <div className="h-full bg-amber-500 transition-all duration-700" style={{ width: `${((c as number) / data.processed) * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Signals Table */}
+        <div className="glass-panel p-6 rounded-2xl bg-[#111827]/60 border border-white/5 overflow-hidden flex flex-col">
+          <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-6 flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-indigo-400" /> Detected Signals
+            <span className="bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full text-xs font-mono">{data.signals.length}</span>
+          </h3>
+          
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-white/5 text-slate-400 text-[11px] uppercase tracking-widest">
+                  <th className="pb-3 px-4 font-semibold">Drug</th>
+                  <th className="pb-3 px-4 font-semibold">Symptom</th>
+                  <th className="pb-3 px-4 font-semibold text-center">Reports</th>
+                  <th className="pb-3 px-4 font-semibold">PRR (Disproportionality)</th>
+                  <th className="pb-3 px-4 font-semibold">ROR (Odds Ratio)</th>
+                  <th className="pb-3 px-4 font-semibold">χ² Confidence</th>
+                  <th className="pb-3 px-4 font-semibold">Strength</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {data.signals.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-8 text-center text-slate-500">
+                      {data.status === 'complete' ? 'No signals detected meeting criteria.' : 'Analyzing patterns...'}
+                    </td>
+                  </tr>
+                ) : (
+                  data.signals.map((sig, i) => {
+                    const maxPRR = Math.max(...data.signals.map(s => s.prr), 1);
+                    return (
+                    <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                      <td className="py-3 px-4 font-bold text-white lowercase">{sig.drug}</td>
+                      <td className="py-3 px-4 text-slate-300 lowercase">{sig.symptom}</td>
+                      <td className="py-3 px-4 text-slate-400 font-mono text-center text-xs">{sig.co_occurrences}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-16 h-1 bg-[#1e293b] rounded-full overflow-hidden">
+                            <div className="h-full bg-cyan-400" style={{ width: `${Math.min((sig.prr / maxPRR) * 100, 100)}%` }} />
+                          </div>
+                          <span className="text-cyan-400 font-mono text-xs">{sig.prr.toFixed(2)}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-slate-300 font-mono text-xs">{sig.ror?.toFixed(2) || '0.00'}</td>
+                      <td className="py-3 px-4 text-slate-300 font-mono text-xs">{sig.chi_square.toFixed(2)}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
+                          sig.strength === 'STRONG' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
+                          sig.strength === 'MODERATE' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                          'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        }`}>
+                          {sig.strength}
+                        </span>
+                      </td>
+                    </tr>
+                  )})
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Processed Posts List */}
+        <div className="glass-panel p-6 rounded-2xl bg-[#111827]/60 border border-white/5 flex flex-col mb-12">
+          <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-6 flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-emerald-400" /> Processed Posts
+            <span className="bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full text-xs font-mono">{data.live_posts.length}</span>
+          </h3>
+          
+          <div className="h-[600px] overflow-y-auto space-y-3 pr-4 custom-scrollbar">
+            <AnimatePresence>
+              {data.live_posts.length === 0 ? (
+                 <div className="h-full flex items-center justify-center text-slate-500 text-sm">
+                   Posts will appear as they are processed...
+                 </div>
+              ) : data.live_posts.map((post: any, idx: number) => {
+                const isPositive = post.sentiment?.toUpperCase() === 'POSITIVE';
+                const isNegative = post.sentiment?.toUpperCase() === 'NEGATIVE';
+                const sentimentColor = isPositive ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : isNegative ? 'text-rose-400 bg-rose-500/10 border-rose-500/20' : 'text-slate-400 bg-slate-500/10 border-slate-500/20';
+
+                return (
+                  <motion.div
+                    key={post.id || idx}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`p-5 rounded-xl border relative bg-[#0d1220]/60 ${post.ae_flag ? 'border-l-[3px] border-l-rose-500 border-white/5' : 'border-l-[3px] border-l-emerald-500 border-white/5'}`}
+                  >
+                    <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] uppercase tracking-widest font-bold text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20">
+                          {post.platform || 'UNKNOWN'}
+                        </span>
+                        <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded border ${sentimentColor}`}>
+                          {post.sentiment || 'NEUTRAL'}
+                        </span>
+                        {post.ae_flag && (
+                          <span className="flex items-center gap-1.5 text-[10px] text-rose-400 font-bold bg-rose-500/10 px-2 py-1 rounded border border-rose-500/20 tracking-widest">
+                            <AlertTriangle className="w-3.5 h-3.5" /> AE DETECTED
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs font-mono text-slate-500">#{idx + 1}</span>
+                    </div>
+                    
+                    {post.title && <h4 className="text-sm font-semibold text-white mb-2">{post.title}</h4>}
+                    <p className="text-[13px] text-slate-300 leading-relaxed mb-4">{post.text}</p>
+                    
+                    {(post.drugs?.length > 0 || post.symptoms?.length > 0 || post.ae_reason) && (
+                      <div className="flex flex-wrap gap-2 mt-2 pt-3 border-t border-white/5">
+                        {post.drugs?.map((d: string, i: number) => (
+                          <span key={`d-${i}`} className="text-[10px] uppercase tracking-widest font-bold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-2 py-1 rounded">
+                            💊 {d}
+                          </span>
+                        ))}
+                        {post.symptoms?.map((s: string, i: number) => (
+                          <span key={`s-${i}`} className="text-[10px] uppercase tracking-widest font-bold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded">
+                            ⚕ {s}
+                          </span>
+                        ))}
+                        {post.ae_reason && (
+                          <span className="text-[10px] uppercase tracking-widest font-medium text-slate-400 bg-slate-800/50 border border-slate-700/50 px-2 py-1 rounded italic">
+                            {post.ae_reason}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Confidence Bar */}
+                    {post.ae_confidence !== undefined && (
+                      <div className="flex items-center gap-2 mt-4">
+                        <div className="flex-1 h-1 bg-[#1e293b]/50 rounded-full overflow-hidden">
+                          <div className={`h-full ${post.ae_confidence >= 0.7 ? 'bg-rose-500' : post.ae_confidence >= 0.4 ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${post.ae_confidence * 100}%` }} />
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-500">{(post.ae_confidence * 100).toFixed(1)}% CONFIDENCE</span>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  );
+}
+
+// Custom Tooltip for Recharts
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div
-        className="rounded-lg p-3 text-xs shadow-2xl"
-        style={{
-          background: "#111118",
-          border: "1px solid rgba(255,255,255,0.10)",
-        }}
-      >
-        <p className="mb-2" style={{ color: "rgba(255,255,255,0.50)" }}>
-          {label}
-        </p>
+      <div className="bg-[#0d1220]/90 backdrop-blur-md px-4 py-3 rounded-xl border border-white/10 shadow-2xl">
+        {label && <p className="text-slate-300 font-medium mb-1 text-xs uppercase tracking-wider">{label}</p>}
         {payload.map((p: any, i: number) => (
-          <div key={p.dataKey || p.name || `tooltip-item-${i}`} className="flex items-center gap-2 py-0.5">
-            <span
-              className="w-2 h-2 rounded-full"
-              style={{ background: p.color }}
-            />
-            <span
-              className="capitalize"
-              style={{ color: "rgba(255,255,255,0.60)" }}
-            >
-              {p.name}:
-            </span>
-            <span style={{ color: "rgba(255,255,255,0.88)", fontWeight: 600 }}>
-              {p.value}
-            </span>
-          </div>
+          <p key={i} className="text-sm font-mono" style={{ color: p.color || p.fill }}>
+            {p.name}: {p.value.toFixed ? p.value.toFixed(2) : p.value}
+          </p>
         ))}
       </div>
     );
@@ -66,568 +544,18 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-function timeAgo(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const hrs = Math.floor(diff / 3600000);
-  if (hrs < 1) return "< 1h ago";
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
-}
-
-// Card component for stat cards
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  color,
-  bg,
-  border,
-  sub,
-}: {
-  label: string;
-  value: string | number;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-  border: string;
-  sub: string;
-}) {
+// Helper component
+function MetricCard({ title, value, subtext, color, glow, icon }: any) {
   return (
-    <div
-      className="rounded-xl p-5 flex flex-col gap-3"
-      style={{
-        background: "#0c0c14",
-        border: `1px solid ${border}`,
-      }}
-    >
-      <div className="flex items-start justify-between">
-        <p
-          style={{
-            fontSize: "12px",
-            fontWeight: 500,
-            color: "rgba(255,255,255,0.40)",
-          }}
-        >
-          {label}
-        </p>
-        <div
-          className="flex items-center justify-center rounded-lg"
-          style={{ width: "32px", height: "32px", background: bg }}
-        >
-          <Icon className="w-4 h-4" style={{ color }} />
-        </div>
+    <div className="glass-panel p-6 rounded-2xl flex flex-col justify-between bg-[#111827]/60 border border-white/5 relative overflow-hidden group">
+      <div className={`absolute -right-8 -top-8 w-24 h-24 rounded-full ${glow || 'bg-indigo-500'} opacity-5 group-hover:opacity-10 transition-opacity blur-xl`} />
+      <div className="flex items-center justify-between mb-3 z-10">
+        <h3 className="text-slate-400 font-bold text-[11px] uppercase tracking-widest">{title}</h3>
+        {icon}
       </div>
-      <p
-        style={{
-          fontSize: "30px",
-          fontWeight: 700,
-          color,
-          lineHeight: 1,
-          letterSpacing: "-0.02em",
-        }}
-      >
-        {value}
-      </p>
-      <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.28)" }}>{sub}</p>
-    </div>
-  );
-}
-
-export function DashboardPage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const projectId = searchParams.get("project_id");
-
-  const [dashboardStatus, setDashboardStatus] = useState("crawling");
-  const [realSignals, setRealSignals] = useState<Signal[]>([]);
-  const [realPosts, setRealPosts] = useState<Post[]>([]);
-
-  useEffect(() => {
-    if (!projectId) return;
-    let pollCount = 0;
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`${API}/api/results/${projectId}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        
-        setDashboardStatus(data.status);
-        if (data.signals) {
-          setRealSignals(data.signals.map((s: any) => ({
-            id: s.drug + s.symptom,
-            drug: s.drug,
-            symptom: s.symptom,
-            postCount: s.post_count,
-            prr: s.prr,
-            ror: s.ror,
-            chi2: s.chi_square,
-            strength: s.strength,
-            status: "Active"
-          })));
-        }
-        if (data.posts) {
-          setRealPosts(data.posts);
-        }
-
-        if (data.status === 'complete' || pollCount > 75) {
-          clearInterval(interval);
-        }
-        pollCount++;
-      } catch (err) {
-        console.warn("Poll failed", err);
-      }
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [projectId]);
-
-  const redSignals = realSignals.filter((s) => s.strength === "STRONG");
-  const amberSignals = realSignals.filter((s) => s.strength === "MODERATE");
-  const greenSignals = realSignals.filter((s) => s.strength === "WEAK");
-  const totalPosts = realPosts.length;
-
-  return (
-    <div className="flex flex-col flex-1 overflow-hidden">
-      <Header
-        title={`Signal Dashboard - Project #${projectId || 'Demo'}`}
-        subtitle={`Status: ${dashboardStatus.toUpperCase()} · Updated just now`}
-      />
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
-        {/* ── Stat cards ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            label="Red Signals"
-            value={redSignals.length}
-            icon={AlertTriangle}
-            color="#ef4444"
-            bg="rgba(239,68,68,0.12)"
-            border="rgba(239,68,68,0.18)"
-            sub="PRR ≥ 5 · Urgent review"
-          />
-          <StatCard
-            label="Amber Signals"
-            value={amberSignals.length}
-            icon={TrendingUp}
-            color="#f59e0b"
-            bg="rgba(245,158,11,0.12)"
-            border="rgba(245,158,11,0.18)"
-            sub="2 ≤ PRR < 5 · Emerging"
-          />
-          <StatCard
-            label="Green Signals"
-            value={greenSignals.length}
-            icon={Activity}
-            color="#22c55e"
-            bg="rgba(34,197,94,0.12)"
-            border="rgba(34,197,94,0.18)"
-            sub="PRR < 2 · Baseline"
-          />
-          <StatCard
-            label="Posts Analyzed"
-            value={totalPosts.toLocaleString()}
-            icon={FileText}
-            color="#818cf8"
-            bg="rgba(99,102,241,0.12)"
-            border="rgba(99,102,241,0.18)"
-            sub="Today · All sources"
-          />
-        </div>
-
-        {/* ── Timeline chart + Activity ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Chart */}
-          <div
-            className="lg:col-span-2 rounded-xl p-5"
-            style={{
-              background: "#0c0c14",
-              border: "1px solid rgba(255,255,255,0.06)",
-            }}
-          >
-            <div className="flex items-start justify-between mb-5">
-              <div>
-                <h3
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    color: "rgba(255,255,255,0.82)",
-                  }}
-                >
-                  Signal Timeline
-                </h3>
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color: "rgba(255,255,255,0.30)",
-                    marginTop: "2px",
-                  }}
-                >
-                  Drug–symptom pairs · 7-day window
-                </p>
-              </div>
-              <div className="flex gap-1">
-                {["7d", "14d", "30d"].map((t, i) => (
-                  <button
-                    key={t}
-                    className="rounded transition-colors"
-                    style={{
-                      padding: "4px 10px",
-                      fontSize: "11px",
-                      fontWeight: 500,
-                      background:
-                        i === 0
-                          ? "rgba(255,255,255,0.10)"
-                          : "transparent",
-                      color:
-                        i === 0
-                          ? "rgba(255,255,255,0.80)"
-                          : "rgba(255,255,255,0.35)",
-                    }}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* Custom legend outside chart to avoid Recharts internal key collisions */}
-            <div className="flex flex-wrap gap-3 mb-3">
-              {[
-                { key: "ibuprofen", color: "#ef4444" },
-                { key: "sertraline", color: "#f59e0b" },
-                { key: "metformin", color: "#818cf8" },
-                { key: "atorvastatin", color: "#22c55e" },
-              ].map((item) => (
-                <div key={item.key} className="flex items-center gap-1.5">
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: item.color }}
-                  />
-                  <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)" }}>
-                    {item.key}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={timelineData}>
-                <CartesianGrid
-                  key="grid"
-                  strokeDasharray="3 3"
-                  stroke="rgba(255,255,255,0.045)"
-                />
-                <XAxis
-                  key="x-axis"
-                  dataKey="date"
-                  tick={{ fill: "rgba(255,255,255,0.32)", fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  key="y-axis"
-                  tick={{ fill: "rgba(255,255,255,0.32)", fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={28}
-                />
-                <Tooltip key="tooltip" content={<CustomTooltip />} />
-                <Line
-                  key="line-ibuprofen"
-                  type="monotone"
-                  dataKey="ibuprofen"
-                  name="ibuprofen"
-                  stroke="#ef4444"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4 }}
-                />
-                <Line
-                  key="line-sertraline"
-                  type="monotone"
-                  dataKey="sertraline"
-                  name="sertraline"
-                  stroke="#f59e0b"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4 }}
-                />
-                <Line
-                  key="line-metformin"
-                  type="monotone"
-                  dataKey="metformin"
-                  name="metformin"
-                  stroke="#818cf8"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4 }}
-                />
-                <Line
-                  key="line-atorvastatin"
-                  type="monotone"
-                  dataKey="atorvastatin"
-                  name="atorvastatin"
-                  stroke="#22c55e"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Activity Feed */}
-          <div
-            className="rounded-xl p-5 flex flex-col"
-            style={{
-              background: "#0c0c14",
-              border: "1px solid rgba(255,255,255,0.06)",
-            }}
-          >
-            <h3
-              className="mb-4"
-              style={{
-                fontSize: "14px",
-                fontWeight: 600,
-                color: "rgba(255,255,255,0.82)",
-              }}
-            >
-              Recent Activity
-            </h3>
-            <div className="space-y-1.5 flex-1 overflow-y-auto">
-              {realPosts.length === 0 && <p className="text-white/30 text-xs text-center py-4">Posts will appear as they are processed...</p>}
-              {realPosts.map((post, idx) => {
-                const dotColor = post.ae_flag ? "#ef4444" : "#22c55e";
-                return (
-                  <div
-                    key={idx}
-                    className="flex gap-3 p-2.5 rounded-lg cursor-pointer transition-colors hover:bg-white/[0.03]"
-                  >
-                    <div
-                      className="mt-1 w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{ background: dotColor, marginTop: "5px" }}
-                    />
-                    <div className="min-w-0">
-                      <p
-                        className="leading-snug line-clamp-3"
-                        style={{
-                          fontSize: "12px",
-                          color: "rgba(255,255,255,0.55)",
-                        }}
-                      >
-                        {post.text}
-                      </p>
-                      <p
-                        className="mt-1"
-                        style={{
-                          fontSize: "10px",
-                          color: "rgba(255,255,255,0.25)",
-                        }}
-                      >
-                        {post.platform} • {post.sentiment} {post.ae_flag && "• AE Flagged"}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Top Drugs Table ── */}
-        <div
-          className="rounded-xl overflow-hidden"
-          style={{
-            background: "#0c0c14",
-            border: "1px solid rgba(255,255,255,0.06)",
-          }}
-        >
-          <div
-            className="flex items-center justify-between px-6 py-4"
-            style={{ borderBottom: "1px solid rgba(255,255,255,0.055)" }}
-          >
-            <div>
-              <h3
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "rgba(255,255,255,0.82)",
-                }}
-              >
-                Top Drugs at Risk
-              </h3>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "rgba(255,255,255,0.28)",
-                  marginTop: "2px",
-                }}
-              >
-                Sorted by PRR · All active signals
-              </p>
-            </div>
-            <button
-              onClick={() => navigate("/worklist")}
-              className="flex items-center gap-1.5 transition-colors"
-              style={{
-                fontSize: "12px",
-                fontWeight: 500,
-                color: "rgba(129,140,248,0.7)",
-              }}
-              onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLElement).style.color = "#818cf8")
-              }
-              onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.color =
-                  "rgba(129,140,248,0.7)")
-              }
-            >
-              View worklist{" "}
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.045)" }}>
-                  {[
-                    "Drug",
-                    "Symptom",
-                    "Severity",
-                    "PRR",
-                    "ROR",
-                    "Chi²",
-                    "Posts",
-                    "Status",
-                    "Detail",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="text-left whitespace-nowrap"
-                      style={{
-                        padding: "10px 16px",
-                        fontSize: "10px",
-                        fontWeight: 600,
-                        color: "rgba(255,255,255,0.28)",
-                        letterSpacing: "0.05em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {realSignals.length === 0 ? (
-                  <tr><td colSpan={9} className="text-center py-8 text-white/50"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" /> Waiting for signal detection...</td></tr>
-                ) : realSignals
-                  .map((sig) => (
-                    <tr
-                      key={sig.id}
-                      className="cursor-pointer transition-colors"
-                      style={{ borderBottom: "1px solid rgba(255,255,255,0.035)" }}
-                      onClick={() => navigate(`/signals/${sig.id}`)}
-                      onMouseEnter={(e) =>
-                        ((e.currentTarget as HTMLElement).style.background =
-                          "rgba(255,255,255,0.018)")
-                      }
-                      onMouseLeave={(e) =>
-                        ((e.currentTarget as HTMLElement).style.background =
-                          "transparent")
-                      }
-                    >
-                      <td
-                        className="whitespace-nowrap"
-                        style={{
-                          padding: "12px 16px",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                          color: "rgba(255,255,255,0.80)",
-                        }}
-                      >
-                        {sig.drug}
-                      </td>
-                      <td
-                        className="whitespace-nowrap"
-                        style={{
-                          padding: "12px 16px",
-                          fontSize: "13px",
-                          color: "rgba(255,255,255,0.52)",
-                        }}
-                      >
-                        {sig.symptom}
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <SeverityBadge severity={sig.strength === "STRONG" ? "RED" : sig.strength === "MODERATE" ? "AMBER" : "GREEN"} size="sm" />
-                      </td>
-                      <td
-                        className="whitespace-nowrap font-mono"
-                        style={{
-                          padding: "12px 16px",
-                          fontSize: "12px",
-                          color: "rgba(255,255,255,0.68)",
-                        }}
-                      >
-                        {sig.prr.toFixed(1)}
-                      </td>
-                      <td
-                        className="whitespace-nowrap font-mono"
-                        style={{
-                          padding: "12px 16px",
-                          fontSize: "12px",
-                          color: "rgba(255,255,255,0.45)",
-                        }}
-                      >
-                        {sig.ror.toFixed(1)}
-                      </td>
-                      <td
-                        className="whitespace-nowrap font-mono"
-                        style={{
-                          padding: "12px 16px",
-                          fontSize: "12px",
-                          color: "rgba(255,255,255,0.45)",
-                        }}
-                      >
-                        {sig.chi2.toFixed(1)}
-                      </td>
-                      <td
-                        className="whitespace-nowrap"
-                        style={{
-                          padding: "12px 16px",
-                          fontSize: "13px",
-                          color: "rgba(255,255,255,0.52)",
-                        }}
-                      >
-                        {sig.postCount.toLocaleString()}
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <StatusBadge status={sig.status} />
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <button
-                          className="flex items-center gap-1 transition-colors"
-                          style={{
-                            fontSize: "11px",
-                            fontWeight: 500,
-                            color: "rgba(129,140,248,0.55)",
-                          }}
-                          onMouseEnter={(e) =>
-                            ((e.currentTarget as HTMLElement).style.color =
-                              "#818cf8")
-                          }
-                          onMouseLeave={(e) =>
-                            ((e.currentTarget as HTMLElement).style.color =
-                              "rgba(129,140,248,0.55)")
-                          }
-                        >
-                          Details{" "}
-                          <ArrowUpRight className="w-3 h-3" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <div className="z-10">
+        <p className={`text-[32px] font-mono font-bold ${color || 'text-white'} tracking-tighter leading-none mb-1`}>{value}</p>
+        {subtext && <p className="text-[11px] text-slate-500">{subtext}</p>}
       </div>
     </div>
   );

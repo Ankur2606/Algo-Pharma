@@ -1,26 +1,21 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import { LandingPage } from "./pages/LandingPage";
-import { AuthPage } from "./pages/AuthPage";
+import { LoginPage } from "./pages/LoginPage";
 import { ChatPage } from "./pages/ChatPage";
 import { ProcessingPage } from "./pages/ProcessingPage";
 import { DashboardPage } from "./pages/DashboardPage";
-import { ValidationPage } from "./pages/ValidationPage";
-import { DashboardLayout } from "./components/layout/DashboardLayout";
 
 export const router = createBrowserRouter([
-  // Landing page is the entry point — no connections to internal pages
+  // Landing page is the entry point
   { path: "/", Component: LandingPage },
-  // App entry (login) lives at /login
-  { path: "/login", Component: AuthPage },
+  // Login page
+  { path: "/login", Component: LoginPage },
+  // Chat interface to input query
   { path: "/chat", Component: ChatPage },
+  // Processing animation
   { path: "/processing", Component: ProcessingPage },
-  // Dashboard and sub-pages share the sidebar layout
-  {
-    Component: DashboardLayout,
-    children: [
-      { path: "/dashboard", Component: DashboardPage },
-      { path: "/validation", Component: ValidationPage },
-    ],
-  },
+  // Final intelligent dashboard
+  { path: "/dashboard", Component: DashboardPage },
+  // Catch-all
   { path: "*", element: <Navigate to="/" replace /> },
 ]);

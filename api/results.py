@@ -156,6 +156,9 @@ def get_results(project_id: int):
         # This prevents the frontend from stopping polling before signals are written.
         all_posts_processed = total_raw > 0 and total_processed >= total_raw
         pipeline_done = signals_done(project_id)  # sentinel file written by Celery task
+        
+        # Check if all crawls for this project are finished (completed or failed)
+        crawls_finished = len(crawl_logs) > 0 and all(cl.status in ("completed", "failed") for cl in crawl_logs)
 
         if signals:
             status = "complete"
@@ -164,6 +167,9 @@ def get_results(project_id: int):
             status = "complete"
         elif all_posts_processed and ae_flagged_count == 0:
             # No AE posts at all — signal detection won't produce anything, done
+            status = "complete"
+        elif crawls_finished and total_raw == 0:
+            # Crawls finished but found absolutely no posts
             status = "complete"
         elif total_processed > 0:
             status = "analysing"

@@ -19,17 +19,45 @@ const FEATURES = [
   { icon: "🤖", title: "Forum Onboarding AI", desc: "Drop any medical forum URL into the system and the AI generates a custom scraper config on the fly using Firecrawl plus Groq." },
   { icon: "🔬", title: "Explainable Output", desc: "Every AE flag shows its full reasoning trace: which drug, which symptom, the sentiment score, negation check result, and confidence value." },
   { icon: "🏗️", title: "Modular by Design", desc: "Each source is a plugin. Adding a new platform means writing one crawler class. The NLP pipeline, DB, and dashboard wire up automatically." },
+  { icon: "📈", title: "Relational Risk Mapping", desc: "Future-ready: Mapping drug-symptom co-occurrence clusters. Medicines linked to high symptom counts are automatically flagged for prioritized risk testing." },
+];
+
+const MOAT_POINTS = [
+  { 
+    title: "Air-Gapped PII Shield", 
+    desc: "Mandatory on-CPU redaction using OpenMed-44M/82M weights. Clinical PII is scrubbed locally BEFORE ingestion, ensuring HIPAA/GDPR compliance by design, not policy." 
+  },
+  { 
+    title: "Clinical Entity Fusion", 
+    desc: "Beyond generic NER. We use PharmaDetect-149M and DiseaseDetect-184M Transformers to isolate drug-symptom relationships in messy, unstructured vernacular social data." 
+  },
+  { 
+    title: "Autonomous Scraper Synthesis", 
+    desc: "Powered by Nvidia Nemotron-3. Our agent analyzes any forum's DOM on-the-fly to synthesize a crawler configuration—eliminating manual coding for new sources." 
+  },
+  { 
+    title: "Dynamic MCP Query Routing", 
+    desc: "The interface layer utilizes Model Context Protocol (MCP) to dynamically route user intent to specialized crawlers, ensuring optimized source selection for every query." 
+  },
+  { 
+    title: "Async Scalability Architecture", 
+    desc: "A hybrid stack using FastAPI for low-latency reactive UX and Celery/Redis for heavy background NLP handling, providing industrial-grade throughput and resilience." 
+  },
+  { 
+    title: "Deterministic Signal Integrity", 
+    desc: "Moving beyond LLM 'vibes.' We calculate PRR (Proportional Reporting Ratio) and ROR—the gold standard clinical math used by the FDA—to prove statistical significance." 
+  }
 ];
 
 const PIPELINE_STEPS = [
-  { num: "01", label: "Language Detection", detail: "langdetect identifies the language before any model runs." },
-  { num: "02", label: "PII Guard", detail: "OpenMed PII (44M/82M) removes clinical entities plus Indian-specific identifiers." },
-  { num: "03", label: "Drug NER", detail: "OpenMed PharmaDetect 149M maps brand names to MedDRA drug codes." },
-  { num: "04", label: "Symptom NER", detail: "OpenMed DiseaseDetect 184M extracts adverse symptoms and maps to preferred terms." },
-  { num: "05", label: "Sentiment Scoring", detail: "Twitter-RoBERTa trained on 58M real tweets scores each post POSITIVE, NEGATIVE, or NEUTRAL." },
-  { num: "06", label: "Negation Detection", detail: "medspaCy clinical rules catch phrases like 'no nausea' and remove false positives." },
-  { num: "07", label: "AE Rule Engine", detail: "Drug + Symptom + Negative Sentiment + Not Negated → AE flagged with confidence score." },
-  { num: "08", label: "PRR Signal Detection", detail: "PRR ≥ 2 and Chi-square ≥ 4 and count ≥ 3 triggers a ranked pharmacovigilance signal." },
+  { num: "01", label: "Vernacular Translation", detail: "Sarvam AI and local weights map regional side-effect slang (Hindi/Telugu) to standardized English." },
+  { num: "02", label: "Local PII Guard", detail: "OpenMed-44M/82M scrubs clinical PII and Indian IDs (Aadhaar/PAN) on-CPU before any network call." },
+  { num: "03", label: "PharmaDetect NER", detail: "OpenMed-149M clinical Transformer maps drug brand names to standardized MedDRA codes." },
+  { num: "04", label: "DiseaseDetect NER", detail: "OpenMed-184M extracts pathological symptoms and adverse reactions from unstructured text." },
+  { num: "05", label: "Sentiment Scoring", detail: "Twitter-RoBERTa (58M tweets) filters for 'Negative Sentiment' as a pre-requisite for AE detection." },
+  { num: "06", label: "medspaCy Negation", detail: "Clinical rule-engines catch phrases like 'no nausea' to eliminate false positive signals." },
+  { num: "07", label: "AE Detection Agent", detail: "Fused logic: [Drug + Symptom + Negative Sentiment + Not Negated] → Flagged Adverse Event." },
+  { num: "08", label: "PRR Statistical Signal", detail: "Gold-standard PV math (PRR ≥ 2, χ² ≥ 4) validates if a signal is statistically significant vs. noise." },
 ];
 
 function GridBackground() {
@@ -175,6 +203,32 @@ export function LandingPage() {
                   <p style={{ fontWeight: 700, fontSize: 15, marginBottom: 10, letterSpacing: "-0.01em" }}>{f.title}</p>
                   <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.65 }}>{f.desc}</p>
                 </GlassCard>
+              </FadeIn>
+            ))}
+          </div>
+        </section>
+
+        {/* The Moat Section */}
+        <section style={{ maxWidth: 1200, margin: "0 auto", padding: "80px 24px", background: "#000", borderRadius: 32, border: "1px solid rgba(255,255,255,0.05)", marginBottom: 80 }}>
+          <FadeIn>
+            <div style={{ marginBottom: 48 }}>
+               <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", background: "#2563eb", padding: "4px 12px", borderRadius: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>Competitive Advantage</span>
+               <h2 style={{ fontSize: "clamp(30px, 5vw, 54px)", fontWeight: 700, letterSpacing: "-0.03em", marginTop: 24, marginBottom: 20 }}>
+                 The <span style={{ color: "#fff", textDecoration: "underline", textDecorationColor: "rgba(255,255,255,0.2)" }}>AlgoPharma Moat</span>: Why Competitors Cannot Easily Replicate This
+               </h2>
+               <p style={{ fontSize: 18, color: "rgba(255,255,255,0.6)", maxWidth: 900, lineHeight: 1.6 }}>
+                 AlgoPharma combines privacy-first architecture, agentic scalability, regional language dominance, and statistically rigorous signal detection into a single, defensible pharmacovigilance platform that no generic tool can match.
+               </p>
+            </div>
+          </FadeIn>
+          
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 40 }}>
+            {MOAT_POINTS.map((point, i) => (
+              <FadeIn key={point.title} delay={i * 100}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>{point.title}</h3>
+                  <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", lineHeight: 1.7 }}>{point.desc}</p>
+                </div>
               </FadeIn>
             ))}
           </div>

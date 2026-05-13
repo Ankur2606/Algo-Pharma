@@ -1,10 +1,57 @@
-/* Hide scrollbars across the app while keeping scroll functionality */
-* {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+@layer base {
+  body {
+    @apply bg-zinc-950 text-slate-200 antialiased selection:bg-cyan-500/30 selection:text-cyan-200;
+    font-family: 'Inter', sans-serif;
+    background-image: 
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99, 102, 241, 0.15), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(6, 182, 212, 0.08), transparent),
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    background-position: center top, center bottom, center center, center center;
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
 }
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-zinc-900/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)];
+  }
+
+  .glass-panel-subtle {
+    @apply bg-zinc-900/40 backdrop-blur-md border border-white/5 shadow-lg;
+  }
+}
+
+/* Custom scrollbars for specific areas, hide it globally by default */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
 *::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
