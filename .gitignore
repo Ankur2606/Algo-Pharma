@@ -139,10 +139,17 @@ celerybeat.pid
 *.aof
 *.pid
 
+
 # RabbitMQ
 mnesia/
 rabbitmq/
 rabbitmq-data/
+algopharma.db-wal
+algopharma.db-shm
+algopharma.db
+algopharma_test.db-wal
+algopharma_test.db-shm
+algopharma_test.db
 
 # ActiveMQ
 activemq-data/
@@ -220,3 +227,6 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 Replicate existing design
+#logs
+logs/done_flags
+logs/results

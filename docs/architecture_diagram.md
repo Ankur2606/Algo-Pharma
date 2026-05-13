@@ -9,33 +9,32 @@
 ║  ┌─────────────────────────────────────────────────────┐    ║
 ║  │ STEP 1 — PII GUARD (runs FIRST, always)             │    ║
 ║  │                                                     │    ║
-║  │  1A. OpenMed/privacy-filter-nemotron                │    ║
-║  │      → 55 clinical entities: MRN, health_plan_ID,   │    ║
-║  │        blood_type, names, email, phone, DOB          │    ║
-║  │      → F1: 0.993 on medical_record_number           │    ║
-║  │      → F1: 0.995 on health_plan_beneficiary_number  │    ║
+║  │  1A. OpenMed-PII-SuperClinical-Small-44M-v1         │    ║
+║  │      → English clinical de-identification           │    ║
 ║  │                                                     │    ║
 ║  │  1B. Indian Regex Layer                             │    ║
 ║  │      → Aadhaar, PAN, UPI, IFSC, IN-phone           │    ║
 ║  │                                                     │    ║
-║  │  1C. Hindi/Telugu: OpenMed multilingual models      │    ║
+║  │  1C. Hindi/Telugu PII Models                        │    ║
+║  │      → OpenMed-PII-Hindi-SuperClinical (44M)        │    ║
+║  │      → OpenMed-PII-Telugu-FastClinical (82M)        │    ║
 ║  │                                                     │    ║
 ║  │  OUTPUT: Redacted text + PII audit log              │    ║
 ║  └─────────────────────────────────────────────────────┘    ║
 ║         ↓                                                    ║
 ║  ┌─────────────────────────────────────────────────────┐    ║
 ║  │ STEP 2 — DRUG NER                                   │    ║
-║  │  OpenMed-NER-PharmaDetect-BigMed-278M               │    ║
+║  │  OpenMed-NER-PharmaDetect-ModernClinical-149M       │    ║
 ║  │  → Detects: Dolo 650, Paracetamol, brand names      │    ║
-║  │  → Trained on BC5CDR chemical corpus                │    ║
+║  │  → CPU-friendly, 149M params                        │    ║
 ║  │  → Maps to MedDRA standard drug codes               │    ║
 ║  └─────────────────────────────────────────────────────┘    ║
 ║         ↓                                                    ║
 ║  ┌─────────────────────────────────────────────────────┐    ║
 ║  │ STEP 3 — SYMPTOM/DISEASE NER                        │    ║
-║  │  OpenMed-NER-DiseaseDetect-BioMed-335M              │    ║
+║  │  OpenMed-NER-DiseaseDetect-SuperClinical-184M       │    ║
 ║  │  → Detects: nausea, stomach pain, liver discomfort  │    ║
-║  │  → Trained on BC5CDR disease corpus                 │    ║
+║  │  → CPU-friendly, 184M params                        │    ║
 ║  │  → Maps to MedDRA preferred terms                   │    ║
 ║  └─────────────────────────────────────────────────────┘    ║
 ║         ↓                                                    ║
@@ -76,10 +75,10 @@
 ║         ↓                                                    ║
 ║  ┌─────────────────────────────────────────────────────┐    ║
 ║  │ STEP 8 — PRR/ROR SIGNAL DETECTION                   │    ║
-║  │  Spike detection: today > 2× 7-day rolling avg      │    ║
-║  │  PRR ≥ 2 AND chi-square ≥ 4 AND count ≥ 3          │    ║
-║  │  → SIGNAL created with full audit trail             │    ║
-║  │  → Alert: email / webhook / Slack MCP               │    ║
+║  │  Disproportionality analysis for adverse events     │    ║
+║  │  → STRONG/MODERATE: PRR ≥ 2 AND χ² ≥ 4 AND count ≥ 3│    ║
+║  │  → MODERATE: PRR ≥ 1.5 AND count ≥ 2                │    ║
+║  │  → WEAK: count ≥ 1 (co-occurrence)                  │    ║
 ║  │  → Dashboard: GREEN / AMBER / RED band              │    ║
 ║  │  → Export: PvPI-formatted CSV for VigiFlow upload   │    ║
 ║  └─────────────────────────────────────────────────────┘    ║

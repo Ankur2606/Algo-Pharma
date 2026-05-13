@@ -1,0 +1,302 @@
+project_id,medicine_queried,post_db_id,platform,title,ae_flag,ae_confidence,ae_gate_reason,sentiment,drugs_detected,symptoms_detected
+11,dolo 650,101,reddit,"Take a photo of a medicine strip → your phone explains uses, side effects, safety. Is this a bad idea? Tell me in the co",FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+11,dolo 650,102,reddit,Side effects of Dolo 650 and paracetamol tablets on UC patients,TRUE,0.654,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Dolo 650; paracetamol; dolo,UC; fever
+11,dolo 650,103,reddit,Sore throat after taking Paracetamol,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,Paracetamol; Paracetamol tablets; Dolo 650; W; dolo,Sore throat; irritation in my throat; dry cough; fever; rash
+11,dolo 650,104,reddit,MY EXPERIENCE WITH THE VACCINE,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,CAPTCHA; dolo 650; dolo,body pain; fever
+11,dolo 650,105,reddit,Will taking a paracetamol 2 &amp; 1/2 hours after CoViD vaccine reduce efficacy?,TRUE,0.48,drug+symptom+negative_sentiment+no_negation,NEGATIVE,paracetamol; Dolo 650; dolo,pain; dullness
+11,dolo 650,106,reddit,Laundry 101 With u/KismaiAesthetics,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,cream of mushroom,smelly armpits
+11,dolo 650,107,reddit,I got offered a paid clinical trial that pays 23k,FALSE,0.0,no_symptom,NEGATIVE,dolo 650,
+11,dolo 650,108,reddit,Endgame DD: How last weeks actions all come together to one specific Date. All the data analyzed.,FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+11,dolo 650,109,reddit,"Redesigning my 18-Node Ryzen 9950X Solar-Powered Cluster (And yes, I am a real human!)",FALSE,0.0,no_symptom,POSITIVE,dolo 650,
+11,dolo 650,110,reddit,Seller Raised the Price 3 Days Before Closing. Is This Even Legal? Need Advice!,FALSE,0.0,no_symptom,NEGATIVE,dolo 650,
+11,dolo 650,111,reddit,We’re living through an experiment by the Federal Reserve and it's gone terribly wrong. Economic intervention since 2008,TRUE,0.768,drug+symptom+negative_sentiment+no_negation,NEGATIVE,dolo 650,inflation
+11,dolo 650,112,reddit,Jingle Jam 2021: Schedule and Links!,FALSE,0.0,no_symptom,POSITIVE,dolo 650,
+11,dolo 650,113,reddit,Shorting NVDA at 740 is literally free money at this point,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,dolo 650,NV
+11,dolo 650,114,reddit,2019 Versys 650 - Looking for cost effective side bags/cases,FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+11,dolo 650,115,reddit,"This is why GAMESTOP won't STOP, and why $100k is NOT A MEME. (REPOSTED)",TRUE,0.69,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Azxvxh; Citadel,GAMESTOP
+11,dolo 650,116,reddit,"203 AI bots, 297 debates, 17,650 arguments — and 994 times a bot switched sides after reading another bot's rebuttal",FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+11,dolo 650,117,reddit,Side effects or normal?,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,testosterone; methadone; testosterone enanthate; BPC-157; TB-500; KPV; GHK-Cu,hypogonadism; FMF; axial spondyloarthritis; sacroiliitis; lower back pain; shoulder bursitis; back pain; fatigue; tired
+11,dolo 650,118,reddit,Relic switching costs are one of the most anti-fun systems in RS3. Please change it.,TRUE,0.588,drug+symptom+negative_sentiment+no_negation,NEGATIVE,iron,itching
+11,dolo 650,119,reddit,Side effects or normal,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,testosterone; methadone; testosterone en; BPC-157; TB-500; KPV; GHK-Cu,hypogonadism; FMF; axial spondyloarthritis; sacroiliitis; lower back pain; shoulder bursitis; back pain; fatigue; tired
+11,dolo 650,120,reddit,SCP-5000: Why?,FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+12,dolo 650,121,reddit,"Take a photo of a medicine strip → your phone explains uses, side effects, safety. Is this a bad idea? Tell me in the co",FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+12,dolo 650,122,reddit,Side effects of Dolo 650 and paracetamol tablets on UC patients,TRUE,0.654,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Dolo 650; paracetamol; dolo,UC; fever
+12,dolo 650,123,reddit,Sore throat after taking Paracetamol,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,Paracetamol; Paracetamol tablets; Dolo 650; W; dolo,Sore throat; irritation in my throat; dry cough; fever; rash
+12,dolo 650,124,reddit,MY EXPERIENCE WITH THE VACCINE,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,CAPTCHA; dolo 650; dolo,body pain; fever
+12,dolo 650,125,reddit,Will taking a paracetamol 2 &amp; 1/2 hours after CoViD vaccine reduce efficacy?,TRUE,0.48,drug+symptom+negative_sentiment+no_negation,NEGATIVE,paracetamol; Dolo 650; dolo,pain; dullness
+12,dolo 650,126,reddit,Laundry 101 With u/KismaiAesthetics,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,cream of mushroom,smelly armpits
+12,dolo 650,127,reddit,I got offered a paid clinical trial that pays 23k,FALSE,0.0,no_symptom,NEGATIVE,dolo 650,
+12,dolo 650,128,reddit,Endgame DD: How last weeks actions all come together to one specific Date. All the data analyzed.,FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+12,dolo 650,129,reddit,"Redesigning my 18-Node Ryzen 9950X Solar-Powered Cluster (And yes, I am a real human!)",FALSE,0.0,no_symptom,POSITIVE,dolo 650,
+12,dolo 650,130,reddit,Seller Raised the Price 3 Days Before Closing. Is This Even Legal? Need Advice!,FALSE,0.0,no_symptom,NEGATIVE,dolo 650,
+12,dolo 650,131,reddit,We’re living through an experiment by the Federal Reserve and it's gone terribly wrong. Economic intervention since 2008,TRUE,0.768,drug+symptom+negative_sentiment+no_negation,NEGATIVE,dolo 650,inflation
+12,dolo 650,132,reddit,Jingle Jam 2021: Schedule and Links!,FALSE,0.0,no_symptom,POSITIVE,dolo 650,
+12,dolo 650,133,reddit,Shorting NVDA at 740 is literally free money at this point,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,dolo 650,NV
+12,dolo 650,134,reddit,2019 Versys 650 - Looking for cost effective side bags/cases,FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+12,dolo 650,135,reddit,"This is why GAMESTOP won't STOP, and why $100k is NOT A MEME. (REPOSTED)",TRUE,0.69,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Azxvxh; Citadel,GAMESTOP
+12,dolo 650,136,reddit,"203 AI bots, 297 debates, 17,650 arguments — and 994 times a bot switched sides after reading another bot's rebuttal",FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+12,dolo 650,137,reddit,Side effects or normal?,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,testosterone; methadone; testosterone enanthate; BPC-157; TB-500; KPV; GHK-Cu,hypogonadism; FMF; axial spondyloarthritis; sacroiliitis; lower back pain; shoulder bursitis; back pain; fatigue; tired
+12,dolo 650,138,reddit,Relic switching costs are one of the most anti-fun systems in RS3. Please change it.,TRUE,0.588,drug+symptom+negative_sentiment+no_negation,NEGATIVE,iron,itching
+12,dolo 650,139,reddit,Side effects or normal,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,testosterone; methadone; testosterone en; BPC-157; TB-500; KPV; GHK-Cu,hypogonadism; FMF; axial spondyloarthritis; sacroiliitis; lower back pain; shoulder bursitis; back pain; fatigue; tired
+12,dolo 650,140,reddit,SCP-5000: Why?,FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+13,Dolo 650,141,reddit,"Take a photo of a medicine strip → your phone explains uses, side effects, safety. Is this a bad idea? Tell me in the co",FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+13,Dolo 650,142,reddit,Side effects of Dolo 650 and paracetamol tablets on UC patients,TRUE,0.654,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Dolo 650; paracetamol; dolo,UC; fever
+13,Dolo 650,143,reddit,Sore throat after taking Paracetamol,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,Paracetamol; Paracetamol tablets; Dolo 650; W; dolo,Sore throat; irritation in my throat; dry cough; fever; rash
+13,Dolo 650,144,reddit,MY EXPERIENCE WITH THE VACCINE,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,CAPTCHA; dolo 650; dolo,body pain; fever
+13,Dolo 650,145,reddit,Will taking a paracetamol 2 &amp; 1/2 hours after CoViD vaccine reduce efficacy?,TRUE,0.48,drug+symptom+negative_sentiment+no_negation,NEGATIVE,paracetamol; Dolo 650; dolo,pain; dullness
+13,Dolo 650,146,reddit,Laundry 101 With u/KismaiAesthetics,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,cream of mushroom,smelly armpits
+13,Dolo 650,147,reddit,I got offered a paid clinical trial that pays 23k,FALSE,0.0,no_symptom,NEGATIVE,dolo 650,
+13,Dolo 650,148,reddit,Endgame DD: How last weeks actions all come together to one specific Date. All the data analyzed.,FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+13,Dolo 650,149,reddit,"Redesigning my 18-Node Ryzen 9950X Solar-Powered Cluster (And yes, I am a real human!)",FALSE,0.0,no_symptom,POSITIVE,dolo 650,
+13,Dolo 650,150,reddit,Seller Raised the Price 3 Days Before Closing. Is This Even Legal? Need Advice!,FALSE,0.0,no_symptom,NEGATIVE,dolo 650,
+13,Dolo 650,151,reddit,We’re living through an experiment by the Federal Reserve and it's gone terribly wrong. Economic intervention since 2008,TRUE,0.768,drug+symptom+negative_sentiment+no_negation,NEGATIVE,dolo 650,inflation
+13,Dolo 650,152,reddit,Jingle Jam 2021: Schedule and Links!,FALSE,0.0,no_symptom,POSITIVE,dolo 650,
+13,Dolo 650,153,reddit,Shorting NVDA at 740 is literally free money at this point,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,dolo 650,NV
+13,Dolo 650,154,reddit,2019 Versys 650 - Looking for cost effective side bags/cases,FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+13,Dolo 650,155,reddit,"This is why GAMESTOP won't STOP, and why $100k is NOT A MEME. (REPOSTED)",TRUE,0.69,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Azxvxh; Citadel,GAMESTOP
+13,Dolo 650,156,reddit,"203 AI bots, 297 debates, 17,650 arguments — and 994 times a bot switched sides after reading another bot's rebuttal",FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+13,Dolo 650,157,reddit,Side effects or normal?,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,testosterone; methadone; testosterone enanthate; BPC-157; TB-500; KPV; GHK-Cu,hypogonadism; FMF; axial spondyloarthritis; sacroiliitis; lower back pain; shoulder bursitis; back pain; fatigue; tired
+13,Dolo 650,158,reddit,Relic switching costs are one of the most anti-fun systems in RS3. Please change it.,TRUE,0.588,drug+symptom+negative_sentiment+no_negation,NEGATIVE,iron,itching
+13,Dolo 650,159,reddit,Side effects or normal,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,testosterone; methadone; testosterone en; BPC-157; TB-500; KPV; GHK-Cu,hypogonadism; FMF; axial spondyloarthritis; sacroiliitis; lower back pain; shoulder bursitis; back pain; fatigue; tired
+13,Dolo 650,160,reddit,SCP-5000: Why?,FALSE,0.0,no_symptom,NEUTRAL,dolo 650,
+15,Vioxx,181,reddit,"‘Masked’ cancer drug stealthily trains immune system to kill tumors while sparing healthy tissues, reducing treatment si",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,vioxx,cancer; tumors
+15,Vioxx,182,reddit,PFIZER has responded to gain of function and directed evolution claims. Admits they are indeed manipulating COVID and pr,TRUE,0.755,drug+symptom+negative_sentiment+no_negation,NEGATIVE,vioxx,COVID
+15,Vioxx,183,reddit,A less talked about side effect of estrogen,FALSE,0.0,no_symptom,POSITIVE,estrogen,
+15,Vioxx,184,reddit,This cube is made up of my dead skin,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,vioxx,OCD
+15,Vioxx,185,reddit,Strange reaction from my husband…unexpected side effect,TRUE,0.516,drug+symptom+negative_sentiment+no_negation,NEGATIVE,vioxx,weight loss
+15,Vioxx,186,reddit,"TIL about Precordial Catch Syndrome (AKA Texidor's Twinge), which is when someone gets a sharp stabbing pain in the side",TRUE,0.559,drug+symptom+negative_sentiment+no_negation,NEGATIVE,vioxx,Precordial Catch Syndrome; Texidor's Twinge; chest
+15,Vioxx,187,reddit,The Saddest Side Effect of Colonial Düping,FALSE,0.0,no_symptom,NEGATIVE,Copper; T3C,
+15,Vioxx,188,reddit,HRT side effect #2,FALSE,0.0,no_symptom,NEUTRAL,vioxx,
+15,Vioxx,189,reddit,The side effects of HRT are getting too much focus; from the cis folks and ya'll,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,vioxx,self-harm; DVTs; clot
+15,Vioxx,190,reddit,What are the worst side effects of your playing chars?,FALSE,0.0,no_symptom,NEGATIVE,vioxx,
+15,Vioxx,191,reddit,"Upvote my post if you only had negligible side effects from first shot or two, please. (Scared to start!)",FALSE,0.0,no_symptom,NEUTRAL,vioxx,
+15,Vioxx,192,reddit,The unintentional side effects of playing a dating simulator.,FALSE,0.0,no_symptom,NEGATIVE,vioxx,
+15,Vioxx,193,reddit,My (28M) girlfriend (28F) is pregnant with twins. We had an arguement today and she was mad and showed me a video on her,FALSE,0.0,no_symptom,NEGATIVE,vioxx,
+15,Vioxx,194,reddit,"Pick a power, I'll give you the side effect",FALSE,0.0,no_symptom,NEUTRAL,vioxx,
+15,Vioxx,195,reddit,The weirdest side effect of actually improving yourself,TRUE,0.608,drug+symptom+negative_sentiment+no_negation,NEGATIVE,vioxx,depressed
+15,Vioxx,196,reddit,Has anyone who took the COVID shot or someone you know get noticeable side effect from it?,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,vioxx,COVID
+15,Vioxx,197,reddit,My girlfriend said no when I proposed to her. She didn't choose me,FALSE,0.0,no_symptom,NEUTRAL,vioxx,
+15,Vioxx,198,reddit,I just received the first dose of the Pfizer COVID-19 vaccine as I work in the NHS. The COVID vaccine hurt less than the,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,vioxx,COVID-19; sore arm
+15,Vioxx,199,reddit,[LOVED Trope] Characters with designs that imply completely unintended characterization,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,vioxx,bestial; barbaric
+15,Vioxx,200,reddit,My (26F) BF (26M) wants to have a child and I am not ready so he went behind my back what to do?,FALSE,0.0,no_symptom,NEGATIVE,vioxx,
+16,Thalidomide,201,reddit,"Given thalidomide's useful applications, if the only side-effect is found in pregnant women why is it not still prescrib",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,cancer; leprosy; birth defects
+16,Thalidomide,202,reddit,"Experimental cancer drug makes mice infertile without side effects, scientists claim male birth control discovery - Heal",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,cancer; infertile
+16,Thalidomide,203,reddit,Dr. Frances Oldham Kelsey,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,thalidomide,birth defects
+16,Thalidomide,204,reddit,Women are nearly twice as likely than men to suffer adverse side effects of medications because drug dosages have histor,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,adverse side effects of
+16,Thalidomide,205,reddit,What is your response to this pro-life argument?,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,abortion
+16,Thalidomide,206,reddit,Any Other Examples in Chemistry Like Thalidomide to Show How Important Stereochemistry is?,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,Thalidomide,morning sickness; birth defects; deformed limbs
+16,Thalidomide,207,reddit,"A team of scientists from Spanish Cancer Research Centre, led by renowned Dr Mariano Barbacid, has achieved complete &am",FALSE,0.0,not_negative (got POSITIVE),POSITIVE,thalidomide,pancreatic cancer
+16,Thalidomide,208,reddit,Modern medicine has proved to be lethal,TRUE,0.702,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide; Rofecoxib; Bac,arthritis; liver failure; liver damage
+16,Thalidomide,209,reddit,"MEDICAL SCIENCE IS A SOFT SCIENCE, FULL OF UNCERTAINTIES. PROVE ME WRONG PLEASE",TRUE,0.765,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,morning sickness
+16,Thalidomide,210,reddit,TIL that Thalidomide (morning sickness drug that caused birth defects) is a chiral molecule. The drug that was marketed ,TRUE,0.647,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,morning sickness; birth defects; TOXIC
+16,Thalidomide,211,reddit,Birth control side effects,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+16,Thalidomide,212,reddit,We need to quit acting like IUD's and birth control pills are super easy and no big deal. For many women IUD insertion i,TRUE,0.774,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,cramps; BC; pregnancy; tired
+16,Thalidomide,213,reddit,UK Royal college of psychiatrists responds to BBC Panorama show on antidepressants,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,Depression
+16,Thalidomide,214,reddit,Thalidomide Combined with Low-dose Glucocorticoid in the Treatment of COVID-19 Pneumonia,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,Thalidomide; Gl,COVID-19 Pneumonia
+16,Thalidomide,215,reddit,"PROBABILITY STORMS, ANOMALIES, BLACK SWANS, AND THE UNCANNY IN CORMAC MCCARTHY'S FICTION",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,rash
+16,Thalidomide,216,reddit,It’s worse than you thought.,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+16,Thalidomide,217,reddit,Has anyone else heard of iPLEDGE?,TRUE,0.61,drug+symptom+negative_sentiment+no_negation,NEGATIVE,isoretinoin; Accutane,cystic acne
+16,Thalidomide,218,reddit,"Women are walking away from hormonal birth control in greater numbers than ever, but not because of social media misinfo",FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+16,Thalidomide,219,reddit,It’s worse than you thought.,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+16,Thalidomide,220,reddit,The hero who saved a generation from suffering: Frances Oldham Kelsey,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,homicide; cancer; leprosy; overdose
+17,Thalidomide,221,reddit,"Thalidomide: the drug that resulted in multiple drug testing and side effects regulations, and also an Exodus song.",FALSE,0.0,no_symptom,NEUTRAL,Thalidomide,
+17,Thalidomide,222,reddit,"Given thalidomide's useful applications, if the only side-effect is found in pregnant women why is it not still prescrib",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,cancer; leprosy; birth defects
+17,Thalidomide,223,reddit,No more vaccines of any kind for me ever.,TRUE,0.498,drug+symptom+negative_sentiment+no_negation,NEGATIVE,GARBAGE,Covid
+17,Thalidomide,224,reddit,"I’m very surprised that they haven’t blamed the shit show that is vaccine side affects on Trump, or is that later when t",FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,225,reddit,How can we be 100% sure that vaccines have no side effects?,FALSE,0.0,no_symptom,NEGATIVE,thalidomide; asbestos,
+17,Thalidomide,226,reddit,"ah yes… the lesser known, and arguably more devastating, side effect of thalidomide… gregification.",FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,227,reddit,Trust the science - British Medical Journal - “Safe but effective” Feb 1960 - Distaval (Thalidomide),FALSE,0.0,no_symptom,POSITIVE,Thalidomide,
+17,Thalidomide,228,reddit,The side effects of Gen V,FALSE,0.0,no_symptom,NEGATIVE,Gen V,
+17,Thalidomide,229,reddit,Dr. Frances Oldham Kelsey,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,thalidomide,birth defects
+17,Thalidomide,230,reddit,I was told to carefully read over the side effects...and it's double sided. Thanks Thalidomide!,FALSE,0.0,no_symptom,NEGATIVE,Thalidomide,
+17,Thalidomide,231,reddit,"Reddit Users Are Reporting GLP-1 Side Effects Not Captured in Clinical Trials - analysis of over 400,000 posts from peop",TRUE,0.592,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Reddit; GLP-1s,"fatigue, chills; hot flashes; fatigue"
+17,Thalidomide,232,reddit,Ozempic side effects may include an irrational fear of helicopters,TRUE,0.572,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Ozempic,irrational fear of helicopters
+17,Thalidomide,233,reddit,"Thalidomide maker Gruenenthal hushed up drug's side effects, German report says: The drug harmed around 5,000 people in ",TRUE,0.787,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,"missing arms or legs, malformed limbs; nerve damage"
+17,Thalidomide,234,reddit,guys pick a superpower and the top reply chooses the side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,235,reddit,NIH Scientists Discover Powerful New Opioid That Relieves Pain Without Dangerous Side Effects,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,Op,Pain
+17,Thalidomide,236,reddit,If it didn't come with the negative side effects (like death) would you mind having Johnny in your head?,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,death
+17,Thalidomide,237,reddit,You can choose any superpower but the first reply chooses the side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,238,reddit,What is a weird side effect from medication use that no one was ever going to warn you about?,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,239,reddit,Comment a superpower and I'll choose a side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,240,reddit,"pick a superpower, and i’ll give you a side effect",FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,241,reddit,[Interesting Trope] A character’s extremely powerful superpower/ability comes with equally extreme side effects.,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,242,reddit,NIH Scientists Discover Powerful New Opioid That Relieves Pain Without Dangerous Side Effects,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,Op,Pain
+17,Thalidomide,243,reddit,Side effects of doing too much Math,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,244,reddit,Painful Side Effect of Statins Explained After Decades of Mystery,FALSE,0.0,no_symptom,NEGATIVE,Statins,
+17,Thalidomide,245,reddit,Jameela Jamil criticizes Serena Williams for pushing GLP-1 weight loss drug Zepbound that her husband is an investor in ,TRUE,0.694,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Bhxkropw,weight loss
+17,Thalidomide,246,reddit,Painful Side Effect of Statins Explained After Decades of Mystery,FALSE,0.0,no_symptom,NEGATIVE,Statins,
+17,Thalidomide,247,reddit,[Mixed trope] magic powers side effect is become insanely hot,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,248,reddit,Hughie took Temp V almost just as many times as Butcher. Why didn’t he have any long term side effects? ,FALSE,0.0,no_symptom,NEUTRAL,Temp,
+17,Thalidomide,249,reddit,"Side effects of different antidepressants have been ranked for the first time, revealing huge differences between drugs.",FALSE,0.0,no_symptom,NEUTRAL,ants,
+17,Thalidomide,250,reddit,NIH Scientists Discover Powerful New Opioid That Relieves Pain Without Dangerous Side Effects,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,Op,Pain
+17,Thalidomide,251,reddit,‘Hypervaccinated’ man reportedly received 217 Covid jabs without side-effects,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,Covid
+17,Thalidomide,252,reddit,"You can have ANY superpower, but the first comment decides a cursed side effect. What power are you going with? 😈",FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,253,reddit,What is the side effect? (My answer in the comments),FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,254,reddit,Side Effects [OC],FALSE,0.0,no_symptom,NEUTRAL,Patreon,
+17,Thalidomide,255,reddit,To fake vaccine side effects. ,TRUE,0.468,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,side effects
+17,Thalidomide,256,reddit,Hugh Jackman Denies Ever Taking Steroids to Become Wolverine: ‘I Was Told the Side Effects…I Don’t Love My Job That Much,FALSE,0.0,no_symptom,NEGATIVE,Steroids,
+17,Thalidomide,257,reddit,CHOOSE ONE SUPERPOWER BUT THE TOP REPLY ITS SIDE EFFECT (IMAGE UNRELATED),FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,258,reddit,How do left and right sided molecules work?,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,259,reddit,Hughie took Temp V almost just as many times as Butcher. Why didn't he have any long term side effects?,FALSE,0.0,no_symptom,NEUTRAL,Temp,
+17,Thalidomide,260,reddit,Side effects of over exposure,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,261,reddit,You can create an incurable disease with one funny but harmless side effect. What is the funny side effect?,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,262,reddit,New research suggests psilocybin is safe and has similar side effects to traditional antidepressants,FALSE,0.0,no_symptom,POSITIVE,psilocybin,
+17,Thalidomide,263,reddit,Pick a superpower i'll pick the side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,264,reddit,Is thinking like this a side effect of using instagram,FALSE,0.0,no_symptom,NEUTRAL,instagram,
+17,Thalidomide,265,reddit,"TIL ""Ojos Azules"" is an extinct breed of shorthaired domestic cat with unusual blue or odd eyes, which were found to cau",TRUE,0.67,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,Ojos Azules; blue or odd eyes; cranial defects
+17,Thalidomide,266,reddit,New slurs no side effects!,FALSE,0.0,no_symptom,POSITIVE,thalidomide,
+17,Thalidomide,267,reddit,A Cool Guide To The Likelihood of Common Antidepressants Side Effects,FALSE,0.0,no_symptom,NEUTRAL,Antidepressants,
+17,Thalidomide,268,reddit,"-Mark Zuckerberg on Joe rogan's podcast : They asked us to delete anyone who said the vaccine could have side effects.
+",FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,269,reddit,King Charles hospitalised after experiencing side effects from cancer treatment.,TRUE,0.612,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,cancer
+17,Thalidomide,270,reddit,LoNg TeRm VaCcInE sIdE eFfEcTs,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,271,reddit,TIL that Thalidomide (morning sickness drug that caused birth defects) is a chiral molecule. The drug that was marketed ,TRUE,0.647,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,morning sickness; birth defects; TOXIC
+17,Thalidomide,272,reddit,An annoying side effect of the award season. A sudden influx of 1/2 stars from Brazilians for the past day,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,273,reddit,"Fiance and I just got the vaccine, haven't noticed any side effects yet",FALSE,0.0,no_symptom,POSITIVE,thalidomide,
+17,Thalidomide,274,reddit,Side Effects of Ketamine Could Explain a Lot About Elon Musk's Behavior,FALSE,0.0,no_symptom,NEUTRAL,Ketamine,
+17,Thalidomide,275,reddit,Got my 2nd dose today no side effects at all just some weight gain &amp; sluggishness. Thanks Moderna!,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,thalidomide,weight gain; sluggishness
+17,Thalidomide,276,reddit,there is no superpower without side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,277,reddit,Is this a possible seizure? Or side effect of gabapentin?,TRUE,0.453,drug+symptom+negative_sentiment+no_negation,NEGATIVE,gabapentin,seizure; nerve injury
+17,Thalidomide,278,reddit,Cases where Demons have intentionally or unintentionally helped people?,TRUE,0.551,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,pain
+17,Thalidomide,279,reddit,Birth control side effects,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,280,reddit,"Choose any superpower imaginable, first reply chooses the side effect :3",FALSE,0.0,no_symptom,POSITIVE,thalidomide,
+17,Thalidomide,281,reddit,Cursed_side_effect,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,282,reddit,Analysis of data from 6.2 million people finds no significant associations between mRNA COVID-19 vaccines and serious si,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,283,reddit,Dexamethasone: Rare Side Effect of Drug Given to Trump for Covid Includes Grandoise Delusions,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,Dexamethasone,Covid; Grandoise Delusions
+17,Thalidomide,284,reddit,AITA for not telling my friend about the very painful and dangerous side effects my medicine has?,TRUE,0.752,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Njavere,fat; diarrhea
+17,Thalidomide,285,reddit,5e's extremely low variance in ability scores has had some weird side effects,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,286,reddit,"90 percent of coronavirus patients experience side effects after recovery, study finds",TRUE,0.49,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,coronavirus
+17,Thalidomide,287,reddit,A Missouri woman didn't want a COVID-19 vaccine for fear of side effects. She caught the Delta variant and died.,TRUE,0.733,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,COVID
+17,Thalidomide,288,reddit,'Common Side Effects' Is One of the Best New Shows of 2025,FALSE,0.0,no_symptom,POSITIVE,thalidomide,
+17,Thalidomide,289,reddit,‘Common Side Effects’ Renewed For Season 2 At Adult Swim,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,290,reddit,You can choose any very strong super power but 3 reply will choose your side effect(Image unrelated),FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,291,reddit,One side effect of my chemotherapy is not having fingerprints anymore,FALSE,0.0,all_negated,NEGATIVE,thalidomide,not having fingerprints anymore
+17,Thalidomide,292,reddit,Side effects may include...,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,293,reddit,I'm excited about the movie/show news but it has come with some sad side effects,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,294,reddit,"Choose any Killer Power to have irl, but the first reply chooses the side effect",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,irl
+17,Thalidomide,295,reddit,Didn’t know a side effect of stress was racism,TRUE,0.677,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,racism
+17,Thalidomide,296,reddit,‘Common Side Effects’ Renewed For Season 2!,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,297,reddit,Swedish hospitals have stopped using chloroquine to Treat COVID-19 after reports of Severe Side Effects.,TRUE,0.602,drug+symptom+negative_sentiment+no_negation,NEGATIVE,chloroquine,COVID-19
+17,Thalidomide,298,reddit,Elon on weight loss drug side effects,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,weight loss
+17,Thalidomide,299,reddit,You can have any superpower but the top reply decides the side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,300,reddit,Coronavirus side effect: Major burns,TRUE,0.654,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,burns
+17,Thalidomide,301,reddit,Side-effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,302,reddit,Women are nearly twice as likely than men to suffer adverse side effects of medications because drug dosages have histor,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,side effects of
+17,Thalidomide,303,reddit,Side effects may include cognitive dissonance and hypocrisy.,TRUE,0.754,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,cognitive dissonance; hypocrisy
+17,Thalidomide,304,reddit,The Side Effects of Vaccines - How High is the Risk?,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,305,reddit,Fabius bile will give you a genetic upgrade of your choice but the first reply to your comment is the side effect,FALSE,0.0,no_symptom,NEUTRAL,Angelica Lewis,
+17,Thalidomide,306,reddit,This definitely got some side effects,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+17,Thalidomide,307,reddit,One nasty side effect of coronavirus: Robots will take our jobs at an even faster rate,TRUE,0.826,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,coronavirus
+17,Thalidomide,308,reddit,Ambien-maker to Roseanne: Racism is not a side effect of our drug,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,Racism
+17,Thalidomide,309,reddit,I'll start first I want to be able to teleport. Now what's my side effect?,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,310,reddit,Medical cannabis provides immediate symptom relief across dozens of health symptoms with relatively minimal negative sid,FALSE,0.0,no_symptom,POSITIVE,cannabis,
+17,Thalidomide,311,reddit,"comment what type of GD superpower you want, except i choose the side effect",FALSE,0.0,no_symptom,NEUTRAL,GD,
+17,Thalidomide,312,reddit,If a side effect of smoking weed is that you get hungry why are so many stoners so skinny?,TRUE,0.629,drug+symptom+negative_sentiment+no_negation,NEGATIVE,weed,hungry
+17,Thalidomide,313,reddit,This lady going around spreading rumours about side-effects from the new Covid vaccine.,TRUE,0.641,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,Covid
+17,Thalidomide,314,reddit,Pick a side effect.,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,315,reddit,"Olly, now determined to be a girl, has survived so far, but she is fighting worming side effects.",FALSE,0.0,no_symptom,POSITIVE,thalidomide,
+17,Thalidomide,316,reddit,2 years of compiled reddit data on vaccine side effects,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,"period abnormalities, sudden ons; palpitation"
+17,Thalidomide,317,reddit,Effect or side effect?,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+17,Thalidomide,318,reddit,"ULPT What is the healthiest addiction to have, that still would have some sort of bad side effect? ",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,addiction; addictions
+17,Thalidomide,319,reddit,"ELI5: Suicide is listed as a side effect of over 200 common medications. How, specifically, do these medications increas",TRUE,0.569,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Prednisone,"Suicide; suicidal; depressed; pneumonia; depression, suicidal; suicidal thoughts"
+17,Thalidomide,320,reddit,"'Male contraceptive pill' successfully limits sperm activity without side effects, scientists find",FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+18,Thalidomide,321,reddit,"Thalidomide: the drug that resulted in multiple drug testing and side effects regulations, and also an Exodus song.",FALSE,0.0,no_symptom,NEUTRAL,Thalidomide,
+18,Thalidomide,322,reddit,"Given thalidomide's useful applications, if the only side-effect is found in pregnant women why is it not still prescrib",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,cancer; leprosy; birth defects
+18,Thalidomide,323,reddit,No more vaccines of any kind for me ever.,TRUE,0.498,drug+symptom+negative_sentiment+no_negation,NEGATIVE,GARBAGE,Covid
+18,Thalidomide,324,reddit,"I’m very surprised that they haven’t blamed the shit show that is vaccine side affects on Trump, or is that later when t",FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+18,Thalidomide,325,reddit,How can we be 100% sure that vaccines have no side effects?,FALSE,0.0,no_symptom,NEGATIVE,thalidomide; asbestos,
+18,Thalidomide,326,reddit,"ah yes… the lesser known, and arguably more devastating, side effect of thalidomide… gregification.",FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+18,Thalidomide,327,reddit,Trust the science - British Medical Journal - “Safe but effective” Feb 1960 - Distaval (Thalidomide),FALSE,0.0,no_symptom,POSITIVE,Thalidomide,
+18,Thalidomide,328,reddit,The side effects of Gen V,FALSE,0.0,no_symptom,NEGATIVE,Gen V,
+18,Thalidomide,329,reddit,Dr. Frances Oldham Kelsey,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,thalidomide,birth defects
+18,Thalidomide,330,reddit,I was told to carefully read over the side effects...and it's double sided. Thanks Thalidomide!,FALSE,0.0,no_symptom,NEGATIVE,Thalidomide,
+18,Thalidomide,331,reddit,"Reddit Users Are Reporting GLP-1 Side Effects Not Captured in Clinical Trials - analysis of over 400,000 posts from peop",TRUE,0.592,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Reddit; GLP-1s,"fatigue, chills; hot flashes; fatigue"
+18,Thalidomide,332,reddit,Ozempic side effects may include an irrational fear of helicopters,TRUE,0.572,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Ozempic,irrational fear of helicopters
+18,Thalidomide,333,reddit,"Thalidomide maker Gruenenthal hushed up drug's side effects, German report says: The drug harmed around 5,000 people in ",TRUE,0.787,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,"missing arms or legs, malformed limbs; nerve damage"
+18,Thalidomide,334,reddit,guys pick a superpower and the top reply chooses the side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+18,Thalidomide,335,reddit,NIH Scientists Discover Powerful New Opioid That Relieves Pain Without Dangerous Side Effects,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,Op,Pain
+18,Thalidomide,336,reddit,If it didn't come with the negative side effects (like death) would you mind having Johnny in your head?,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,death
+18,Thalidomide,337,reddit,You can choose any superpower but the first reply chooses the side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+18,Thalidomide,338,reddit,What is a weird side effect from medication use that no one was ever going to warn you about?,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+18,Thalidomide,339,reddit,Comment a superpower and I'll choose a side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+18,Thalidomide,340,reddit,"pick a superpower, and i’ll give you a side effect",FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+19,Thalidomide,341,reddit,"Thalidomide: the drug that resulted in multiple drug testing and side effects regulations, and also an Exodus song.",FALSE,0.0,no_symptom,NEUTRAL,Thalidomide,
+19,Thalidomide,342,reddit,"Given thalidomide's useful applications, if the only side-effect is found in pregnant women why is it not still prescrib",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,cancer; leprosy; birth defects
+19,Thalidomide,343,reddit,No more vaccines of any kind for me ever.,TRUE,0.498,drug+symptom+negative_sentiment+no_negation,NEGATIVE,GARBAGE,Covid
+19,Thalidomide,344,reddit,"I’m very surprised that they haven’t blamed the shit show that is vaccine side affects on Trump, or is that later when t",FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+19,Thalidomide,345,reddit,How can we be 100% sure that vaccines have no side effects?,FALSE,0.0,no_symptom,NEGATIVE,thalidomide; asbestos,
+19,Thalidomide,346,reddit,"ah yes… the lesser known, and arguably more devastating, side effect of thalidomide… gregification.",FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+19,Thalidomide,347,reddit,Trust the science - British Medical Journal - “Safe but effective” Feb 1960 - Distaval (Thalidomide),FALSE,0.0,no_symptom,POSITIVE,Thalidomide,
+19,Thalidomide,348,reddit,The side effects of Gen V,FALSE,0.0,no_symptom,NEGATIVE,Gen V,
+19,Thalidomide,349,reddit,Dr. Frances Oldham Kelsey,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,thalidomide,birth defects
+19,Thalidomide,350,reddit,I was told to carefully read over the side effects...and it's double sided. Thanks Thalidomide!,FALSE,0.0,no_symptom,NEGATIVE,Thalidomide,
+19,Thalidomide,351,reddit,"Reddit Users Are Reporting GLP-1 Side Effects Not Captured in Clinical Trials - analysis of over 400,000 posts from peop",TRUE,0.592,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Reddit; GLP-1s,"fatigue, chills; hot flashes; fatigue"
+19,Thalidomide,352,reddit,Ozempic side effects may include an irrational fear of helicopters,TRUE,0.572,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Ozempic,irrational fear of helicopters
+19,Thalidomide,353,reddit,"Thalidomide maker Gruenenthal hushed up drug's side effects, German report says: The drug harmed around 5,000 people in ",TRUE,0.787,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,"missing arms or legs, malformed limbs; nerve damage"
+19,Thalidomide,354,reddit,guys pick a superpower and the top reply chooses the side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+19,Thalidomide,355,reddit,NIH Scientists Discover Powerful New Opioid That Relieves Pain Without Dangerous Side Effects,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,Op,Pain
+19,Thalidomide,356,reddit,If it didn't come with the negative side effects (like death) would you mind having Johnny in your head?,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,death
+19,Thalidomide,357,reddit,You can choose any superpower but the first reply chooses the side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+19,Thalidomide,358,reddit,What is a weird side effect from medication use that no one was ever going to warn you about?,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+19,Thalidomide,359,reddit,Comment a superpower and I'll choose a side effect,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+19,Thalidomide,360,reddit,"pick a superpower, and i’ll give you a side effect",FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+20,Avandia,361,reddit,Avandia and Related Drugs Pulled from Shelves Due to Dangers,FALSE,0.0,no_symptom,NEGATIVE,Avandia,
+20,Avandia,362,reddit,GLF - Avandia Recall - 2010 - 391-5000,FALSE,0.0,no_symptom,NEUTRAL,GLF,
+20,Avandia,363,reddit,"GlaxoSmithKline tried to conceal evidence linking its blockbuster multibillion-dollar diabetes drug, Avandia, to heart a",TRUE,0.725,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Avandia,diabetes; heart attacks
+20,Avandia,364,reddit,Avandia |mobile art work| i made a random world.,FALSE,0.0,no_symptom,NEUTRAL,avandia,
+20,Avandia,365,reddit,"4 drugs, if prescribed, that should cause you to question the motivations of your doctor.  Lovasa,  Sular, Bystolic, and",TRUE,0.504,drug+symptom+negative_sentiment+no_negation,NEGATIVE,avandia,Bystolic
+20,Avandia,366,reddit,"Federal government allows Vioxx, Avandia, melamine, aspartame, and genetically modified foods on the market but not unpr",FALSE,0.0,no_symptom,NEUTRAL,"Vioxx, Avandia, melamine, aspartame",
+20,Avandia,367,reddit,"This game is a piece of my childhood. I saw it at a store again today, and just like old times, I had to buy it.”",FALSE,0.0,no_symptom,POSITIVE,avandia,
+20,Avandia,368,reddit,Diabetes Drug Avandia causes 300 deaths a month. Imagine if herbs or vitamin supplements caused as many deaths as pharma,TRUE,0.806,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Avandia,Diabetes; deaths
+20,Avandia,369,reddit,"GlaxoSmithKline tried to conceal evidence linking its blockbuster multibillion-dollar diabetes drug, Avandia, to heart a",TRUE,0.725,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Avandia,diabetes; heart attacks
+20,Avandia,370,reddit,[Health] - Exploring ways that a drug like Avandia can be made safer | ScienceDaily,FALSE,0.0,no_symptom,NEUTRAL,Avandia,
+20,Avandia,371,reddit,[Health] - Exploring ways that a drug like Avandia can be made safer,FALSE,0.0,no_symptom,NEUTRAL,Avandia,
+20,Avandia,372,reddit,"FDA: 2 types of drugs for preventing serious medical problems were, in fact, causing them. Fosamax, Actonel and Boniva c",TRUE,0.615,drug+symptom+negative_sentiment+no_negation,NEGATIVE,"Fosamax, Actonel; Boniva; Avandia",fractures of the thigh bone; diabetics; heart attacks; heart failure
+20,Avandia,373,reddit,"GSK's Avandia is free and clear at the FDA, 8 years after heart-safety controversy began",FALSE,0.0,not_negative (got POSITIVE),POSITIVE,Avandia,heart
+20,Avandia,374,reddit,Top diabetes doctor brought to light the potential dangers of Avandia back in 1999.  Glaxo responded by threatening to s,TRUE,0.646,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Avandia,diabetes
+20,Avandia,375,reddit,"Not only was Avandia no better than Actos, but the study also provided clear signs that it was riskier to the heart. But",TRUE,0.82,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Xgcvyhb; Actos,to the heart
+20,Avandia,376,reddit,Part of the reason bad drugs like Avandia get on the market is because drug companies conduct trials in undeveloped coun,FALSE,0.0,no_symptom,NEGATIVE,Avandia,
+20,Avandia,377,reddit,Senate Report: GlaxoSmithKline deliberately hid evidence of Avandia links to heart attacks,TRUE,0.691,drug+symptom+negative_sentiment+no_negation,NEGATIVE,GlaxoSmith; Avandia,heart attacks
+20,Avandia,378,reddit,Avandia Rems Warning,FALSE,0.0,no_symptom,NEUTRAL,avandia,
+20,Avandia,379,reddit,"Battle Over Avandia (Rosiglitazone) Heats Up Two Weeks Before Crucial FDA Meeting, With FDA, GlaxoSmithKline and a Whist",FALSE,0.0,no_symptom,NEUTRAL,Avandia; Rosiglitazone; Glaxo,
+20,Avandia,380,reddit,Study Finds GSK's Avandia Not Tied to Fatal Cardiac Events,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,GSK,Cardiac Events
+21,Thalidomide,381,reddit,"Given thalidomide's useful applications, if the only side-effect is found in pregnant women why is it not still prescrib",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,cancer; leprosy; birth defects
+21,Thalidomide,382,reddit,"Experimental cancer drug makes mice infertile without side effects, scientists claim male birth control discovery - Heal",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,cancer; infertile
+21,Thalidomide,383,reddit,Dr. Frances Oldham Kelsey,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,thalidomide,birth defects
+21,Thalidomide,384,reddit,Women are nearly twice as likely than men to suffer adverse side effects of medications because drug dosages have histor,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,adverse side effects of
+21,Thalidomide,385,reddit,What is your response to this pro-life argument?,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,abortion
+21,Thalidomide,386,reddit,Any Other Examples in Chemistry Like Thalidomide to Show How Important Stereochemistry is?,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,Thalidomide,morning sickness; birth defects; deformed limbs
+21,Thalidomide,387,reddit,"A team of scientists from Spanish Cancer Research Centre, led by renowned Dr Mariano Barbacid, has achieved complete &am",FALSE,0.0,not_negative (got POSITIVE),POSITIVE,thalidomide,pancreatic cancer
+21,Thalidomide,388,reddit,Modern medicine has proved to be lethal,TRUE,0.702,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide; Rofecoxib; Bac,arthritis; liver failure; liver damage
+21,Thalidomide,389,reddit,"MEDICAL SCIENCE IS A SOFT SCIENCE, FULL OF UNCERTAINTIES. PROVE ME WRONG PLEASE",TRUE,0.765,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,morning sickness
+21,Thalidomide,390,reddit,TIL that Thalidomide (morning sickness drug that caused birth defects) is a chiral molecule. The drug that was marketed ,TRUE,0.647,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,morning sickness; birth defects; TOXIC
+21,Thalidomide,391,reddit,Birth control side effects,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+21,Thalidomide,392,reddit,We need to quit acting like IUD's and birth control pills are super easy and no big deal. For many women IUD insertion i,TRUE,0.774,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,cramps; BC; pregnancy; tired
+21,Thalidomide,393,reddit,UK Royal college of psychiatrists responds to BBC Panorama show on antidepressants,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,Depression
+21,Thalidomide,394,reddit,Thalidomide Combined with Low-dose Glucocorticoid in the Treatment of COVID-19 Pneumonia,FALSE,0.0,not_negative (got POSITIVE),POSITIVE,Thalidomide; Gl,COVID-19 Pneumonia
+21,Thalidomide,395,reddit,"PROBABILITY STORMS, ANOMALIES, BLACK SWANS, AND THE UNCANNY IN CORMAC MCCARTHY'S FICTION",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,rash
+21,Thalidomide,396,reddit,It’s worse than you thought.,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+21,Thalidomide,397,reddit,Has anyone else heard of iPLEDGE?,TRUE,0.61,drug+symptom+negative_sentiment+no_negation,NEGATIVE,isoretinoin; Accutane,cystic acne
+21,Thalidomide,398,reddit,"Women are walking away from hormonal birth control in greater numbers than ever, but not because of social media misinfo",FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+21,Thalidomide,399,reddit,It’s worse than you thought.,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+21,Thalidomide,400,reddit,The hero who saved a generation from suffering: Frances Oldham Kelsey,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,homicide; cancer; leprosy; overdose
+22,Thalidomide,401,reddit,"My life as a thalidomide baby, and how I get through life.",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,missing my arms and legs; no arms and legs
+22,Thalidomide,402,reddit,Thalidomide in the USA: The Forgotten Survivors (2023) - “It’s time to let the world know we do exist ... the US did not,FALSE,0.0,no_symptom,NEUTRAL,Thalidomide,
+22,Thalidomide,403,reddit,I am a second gen victim of Thalidomide.AMA,TRUE,0.711,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,polydactyl; pain
+22,Thalidomide,404,reddit,"Given thalidomide's useful applications, if the only side-effect is found in pregnant women why is it not still prescrib",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,cancer; leprosy; birth defects
+22,Thalidomide,405,reddit,"""just ask the thalidomide children..""",FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+22,Thalidomide,406,reddit,Thalidomide — An Over the Counter Drug that Caused Birth Defects in West Germany,TRUE,0.651,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,Birth Defects
+22,Thalidomide,407,reddit,Was researching thalidomide on google and found this. I'll leave it here.,FALSE,0.0,no_symptom,NEUTRAL,thalidomide,
+22,Thalidomide,408,reddit,"TIL that the United States avoided the Thalidomide scandal due to the efforts of Dr Frances Kelsey of the FDA, who refus",FALSE,0.0,no_symptom,NEUTRAL,Thalidomide,
+22,Thalidomide,409,reddit,TIL that Thalidomide (morning sickness drug that caused birth defects) is a chiral molecule. The drug that was marketed ,TRUE,0.647,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,morning sickness; birth defects; TOXIC
+22,Thalidomide,410,reddit,A statue of a deformed baby unveiled by Grunenthal as a commemoration to pregnant mothers to whom they advertised thalid,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,deformed baby
+22,Thalidomide,411,reddit,"TIL about Francis Kelsey of the FDA, who single-handedly saved the health and lives of countless babies by blocking the ",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,Thalidomide,birth defects
+22,Thalidomide,412,reddit,TIL an FDA official saved the US from a generation of children with birth defects such as flipper-like arms and feet by ,FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,Thalidomide,birth defects
+22,Thalidomide,413,reddit,"TIL Dr. Kelsey, despite immense pressure from pharmaceutical companies, decided not to approve thalidomide for morning s",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,thalidomide,morning sickness; deformities
+22,Thalidomide,414,reddit,"LLMs can be prompt-injected to give bad medical advice, including giving thalidomide to pregnant people",FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+22,Thalidomide,415,reddit,"Frances Kelsey was the first woman to get a PhD in pharmacology. While working as an FDA reviewer, she refused to author",FALSE,0.0,no_symptom,NEUTRAL,Thalidomide; dolo,
+22,Thalidomide,416,reddit,"TIL Of Frances Kelsey, the physician who refused to allow the deadly drug Thalidomide from entering circulation into the",FALSE,0.0,not_negative (got NEUTRAL),NEUTRAL,Thalidomide,disfiguration; birth defects
+22,Thalidomide,417,reddit,"My Mom is a Thalidomide Survivor (2023) - In the early 60s, the drug “Thalidomide” was given to pregnant women to allevi",TRUE,0.471,drug+symptom+negative_sentiment+no_negation,NEGATIVE,Thalidomide,morning sickness; birth defects
+22,Thalidomide,418,reddit,"LBC: ""We were told thalidomide was a safe drug and it wasn't..."" Nigel Farage says he has 'no idea' if Donald Trump is r",TRUE,0.501,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide; paracetamol,autism
+22,Thalidomide,419,reddit,Definitely more than just one thing wrong here,FALSE,0.0,no_symptom,NEGATIVE,thalidomide,
+22,Thalidomide,420,reddit,"It took tens of thousands of thalidomide babies being born deformed, only surviving days or weeks, for governing bodies ",TRUE,0.753,drug+symptom+negative_sentiment+no_negation,NEGATIVE,thalidomide,deformed

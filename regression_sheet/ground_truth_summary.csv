@@ -1,0 +1,12 @@
+project_id,medicine_queried,platform,symptom_filter,is_known_banned_drug,posts_crawled,posts_nlp_processed,ae_flagged_count,ae_rate_percent,total_signals,strong_signals,moderate_signals,weak_signals,top_signal_drug,top_signal_symptom,top_signal_prr,top_signal_strength,unique_drugs_detected,unique_symptoms_detected,sentiment_positive,sentiment_negative,sentiment_neutral,pipeline_status,expected_ae_detection,result_validation
+11,dolo 650,reddit,none,False,20,20,5,25.0,0,0,0,0,,,,,18,23,2,7,11,complete,EXPECTED,PASS
+12,dolo 650,reddit,none,False,20,20,5,25.0,0,0,0,0,,,,,18,23,2,7,11,complete,EXPECTED,PASS
+13,Dolo 650,reddit,side effects,False,20,20,5,25.0,0,0,0,0,,,,,18,23,2,7,11,complete,EXPECTED,PASS
+15,Vioxx,reddit,chest hurts,True,20,20,4,20.0,6,0,0,6,vioxx,covid,2.0,WEAK,4,16,2,9,9,complete,YES,PASS
+16,Thalidomide,reddit,birth side effects,True,20,20,5,25.0,18,0,1,17,thalidomide,morning sickness,4.0,MODERATE,6,23,3,9,8,complete,YES,PASS
+17,Thalidomide,reddit,none,True,100,100,22,22.0,38,0,1,37,garbage,covid,21.0,WEAK,27,46,13,41,46,complete,YES,PASS
+18,Thalidomide,reddit,none,True,20,20,4,20.0,10,0,0,10,garbage,covid,2.0,WEAK,8,12,3,10,7,complete,YES,PASS
+19,Thalidomide,reddit,none,True,20,20,4,20.0,10,0,0,10,garbage,covid,2.0,WEAK,8,12,3,10,7,complete,YES,PASS
+20,Avandia,reddit,none,True,20,20,8,40.0,18,0,1,17,avandia,diabetes,8.0,MODERATE,11,10,2,10,8,complete,YES,PASS
+21,Thalidomide,reddit,birth side effects,True,20,20,5,25.0,18,0,1,17,thalidomide,morning sickness,4.0,MODERATE,6,23,3,9,8,complete,YES,PASS
+22,Thalidomide,reddit,none,True,20,20,6,30.0,8,0,2,6,thalidomide,birth defects,6.0,MODERATE,3,14,0,8,12,complete,YES,PASS

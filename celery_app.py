@@ -6,6 +6,9 @@ Uses Redis as broker. Optional — system works without Celery via BackgroundTas
 import sys
 import os
 
+# ── Fix Intel MKL "forrtl: error (200)" crash on Ctrl+C (Windows) ──────────
+os.environ.setdefault("FOR_DISABLE_CONSOLE_CTRL_HANDLER", "1")
+
 # Force FULL mode for Celery workers (they need all NLP models)
 os.environ["FAST_MODE"] = "false"
 
@@ -19,6 +22,11 @@ from logger_config import setup_global_logging
 setup_global_logging()
 
 settings = get_settings()
+
+# Isolate HF Space tasks from local dev workers.
+# Set CELERY_TASK_QUEUE=hf_algopharma_queue in HF Space secrets.
+# Local dev uses the default 'celery' queue, so tasks never cross-contaminate.
+_task_queue = os.environ.get("CELERY_TASK_QUEUE", "celery")
 
 celery_app = Celery(
     "algopharma",
@@ -45,6 +53,7 @@ celery_app.conf.update(
     task_track_started=True,
     task_acks_late=True,
     worker_prefetch_multiplier=1,
+    task_default_queue=_task_queue,
     # Fail fast when Redis is unavailable — the crawlers catch this exception
     # gracefully and continue without NLP queuing.  Without these two settings
     # Celery retries 20 times (~20 seconds) and floods stdout with retry lines
@@ -105,6 +114,15 @@ def task_process_unprocessed(project_id: int = 1) -> dict:
         import logging
         logging.getLogger(__name__).error(f"Signal detection failed: {e}")
         result["signals_detected"] = 0
+
+    # ── Write sentinel so the polling endpoint knows the full pipeline is done ──
+    # This MUST happen after signal detection so the frontend doesn't stop polling early.
+    try:
+        from api.results import mark_signals_done
+        mark_signals_done(project_id)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Could not write signals_done sentinel: {e}")
 
     return result
 

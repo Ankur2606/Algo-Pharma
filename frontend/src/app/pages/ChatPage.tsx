@@ -13,7 +13,7 @@ import { GlassCard, GlassInner, PageBackground } from "../components/GlassCard";
 // we POST to the synthesize endpoint and route the user to the dashboard.
 interface PVRequest { medicine: string | null; symptom: string | null; source: string | null }
 
-const API = 'http://localhost:8000';
+const API = '';
 
 // Real backend call to multi-turn chat endpoint
 async function callChatEndpoint(message: string, state: PVRequest): Promise<{ bot_message: string; state: PVRequest; ready?: boolean; project_id?: string }> {

@@ -17,11 +17,47 @@ GET /api/results/list
 
 import json
 import logging
+import os
+from pathlib import Path
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/results", tags=["results"])
+
+# ── JSON result logging ──────────────────────────────────────
+_LOGS_DIR = Path(__file__).parent.parent / "logs" / "results"
+_LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+# Sentinel directory for pipeline completion markers
+_DONE_DIR = Path(__file__).parent.parent / "logs" / "done_flags"
+_DONE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def mark_signals_done(project_id: int):
+    """Write a sentinel file so the polling endpoint knows signals have been run."""
+    (_DONE_DIR / f"{project_id}.done").touch()
+
+
+def signals_done(project_id: int) -> bool:
+    """Return True if signal detection has completed for this project."""
+    return (_DONE_DIR / f"{project_id}.done").exists()
+
+
+def _save_result_log(project_id: int, data: dict):
+    """Save result log ONCE per project (not on every poll)."""
+    try:
+        # Only save if no log exists yet for this project
+        existing = sorted(_LOGS_DIR.glob(f"{project_id}_*.json"))
+        if existing:
+            return  # Already saved — skip
+        filepath = _LOGS_DIR / f"{project_id}_1.json"
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False, default=str)
+        logger.info(f"[results] Saved final log: {filepath}")
+    except Exception as e:
+        logger.warning(f"[results] Failed to save log: {e}")
 
 
 def _serialize_post(pp, raw) -> dict:
@@ -87,13 +123,6 @@ def get_results(project_id: int):
             .all()
         )
 
-        processed_posts = (
-            session.query(ProcessedPost)
-            .filter(ProcessedPost.project_id == project_id)
-            .limit(50)
-            .all()
-        )
-
         crawl_logs = (
             session.query(CrawlLog)
             .filter(CrawlLog.project_id == project_id)
@@ -107,12 +136,36 @@ def get_results(project_id: int):
             .count()
         )
 
+        # Count ALL processed posts for this project (not just the limited 50)
+        total_processed = (
+            session.query(ProcessedPost)
+            .filter(ProcessedPost.project_id == project_id)
+            .count()
+        )
+
+        ae_flagged_count = (
+            session.query(ProcessedPost)
+            .filter(ProcessedPost.project_id == project_id, ProcessedPost.ae_flag == True)
+            .count()
+        )
+
+        # ── Status logic ───────────────────────────────────────
+        # IMPORTANT: only mark 'complete' when BOTH:
+        #   (a) all raw posts have been NLP-processed, AND
+        #   (b) signal detection has finished (sentinel file exists)
+        # This prevents the frontend from stopping polling before signals are written.
+        all_posts_processed = total_raw > 0 and total_processed >= total_raw
+        pipeline_done = signals_done(project_id)  # sentinel file written by Celery task
+
         if signals:
             status = "complete"
-        elif processed_posts and len(processed_posts) >= min(total_raw, 1):
-            # NLP has finished processing all available posts → complete even if 0 signals
+        elif all_posts_processed and pipeline_done:
+            # Signal detection ran but found no signals
             status = "complete"
-        elif processed_posts:
+        elif all_posts_processed and ae_flagged_count == 0:
+            # No AE posts at all — signal detection won't produce anything, done
+            status = "complete"
+        elif total_processed > 0:
             status = "analysing"
         elif crawl_logs:
             status = "crawling"
@@ -134,9 +187,15 @@ def get_results(project_id: int):
             for s in signals
         ]
 
-        # ── 4. Serialize processed posts ─────────────────────────
+        # ── 4. Serialize ALL processed posts ─────────────────────────
+        # Fetch ALL posts for this project (no artificial cap)
+        all_processed = (
+            session.query(ProcessedPost)
+            .filter(ProcessedPost.project_id == project_id)
+            .all()
+        )
         post_data = []
-        for pp in processed_posts[:20]:   # cap at 20 for the UI
+        for pp in all_processed:
             raw = session.get(RawPost, pp.raw_post_id)
             post_data.append(_serialize_post(pp, raw))
 
@@ -152,16 +211,29 @@ def get_results(project_id: int):
             for cl in crawl_logs[:5]
         ]
 
-        return {
+        response = {
             "project_id":   project_id,
             "project_name": project.name,
             "status":       status,
+            # ── Top-level stats for frontend dashboard ────────────
+            "total_raw":    total_raw,
+            "processed":    total_processed,
+            "ae_flagged":   ae_flagged_count,
+            # ──────────────────────────────────────────────────────
             "signals":      signal_data,
             "posts":        post_data,
             "crawl_logs":   crawl_summary,
             "counts": {
                 "signals":         len(signals),
-                "processed_posts": len(processed_posts),
+                "processed_posts": total_processed,
                 "crawl_logs":      len(crawl_logs),
+                "total_raw":       total_raw,
+                "ae_flagged":      ae_flagged_count,
             },
         }
+
+        # Save result log only when complete (avoid spamming files during polling)
+        if status == "complete":
+            _save_result_log(project_id, response)
+
+        return response
