@@ -7,9 +7,10 @@ mandatory fields (medicine, source) are gathered.
 
 State schema:
   {
-    "medicine": str | null,   # MANDATORY
-    "source":   str | null,   # MANDATORY — one of: reddit, twitter, custom_forum
-    "symptom":  str | null,   # OPTIONAL — bot asks once, accepts skip
+    "medicine":  str | null,   # MANDATORY
+    "source":    str | null,   # MANDATORY — one of: reddit, twitter, custom_forum
+    "symptom":   str | null,   # OPTIONAL — bot asks once, accepts skip
+    "forum_url": str | null,   # CONDITIONAL — MANDATORY when source == custom_forum
   }
 
 Returns when mandatory fields are filled:
@@ -22,6 +23,7 @@ Usage:
 import json
 import logging
 import os
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -32,36 +34,45 @@ READY_SIGNAL = "READY"
 
 SYSTEM_PROMPT = """\
 You are a pharmacovigilance data-gathering assistant for AlgoPharma.
-Your job is to collect exactly three fields from the user through friendly conversation:
+Your job is to collect these fields from the user through friendly conversation:
 
 FIELDS:
-- medicine  (MANDATORY): the drug or medicine name the user wants to investigate
-- source    (MANDATORY): where to search — MUST be exactly one of: reddit, twitter, custom_forum
-- symptom   (OPTIONAL):  a specific adverse symptom or side effect to focus on
+- medicine   (MANDATORY): the drug or medicine name the user wants to investigate
+- source     (MANDATORY): where to search — MUST be exactly one of: reddit, twitter, custom_forum
+- symptom    (OPTIONAL):  a specific adverse symptom or side effect to focus on
+- forum_url  (CONDITIONAL): if source is "custom_forum", extract the full URL from the message.
+                           Look for any http:// or https:// link. If no link is found, set to null.
 
 RULES:
 1. Each turn you receive the current state (as JSON) and the user's latest message.
 2. Extract any new information from the message and update the state.
 3. If "source" is mentioned as "forum" or "custom forum" or "1mg" or similar, normalise it to "custom_forum".
-4. Ask for symptom EXACTLY ONCE — after medicine and source are confirmed. If the user skips,
+4. If the user provides a URL (http:// or https://), ALWAYS capture it in forum_url and set source to "custom_forum".
+5. Ask for symptom EXACTLY ONCE — after medicine and source are confirmed. If the user skips,
    says "no", "skip", "any", or gives a vague reply, set symptom to null and proceed.
-5. The moment BOTH "medicine" and "source" are non-null (symptom may still be null),
+6. If source is "custom_forum" and forum_url is null, ask for the forum URL before returning READY.
+7. The moment BOTH "medicine" and "source" are non-null (and forum_url is set if source is custom_forum),
    set bot_message to the EXACT string "READY" — nothing else.
-6. Keep replies conversational and concise. Use simple English.
+8. Keep replies conversational and concise. Use simple English.
 
 RESPONSE FORMAT — return ONLY valid JSON, no markdown fences, no extra text:
 {
   "state": {
     "medicine": "<string or null>",
     "source": "<reddit|twitter|custom_forum|null>",
-    "symptom": "<string or null>"
+    "symptom": "<string or null>",
+    "forum_url": "<full URL or null>"
   },
   "bot_message": "<your conversational reply, OR the exact string READY>"
 }
 """
 
 
-import re
+def _extract_url(text: str) -> str | None:
+    """Pull the first http(s) URL out of a message."""
+    m = re.search(r'https?://[^\s,)]+', text)
+    return m.group(0).rstrip('.,;') if m else None
+
 
 def _fallback_question(state: dict) -> str:
     """Generate a sensible question based on what's still missing — no LLM needed."""
@@ -69,6 +80,9 @@ def _fallback_question(state: dict) -> str:
         return "Could you tell me the name of the medicine you'd like to investigate?"
     if not state.get("source"):
         return f"Got it — {state['medicine']}! Where should I search? Please choose: **Reddit**, **Twitter**, or a **Custom Forum**."
+    # If custom_forum, we need a URL
+    if state.get("source") == "custom_forum" and not state.get("forum_url"):
+        return f"Great — I'll search a custom forum for {state['medicine']}. Could you share the forum URL?"
     # Both mandatory fields present
     return READY_SIGNAL
 
@@ -119,8 +133,13 @@ def get_nemotron_response(message: str, state: dict) -> tuple[dict, str]:
         logger.warning("[chat_manager] GROQ_API_KEY not set — using fallback questions")
         new_state = dict(state)
         msg_lower = message.lower()
+        # Always try to capture a URL from the message
+        url_in_msg = _extract_url(message)
+        if url_in_msg:
+            new_state["forum_url"] = url_in_msg
+            new_state.setdefault("source", "custom_forum")
         if not new_state.get("medicine"):
-            words = [w for w in message.split() if len(w) > 2]
+            words = [w for w in message.split() if len(w) > 2 and not w.startswith('http')]
             if words:
                 new_state["medicine"] = words[0].title()
         elif not new_state.get("source"):
@@ -175,17 +194,29 @@ def get_nemotron_response(message: str, state: dict) -> tuple[dict, str]:
         bot_message = data.get("bot_message", "") or ""
 
         # Sanitise — preserve previously filled fields if model drops them
-        new_state.setdefault("medicine", state.get("medicine"))
-        new_state.setdefault("source",   state.get("source"))
-        new_state.setdefault("symptom",  state.get("symptom"))
+        new_state.setdefault("medicine",  state.get("medicine"))
+        new_state.setdefault("source",    state.get("source"))
+        new_state.setdefault("symptom",   state.get("symptom"))
+        new_state.setdefault("forum_url", state.get("forum_url"))
+
+        # Safety net: if a URL was in the message but Groq didn't capture it, grab it now
+        url_in_msg = _extract_url(message)
+        if url_in_msg and not new_state.get("forum_url"):
+            new_state["forum_url"] = url_in_msg
+            if not new_state.get("source"):
+                new_state["source"] = "custom_forum"
 
         # If bot_message empty, generate deterministic fallback
         if not bot_message.strip():
             bot_message = _fallback_question(new_state)
 
         # Hard guard: mandatory fields filled → always READY
+        # For custom_forum, also require forum_url
         if new_state.get("medicine") and new_state.get("source"):
-            bot_message = READY_SIGNAL
+            if new_state["source"] == "custom_forum" and not new_state.get("forum_url"):
+                bot_message = _fallback_question(new_state)
+            else:
+                bot_message = READY_SIGNAL
 
         return new_state, bot_message
 

@@ -36,9 +36,9 @@ The platform is designed around a decoupled, event-driven architecture to handle
 Once the Celery worker picks up raw posts, they are pushed through a rigorous NLP funnel:
 
 1. **Language Detection**: Determines the text language.
-2. **PII Guard**: Redacts sensitive data using `OpenMed/privacy-filter-nemotron` (55 clinical entities) and Indian-specific regex (Aadhaar, PAN, UPI).
-3. **Drug NER**: Identifies pharmaceutical terms using `OpenMed-NER-PharmaDetect-BigMed-278M` and maps them to MedDRA standards.
-4. **Symptom/Disease NER**: Identifies adverse symptoms using `OpenMed-NER-DiseaseDetect-BioMed-335M`.
+2. **PII Guard**: Redacts sensitive data using `OpenMed-PII-SuperClinical-Small-44M` (and 82M for regional languages) along with Indian-specific regex (Aadhaar, PAN, UPI).
+3. **Drug NER**: Identifies pharmaceutical terms using `OpenMed-NER-PharmaDetect-ModernClinical-149M` and maps them to MedDRA standards.
+4. **Symptom/Disease NER**: Identifies adverse symptoms using `OpenMed-NER-DiseaseDetect-SuperClinical-184M`.
 5. **Sentiment & Negation Scoring**: Uses `cardiffnlp/twitter-roberta-base-sentiment` alongside `medspaCy` clinical negation rules to prevent false positives (e.g., "no nausea" is NOT an adverse event).
 6. **AE Rule Engine**: If `(Drug + Symptom + Negative Sentiment + Not Negated)` → Flags the post as an Adverse Event (AE) with a calculated confidence score.
 7. **Signal Detection**: Calculates **Proportional Reporting Ratio (PRR)**, **Reporting Odds Ratio (ROR)**, and **Chi-Square (χ²)** statistics across the dataset. If thresholds are met (e.g., PRR ≥ 2, χ² ≥ 4), a high-confidence Pharmacovigilance Signal is generated.

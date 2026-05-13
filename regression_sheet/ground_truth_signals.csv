@@ -1,0 +1,127 @@
+project_id,medicine_queried,drug_in_signal,symptom_in_signal,co_occurrence_posts,prr,ror,chi_square,strength,is_true_positive
+15,Vioxx,vioxx,covid,1,2.0,3.0,0.194,WEAK,YES
+15,Vioxx,vioxx,weight loss,1,2.0,3.0,0.194,WEAK,YES
+15,Vioxx,vioxx,precordial catch syndrome,1,2.0,3.0,0.194,WEAK,YES
+15,Vioxx,vioxx,texidor's twinge,1,2.0,3.0,0.194,WEAK,YES
+15,Vioxx,vioxx,chest,1,2.0,3.0,0.194,WEAK,YES
+15,Vioxx,vioxx,depressed,1,2.0,3.0,0.194,WEAK,YES
+16,Thalidomide,thalidomide,morning sickness,2,4.0,6.0,0.218,MODERATE,YES
+16,Thalidomide,isoretinoin,cystic acne,1,4.0,0.0,1.875,WEAK,REVIEW
+16,Thalidomide,accutane,cystic acne,1,4.0,0.0,1.875,WEAK,REVIEW
+16,Thalidomide,thalidomide,birth defects,1,2.0,3.0,0.11,WEAK,YES
+16,Thalidomide,thalidomide,toxic,1,2.0,3.0,0.11,WEAK,YES
+16,Thalidomide,thalidomide,cramps,1,2.0,3.0,0.11,WEAK,YES
+16,Thalidomide,thalidomide,bc,1,2.0,3.0,0.11,WEAK,YES
+16,Thalidomide,thalidomide,pregnancy,1,2.0,3.0,0.11,WEAK,YES
+16,Thalidomide,thalidomide,tired,1,2.0,3.0,0.11,WEAK,YES
+16,Thalidomide,rofecoxib,arthritis,1,0.5,0.25,0.667,WEAK,YES
+16,Thalidomide,rofecoxib,liver failure,1,0.5,0.25,0.667,WEAK,YES
+16,Thalidomide,rofecoxib,liver damage,1,0.5,0.25,0.667,WEAK,YES
+16,Thalidomide,bac,arthritis,1,0.5,0.25,0.667,WEAK,REVIEW
+16,Thalidomide,bac,liver failure,1,0.5,0.25,0.667,WEAK,REVIEW
+16,Thalidomide,bac,liver damage,1,0.5,0.25,0.667,WEAK,REVIEW
+16,Thalidomide,thalidomide,arthritis,1,0.15,0.056,4.174,WEAK,YES
+16,Thalidomide,thalidomide,liver failure,1,0.15,0.056,4.174,WEAK,YES
+16,Thalidomide,thalidomide,liver damage,1,0.15,0.056,4.174,WEAK,YES
+17,Thalidomide,garbage,covid,1,21.0,0.0,10.476,WEAK,REVIEW
+17,Thalidomide,reddit,"fatigue, chills",1,6.333,9.0,2.47,WEAK,REVIEW
+17,Thalidomide,reddit,hot flashes,1,6.333,9.0,2.47,WEAK,REVIEW
+17,Thalidomide,reddit,fatigue,1,6.333,9.0,2.47,WEAK,REVIEW
+17,Thalidomide,glp-1s,"fatigue, chills",1,6.333,9.0,2.47,WEAK,REVIEW
+17,Thalidomide,glp-1s,hot flashes,1,6.333,9.0,2.47,WEAK,REVIEW
+17,Thalidomide,glp-1s,fatigue,1,6.333,9.0,2.47,WEAK,REVIEW
+17,Thalidomide,thalidomide,coronavirus,2,4.0,6.0,0.489,MODERATE,YES
+17,Thalidomide,ozempic,irrational fear of helicopters,1,2.0,3.0,22.0,WEAK,REVIEW
+17,Thalidomide,thalidomide,"missing arms or legs, malformed limbs",1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,thalidomide,nerve damage,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,bhxkropw,weight loss,1,2.0,3.0,22.0,WEAK,REVIEW
+17,Thalidomide,thalidomide,side effects,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,thalidomide,ojos azules,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,thalidomide,blue or odd eyes,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,thalidomide,cranial defects,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,thalidomide,cancer,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,thalidomide,morning sickness,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,thalidomide,birth defects,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,thalidomide,toxic,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,gabapentin,seizure,1,2.0,3.0,10.476,WEAK,REVIEW
+17,Thalidomide,gabapentin,nerve injury,1,2.0,3.0,10.476,WEAK,REVIEW
+17,Thalidomide,thalidomide,pain,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,njavere,fat,1,2.0,3.0,10.476,WEAK,REVIEW
+17,Thalidomide,njavere,diarrhea,1,2.0,3.0,10.476,WEAK,REVIEW
+17,Thalidomide,thalidomide,racism,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,chloroquine,covid-19,1,2.0,3.0,22.0,WEAK,REVIEW
+17,Thalidomide,thalidomide,burns,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,thalidomide,cognitive dissonance,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,thalidomide,hypocrisy,1,2.0,3.0,0.308,WEAK,YES
+17,Thalidomide,weed,hungry,1,2.0,3.0,22.0,WEAK,REVIEW
+17,Thalidomide,prednisone,suicide,1,2.0,3.0,2.794,WEAK,REVIEW
+17,Thalidomide,prednisone,suicidal,1,2.0,3.0,2.794,WEAK,REVIEW
+17,Thalidomide,prednisone,depressed,1,2.0,3.0,2.794,WEAK,REVIEW
+17,Thalidomide,prednisone,pneumonia,1,2.0,3.0,2.794,WEAK,REVIEW
+17,Thalidomide,prednisone,"depression, suicidal",1,2.0,3.0,2.794,WEAK,REVIEW
+17,Thalidomide,prednisone,suicidal thoughts,1,2.0,3.0,2.794,WEAK,REVIEW
+17,Thalidomide,thalidomide,covid,2,0.444,0.375,0.536,WEAK,YES
+18,Thalidomide,garbage,covid,1,2.0,3.0,4.0,WEAK,REVIEW
+18,Thalidomide,ozempic,irrational fear of helicopters,1,2.0,3.0,4.0,WEAK,REVIEW
+18,Thalidomide,thalidomide,"missing arms or legs, malformed limbs",1,2.0,3.0,1.333,WEAK,YES
+18,Thalidomide,thalidomide,nerve damage,1,2.0,3.0,1.333,WEAK,YES
+18,Thalidomide,reddit,"fatigue, chills",1,0.667,0.5,0.139,WEAK,REVIEW
+18,Thalidomide,reddit,hot flashes,1,0.667,0.5,0.139,WEAK,REVIEW
+18,Thalidomide,reddit,fatigue,1,0.667,0.5,0.139,WEAK,REVIEW
+18,Thalidomide,glp-1s,"fatigue, chills",1,0.667,0.5,0.139,WEAK,REVIEW
+18,Thalidomide,glp-1s,hot flashes,1,0.667,0.5,0.139,WEAK,REVIEW
+18,Thalidomide,glp-1s,fatigue,1,0.667,0.5,0.139,WEAK,REVIEW
+19,Thalidomide,garbage,covid,1,2.0,3.0,4.0,WEAK,REVIEW
+19,Thalidomide,ozempic,irrational fear of helicopters,1,2.0,3.0,4.0,WEAK,REVIEW
+19,Thalidomide,thalidomide,"missing arms or legs, malformed limbs",1,2.0,3.0,1.333,WEAK,YES
+19,Thalidomide,thalidomide,nerve damage,1,2.0,3.0,1.333,WEAK,YES
+19,Thalidomide,reddit,"fatigue, chills",1,0.667,0.5,0.139,WEAK,REVIEW
+19,Thalidomide,reddit,hot flashes,1,0.667,0.5,0.139,WEAK,REVIEW
+19,Thalidomide,reddit,fatigue,1,0.667,0.5,0.139,WEAK,REVIEW
+19,Thalidomide,glp-1s,"fatigue, chills",1,0.667,0.5,0.139,WEAK,REVIEW
+19,Thalidomide,glp-1s,hot flashes,1,0.667,0.5,0.139,WEAK,REVIEW
+19,Thalidomide,glp-1s,fatigue,1,0.667,0.5,0.139,WEAK,REVIEW
+20,Avandia,avandia,diabetes,4,8.0,12.0,0.629,MODERATE,YES
+20,Avandia,xgcvyhb,to the heart,1,7.0,0.0,3.429,WEAK,REVIEW
+20,Avandia,actos,to the heart,1,7.0,0.0,3.429,WEAK,REVIEW
+20,Avandia,glaxosmith,heart attacks,1,2.333,0.0,1.143,WEAK,REVIEW
+20,Avandia,avandia,bystolic,1,2.0,3.0,0.163,WEAK,YES
+20,Avandia,avandia,deaths,1,2.0,3.0,0.163,WEAK,YES
+20,Avandia,avandia,heart attacks,4,0.533,0.222,1.4,WEAK,YES
+20,Avandia,"fosamax, actonel",fractures of the thigh bone,1,0.5,0.333,0.533,WEAK,REVIEW
+20,Avandia,"fosamax, actonel",diabetics,1,0.5,0.333,0.533,WEAK,REVIEW
+20,Avandia,"fosamax, actonel",heart failure,1,0.5,0.333,0.533,WEAK,REVIEW
+20,Avandia,boniva,fractures of the thigh bone,1,0.5,0.333,0.533,WEAK,REVIEW
+20,Avandia,boniva,diabetics,1,0.5,0.333,0.533,WEAK,REVIEW
+20,Avandia,boniva,heart failure,1,0.5,0.333,0.533,WEAK,REVIEW
+20,Avandia,"fosamax, actonel",heart attacks,1,0.333,0.111,2.0,WEAK,REVIEW
+20,Avandia,boniva,heart attacks,1,0.333,0.111,2.0,WEAK,REVIEW
+20,Avandia,avandia,fractures of the thigh bone,1,0.214,0.083,2.744,WEAK,YES
+20,Avandia,avandia,diabetics,1,0.214,0.083,2.744,WEAK,YES
+20,Avandia,avandia,heart failure,1,0.214,0.083,2.744,WEAK,YES
+21,Thalidomide,thalidomide,morning sickness,2,4.0,6.0,0.218,MODERATE,YES
+21,Thalidomide,isoretinoin,cystic acne,1,4.0,0.0,1.875,WEAK,REVIEW
+21,Thalidomide,accutane,cystic acne,1,4.0,0.0,1.875,WEAK,REVIEW
+21,Thalidomide,thalidomide,birth defects,1,2.0,3.0,0.11,WEAK,YES
+21,Thalidomide,thalidomide,toxic,1,2.0,3.0,0.11,WEAK,YES
+21,Thalidomide,thalidomide,cramps,1,2.0,3.0,0.11,WEAK,YES
+21,Thalidomide,thalidomide,bc,1,2.0,3.0,0.11,WEAK,YES
+21,Thalidomide,thalidomide,pregnancy,1,2.0,3.0,0.11,WEAK,YES
+21,Thalidomide,thalidomide,tired,1,2.0,3.0,0.11,WEAK,YES
+21,Thalidomide,rofecoxib,arthritis,1,0.5,0.25,0.667,WEAK,YES
+21,Thalidomide,rofecoxib,liver failure,1,0.5,0.25,0.667,WEAK,YES
+21,Thalidomide,rofecoxib,liver damage,1,0.5,0.25,0.667,WEAK,YES
+21,Thalidomide,bac,arthritis,1,0.5,0.25,0.667,WEAK,REVIEW
+21,Thalidomide,bac,liver failure,1,0.5,0.25,0.667,WEAK,REVIEW
+21,Thalidomide,bac,liver damage,1,0.5,0.25,0.667,WEAK,REVIEW
+21,Thalidomide,thalidomide,arthritis,1,0.15,0.056,4.174,WEAK,YES
+21,Thalidomide,thalidomide,liver failure,1,0.15,0.056,4.174,WEAK,YES
+21,Thalidomide,thalidomide,liver damage,1,0.15,0.056,4.174,WEAK,YES
+22,Thalidomide,thalidomide,birth defects,3,6.0,9.0,0.476,MODERATE,YES
+22,Thalidomide,paracetamol,autism,1,5.0,0.0,2.4,WEAK,REVIEW
+22,Thalidomide,thalidomide,morning sickness,2,4.0,6.0,0.321,MODERATE,YES
+22,Thalidomide,thalidomide,polydactyl,1,2.0,3.0,0.163,WEAK,YES
+22,Thalidomide,thalidomide,pain,1,2.0,3.0,0.163,WEAK,YES
+22,Thalidomide,thalidomide,toxic,1,2.0,3.0,0.163,WEAK,YES
+22,Thalidomide,thalidomide,deformed,1,2.0,3.0,0.163,WEAK,YES
+22,Thalidomide,thalidomide,autism,1,0.286,0.167,1.148,WEAK,YES

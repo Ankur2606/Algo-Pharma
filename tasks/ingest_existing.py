@@ -588,12 +588,16 @@ def process_unprocessed_raw_posts(project_id: int = 1) -> dict:
                 entities  = extract_entities(redacted)
 
                 # ── Medicine hint injection ──────────────────────────────────
-                # If NER finds no drugs, inject the queried medicine as a known
-                # drug entity so AE detection can still produce a signal.
-                # This handles brand names / misspellings NER models don't know.
+                # If NER finds no drugs, inject the queried medicine ONLY if the
+                # drug name actually appears in the post text.  Without this check
+                # the hint was blindly tagging every post (tattoo chats, cat posts,
+                # gaming rants) with the query drug, causing massive false positives.
                 if medicine_hint and not entities.get("drugs"):
-                    entities["drugs"] = [{"text": medicine_hint, "label": "DRUG", "score": 0.8, "source": "query_hint"}]
-                    logger.info(f"[process_unprocessed] [{raw_post.thread_id}] Drug hint injected: '{medicine_hint}'")
+                    if medicine_hint.lower() in redacted.lower():
+                        entities["drugs"] = [{"text": medicine_hint, "label": "DRUG", "score": 0.8, "source": "query_hint"}]
+                        logger.info(f"[process_unprocessed] [{raw_post.thread_id}] Drug hint injected: '{medicine_hint}'")
+                    else:
+                        logger.info(f"[process_unprocessed] [{raw_post.thread_id}] Drug hint '{medicine_hint}' NOT in text — skipping injection")
 
                 sentiment = analyze_sentiment(redacted, "en")
                 ae_result = detect_ae(redacted, "en", entities=entities, sentiment=sentiment)

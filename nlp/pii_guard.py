@@ -39,7 +39,7 @@ REGIONAL_LANGS = {'hi', 'mr', 'gu', 'ta', 'te', 'kn', 'ml', 'bn', 'pa', 'or', 'a
 PROTECTED_MEDS = re.compile(r'\b(Dolo|Paracetamol|Crocin|Calpol|Taxim|Combiflam|Azithromycin|Amoxicillin)\b', re.IGNORECASE)
 
 
-def redact_pii(text: str, lang: str = "en") -> dict:
+def redact_pii(text: str, lang: str = "en", preserve_urls: bool = False) -> dict:
     """
     Run 3-layer PII redaction.
     Returns: {redacted_text, pii_entities_found, pii_language_flag, original_sha256}
@@ -84,32 +84,21 @@ def redact_pii(text: str, lang: str = "en") -> dict:
                 # Protection: If the model thinks a medication is a name, skip it
                 if PROTECTED_MEDS.search(ent.text):
                     continue
+                # Protection: preserve URLs if requested
+                if preserve_urls and ent.label.lower() in ("url", "link"):
+                    continue
                 valid_entities.append(ent)
                 pii_entities.append({"type": ent.label, "layer": 2, "text": ent.text[:10]})
 
             if valid_entities:
-                # Use "replace" method to get realistic surrogate values instead of masks
-                deid_result = deidentify(
-                    truncated,
-                    lang=lang,
-                    model_name=model_name,
-                    method="replace", 
-                    consistent=True,
-                    seed=42
-                )
-                
-                # If deidentify fails to actually replace due to boundary issues (like @ in twitter handles),
-                # we fall back to manual replacement for any entity that is still in the text.
-                redacted = deid_result.deidentified_text
-                
-                # Setup anonymizer for the fallback to ensure realistic fake data
+                redacted = truncated
+                # Setup anonymizer to ensure realistic fake data
                 from openmed.core.anonymizer import Anonymizer
                 anonymizer = Anonymizer(lang=lang, consistent=True, seed=42)
                 
                 # Replace longer entities first to prevent partial substring replacements
                 for ent in sorted(valid_entities, key=lambda e: len(e.text), reverse=True):
                     if ent.text in redacted:
-                        # Fallback: manually insert realistic surrogate value
                         surrogate = anonymizer.surrogate(ent.text, ent.label, lang=lang)
                         redacted = redacted.replace(ent.text, surrogate)
 

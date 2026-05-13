@@ -198,6 +198,17 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;backgro
 .empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
 .empty-icon{font-size:2.5rem;margin-bottom:12px;opacity:.5}
 .empty-state p{font-size:.9rem}
+.infographic-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.infographic-row{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.infographic-row{grid-template-columns:1fr}}
+.info-card{border-radius:var(--radius);padding:18px 20px}
+.info-card-title{font-size:.75rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+.info-bars{display:flex;flex-direction:column;gap:9px}
+.info-bar-row{display:flex;flex-direction:column;gap:3px}
+.info-bar-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text2)}
+.info-bar-label span:last-child{color:var(--text3);font-family:var(--mono)}
+.info-bar-track{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.info-bar-fill{height:100%;border-radius:3px;transition:width .7s ease}
 .session-bar{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
 .session-item{padding:4px 12px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);font-size:.78rem;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
 .session-item:hover{border-color:var(--accent);color:var(--accent3)}
@@ -370,6 +381,22 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;backgro
     <div class="big-chart-wrap"><canvas id="chart-signals"></canvas></div>
   </div>
 
+  <!-- Pipeline infographic -->
+  <div class="infographic-row" id="infographic-row" style="display:none">
+    <div class="info-card glass2" id="info-ae-breakdown">
+      <div class="info-card-title">AE Gate Analysis</div>
+      <div class="info-bars" id="info-ae-bars"></div>
+    </div>
+    <div class="info-card glass2" id="info-drug-coverage">
+      <div class="info-card-title">Top Drugs Detected</div>
+      <div class="info-bars" id="info-drug-bars"></div>
+    </div>
+    <div class="info-card glass2" id="info-symptom-coverage">
+      <div class="info-card-title">Top Symptoms Detected</div>
+      <div class="info-bars" id="info-symptom-bars"></div>
+    </div>
+  </div>
+
   <!-- Signal table -->
   <div class="signal-section glass2">
     <h4><span class="dot" style="background:var(--red)"></span>Detected Signals <span class="count-badge" id="signal-count">0</span></h4>
@@ -389,7 +416,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;backgro
 </div>
 <script>
 const API = '';
-let chatState = {medicine:null,source:null,symptom:null};
+let chatState = {medicine:null,source:null,symptom:null,forum_url:null};
 let projectId = null;
 let pollInterval = null;
 let pollCount = 0;
@@ -475,7 +502,7 @@ function renderSessions() {
 function loadSession(id) {
   projectId = id;
   const s = sessions.find(x=>x.id===id);
-  if (s) { chatState = {medicine:s.med, source:s.src, symptom:s.symp||null}; }
+  if (s) { chatState = {medicine:s.med, source:s.src, symptom:s.symp||null, forum_url:s.forum_url||null}; }
   startDashboardPhase();
 }
 
@@ -677,21 +704,28 @@ function renderDashboard(data){
   document.getElementById('s-ae-count').textContent=`${aeFlagged} of ${processed} flagged`;
   document.getElementById('s-signals').textContent=(data.signals||[]).length;
 
-  // Charts (only build when we have data)
-  buildAEChart(aePct);
-  if((data.posts||[]).length){
-    buildSentimentChart(data.posts);
-    buildPlatformChart(data.posts);
-  }
-  if((data.signals||[]).length) buildSignalsChart(data.signals);
+  // Charts — wrapped in try-catch so failures don't block posts/signals rendering
+  try { buildAEChart(aePct); } catch(e) { console.warn('AE chart error:', e); }
+  try {
+    if((data.posts||[]).length){
+      buildSentimentChart(data.posts);
+      buildPlatformChart(data.posts);
+    }
+  } catch(e) { console.warn('Chart error:', e); }
+  try {
+    if((data.signals||[]).length) buildSignalsChart(data.signals);
+  } catch(e) { console.warn('Signal chart error:', e); }
+  try {
+    if((data.posts||[]).length) buildInfographics(data.posts, processed);
+  } catch(e) { console.warn('Infographic error:', e); }
 
-  // Signal table
+  // Signal table — MUST render regardless of chart errors
   const sc=document.getElementById('signal-count');
   const sb=document.getElementById('signal-body');
   const sigs=data.signals||[];
   sc.textContent=sigs.length;
   if(!sigs.length){
-    sb.innerHTML=`<div class="empty-state"><div class="empty-icon">⏳</div><p>No signals detected yet...</p></div>`;
+    sb.innerHTML=`<div class="empty-state"><div class="empty-icon">⏳</div><p>${data.status==='complete'?'No signals detected for this dataset.':'Waiting for signal detection...'}</p></div>`;
   } else {
     const maxPRR=Math.max(...sigs.map(s=>parseFloat(s.prr)||0),1);
     sb.innerHTML=`<table class="sig-table">
@@ -711,26 +745,28 @@ function renderDashboard(data){
       }).join('')}</tbody></table>`;
   }
 
-  // Posts list
+  // Posts list — MUST render regardless of chart errors
   const pc=document.getElementById('post-count');
   const pl=document.getElementById('post-list');
   const posts=data.posts||[];
-  pc.textContent=posts.length;
+  pc.textContent=processed>0?processed:posts.length;
   if(!posts.length){
     pl.innerHTML=`<div class="empty-state"><div class="empty-icon">⏳</div><p>Posts will appear as they are processed...</p></div>`;
   } else {
-    pl.innerHTML=posts.map(p=>{
+    pl.innerHTML=posts.map((p,idx)=>{
       const conf=p.ae_confidence||0;
       const confPct=(conf*100).toFixed(1);
       const confClass=conf>=0.7?'high':conf>=0.4?'med':'low';
       const drugTags = (p.drugs||[]).map(d => `<span class="entity-tag drug">💊 ${d}</span>`).join('');
       const symptomTags = (p.symptoms||[]).map(s => `<span class="entity-tag symptom">⚕ ${s}</span>`).join('');
       const reasonTag = p.ae_reason ? `<span class="entity-tag reason">${p.ae_reason}</span>` : '';
+      const idxBadge = `<span style="font-family:var(--mono);font-size:.68rem;color:var(--text3);margin-left:auto">#${idx+1}</span>`;
       return `<div class="post-item ${p.ae_flag?'ae':'no-ae'}">
         <div class="post-meta">
           <span class="post-platform">${p.platform}</span>
           <span class="post-sentiment ${p.sentiment}">${p.sentiment}</span>
           ${p.ae_flag?`<span class="ae-flag-badge">⚠ AE</span>`:''}
+          ${idxBadge}
         </div>
         ${p.title?`<div class="post-title">${p.title}</div>`:''}
         <div class="post-text">${p.text}</div>
@@ -746,12 +782,68 @@ function renderDashboard(data){
   }
 }
 
+// ── Infographic panels ─────────────────────────────────
+function buildInfographics(posts, total) {
+  const infRow = document.getElementById('infographic-row');
+  if (!posts.length) { infRow.style.display = 'none'; return; }
+  infRow.style.display = 'grid';
+
+  // AE Gate analysis
+  const gates = {ae: 0, no_drug: 0, no_symptom: 0, not_negative: 0, all_negated: 0, other: 0};
+  posts.forEach(p => {
+    if (p.ae_flag) { gates.ae++; return; }
+    const r = p.ae_reason || '';
+    if (r.includes('no_drug')) gates.no_drug++;
+    else if (r.includes('no_symptom')) gates.no_symptom++;
+    else if (r.includes('not_negative')) gates.not_negative++;
+    else if (r.includes('all_negated')) gates.all_negated++;
+    else gates.other++;
+  });
+  const gateColors = {ae:'var(--red)',no_drug:'var(--text3)',no_symptom:'var(--yellow)',not_negative:'var(--cyan)',all_negated:'var(--accent)',other:'var(--text3)'};
+  const gateLabels = {ae:'✅ AE Confirmed',no_drug:'❌ No drug found',no_symptom:'❌ No symptom',not_negative:'❌ Not negative',all_negated:'❌ All negated',other:'⚪ Other'};
+  document.getElementById('info-ae-bars').innerHTML = Object.entries(gates)
+    .filter(([,v]) => v > 0)
+    .sort(([,a],[,b]) => b - a)
+    .map(([k, v]) => {
+      const pct = Math.round((v / posts.length) * 100);
+      return `<div class="info-bar-row">
+        <div class="info-bar-label"><span>${gateLabels[k]}</span><span>${v} / ${pct}%</span></div>
+        <div class="info-bar-track"><div class="info-bar-fill" style="width:${pct}%;background:${gateColors[k]}"></div></div>
+      </div>`;
+    }).join('');
+
+  // Top drugs
+  const drugCounts = {};
+  posts.forEach(p => (p.drugs||[]).forEach(d => { drugCounts[d] = (drugCounts[d]||0) + 1; }));
+  const topDrugs = Object.entries(drugCounts).sort(([,a],[,b]) => b - a).slice(0, 6);
+  const maxDrug = topDrugs[0]?.[1] || 1;
+  document.getElementById('info-drug-bars').innerHTML = topDrugs.length
+    ? topDrugs.map(([d, v]) => `<div class="info-bar-row">
+        <div class="info-bar-label"><span>💊 ${d}</span><span>${v} posts</span></div>
+        <div class="info-bar-track"><div class="info-bar-fill" style="width:${Math.round((v/maxDrug)*100)}%;background:var(--accent)"></div></div>
+      </div>`).join('')
+    : '<p style="color:var(--text3);font-size:.8rem">No drugs detected</p>';
+
+  // Top symptoms
+  const symCounts = {};
+  posts.forEach(p => (p.symptoms||[]).forEach(s => { symCounts[s] = (symCounts[s]||0) + 1; }));
+  const topSyms = Object.entries(symCounts).sort(([,a],[,b]) => b - a).slice(0, 6);
+  const maxSym = topSyms[0]?.[1] || 1;
+  document.getElementById('info-symptom-bars').innerHTML = topSyms.length
+    ? topSyms.map(([s, v]) => `<div class="info-bar-row">
+        <div class="info-bar-label"><span>⚕ ${s}</span><span>${v} posts</span></div>
+        <div class="info-bar-track"><div class="info-bar-fill" style="width:${Math.round((v/maxSym)*100)}%;background:var(--yellow)"></div></div>
+      </div>`).join('')
+    : '<p style="color:var(--text3);font-size:.8rem">No symptoms detected</p>';
+}
+
+
 // ── New Analysis ────────────────────────────────────
 function startNew(){
   clearInterval(pollInterval);
   Object.keys(charts).forEach(k=>{ if(charts[k]) charts[k].destroy(); });
   charts={};
-  chatState={medicine:null,source:null,symptom:null};
+  chatState={medicine:null,source:null,symptom:null,forum_url:null};
   projectId=null;
   pollCount=0;
   updatePills(chatState);

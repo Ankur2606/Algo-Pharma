@@ -25,7 +25,7 @@ router = APIRouter(prefix="/api", tags=["chat"])
 # ── Request / Response models ─────────────────────────────
 class ChatRequest(BaseModel):
     message: str
-    state: dict = {"medicine": None, "source": None, "symptom": None}
+    state: dict = {"medicine": None, "source": None, "symptom": None, "forum_url": None}
 
 
 class ChatResponse(BaseModel):
@@ -65,6 +65,26 @@ def _create_project(name: str) -> int:
         return project.id
 
 
+async def _run_forum_pipeline(project_id: int, forum_url: str, medicine: str, symptom: str | None):
+    """
+    Background task for custom_forum.
+    Bypasses Gemini tool-selection — we already know the tool is forum_onboarding.
+    """
+    import asyncio
+    from tasks.crawl_forum import crawl_forum
+    try:
+        result = await asyncio.to_thread(
+            crawl_forum,
+            project_id=project_id,
+            forum_url=forum_url,
+            medicine=medicine,
+            symptom=symptom or "",
+        )
+        logger.info(f"[forum_pipeline] Completed | project_id={project_id} | result={result}")
+    except Exception as e:
+        logger.error(f"[forum_pipeline] Failed | project_id={project_id} | error={e}")
+
+
 # ── Endpoint ──────────────────────────────────────────────
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
@@ -92,19 +112,30 @@ async def chat(request: ChatRequest, background_tasks: BackgroundTasks):
 
     # 3. READY — create project + fire background pipeline
     try:
-        med    = new_state.get("medicine", "unknown")
-        source = new_state.get("source",   "unknown")
-        symp   = new_state.get("symptom")
+        med       = new_state.get("medicine", "unknown")
+        source    = new_state.get("source",   "unknown")
+        symp      = new_state.get("symptom")
+        forum_url = new_state.get("forum_url")
 
         project_name = f"{med}_{source}" + (f"_{symp}" if symp else "")
         project_id   = _create_project(project_name)
-        query        = _build_query(new_state)
 
-        logger.info(f"[/api/chat] Pipeline triggered | project_id={project_id} | query={query!r}")
-
-        # Fire-and-forget: runs llm_agent in the background so we respond immediately
-        from llm_module import llm_agent
-        background_tasks.add_task(llm_agent, query, project_id)
+        # ── Route by source ──────────────────────────────────────
+        # custom_forum → Direct pipeline (no Gemini tool-selection needed)
+        # reddit/twitter → Gemini agent picks the right crawler
+        if source == "custom_forum" and forum_url:
+            logger.info(
+                f"[/api/chat] Forum pipeline triggered | project_id={project_id} | "
+                f"url={forum_url!r} | medicine={med!r}"
+            )
+            background_tasks.add_task(
+                _run_forum_pipeline, project_id, forum_url, med, symp
+            )
+        else:
+            query = _build_query(new_state)
+            logger.info(f"[/api/chat] LLM agent triggered | project_id={project_id} | query={query!r}")
+            from llm_module import llm_agent
+            background_tasks.add_task(llm_agent, query, project_id)
 
         return ChatResponse(
             ready=True,

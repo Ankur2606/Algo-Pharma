@@ -236,26 +236,26 @@ In FAST_MODE=false:
 
   1. spaCy en_core_web_lg (always needed for negation)
 
-  2. OpenMed Nemotron PII model
-     Model ID: OpenMed/privacy-filter-nemotron
+  2. OpenMed PII model
+     Model ID: OpenMed/OpenMed-PII-SuperClinical-Small-44M-v1
      Load via: AutoModelForTokenClassification + 
      AutoTokenizer with trust_remote_code=True
      Fallback: None (regex-only PII will run instead)
-     Reference: https://huggingface.co/OpenMed/privacy-filter-nemotron
+     Reference: https://huggingface.co/OpenMed/OpenMed-PII-SuperClinical-Small-44M-v1
 
   3. Drug NER model
-     Model ID: OpenMed/OpenMed-NER-PharmaDetect-BigMed-278M
+     Model ID: OpenMed/OpenMed-NER-PharmaDetect-ModernClinical-149M
      Load via: transformers pipeline,
      task="token-classification",
      aggregation_strategy="simple"
      Fallback: None (keyword matching runs instead)
-     Reference: https://huggingface.co/OpenMed/OpenMed-NER-PharmaDetect-BigMed-278M
+     Reference: https://huggingface.co/OpenMed/OpenMed-NER-PharmaDetect-ModernClinical-149M
 
   4. Disease NER model
-     Model ID: OpenMed/OpenMed-NER-DiseaseDetect-BioMed-335M
+     Model ID: OpenMed/OpenMed-NER-DiseaseDetect-SuperClinical-184M
      Same loading pattern as drug NER
      Fallback: None (keyword matching runs instead)
-     Reference: https://huggingface.co/OpenMed/OpenMed-NER-DiseaseDetect-BioMed-335M
+     Reference: https://huggingface.co/OpenMed/OpenMed-NER-DiseaseDetect-SuperClinical-184M
 
   5. Sentiment model
      Model ID: cardiffnlp/twitter-roberta-base-sentiment-latest

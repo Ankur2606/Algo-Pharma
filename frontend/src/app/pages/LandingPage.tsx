@@ -12,7 +12,7 @@ const ARTIFACTS = [
 
 const FEATURES = [
   { icon: "🔍", title: "Agentic Crawling", desc: "Type a natural language query. Groq's Llama 3.3 70B picks the right crawler and extracts data from Reddit, Twitter, or any forum automatically." },
-  { icon: "🛡️", title: "Privacy First", desc: "OpenMed Nemotron redacts 55 clinical PII entity types including Aadhaar, PAN, UPI IDs, and medical record numbers before any AI stage runs." },
+  { icon: "🛡️", title: "Privacy First", desc: "OpenMed PII models (44M/82M) redact clinical PII entity types including Aadhaar, PAN, UPI IDs, and medical record numbers before any AI stage runs." },
   { icon: "🌐", title: "India Ready", desc: "Regional language support for Hindi and Telugu via Sarvam AI translation, with multilingual PII models trained specifically on Indian data." },
   { icon: "⚡", title: "Non-Blocking Pipeline", desc: "FastAPI responds in milliseconds. All heavy NLP runs asynchronously inside Celery workers backed by Upstash Redis in the cloud." },
   { icon: "📊", title: "Statistical Signals", desc: "PRR, ROR, and Chi-square statistics rank every drug-symptom pair. Only spikes that cross clinical thresholds become actionable signals." },
@@ -23,9 +23,9 @@ const FEATURES = [
 
 const PIPELINE_STEPS = [
   { num: "01", label: "Language Detection", detail: "langdetect identifies the language before any model runs." },
-  { num: "02", label: "PII Guard", detail: "OpenMed Nemotron removes 55 clinical entities plus Indian-specific identifiers." },
-  { num: "03", label: "Drug NER", detail: "OpenMed PharmaDetect 278M maps brand names to MedDRA drug codes." },
-  { num: "04", label: "Symptom NER", detail: "OpenMed DiseaseDetect 335M extracts adverse symptoms and maps to preferred terms." },
+  { num: "02", label: "PII Guard", detail: "OpenMed PII (44M/82M) removes clinical entities plus Indian-specific identifiers." },
+  { num: "03", label: "Drug NER", detail: "OpenMed PharmaDetect 149M maps brand names to MedDRA drug codes." },
+  { num: "04", label: "Symptom NER", detail: "OpenMed DiseaseDetect 184M extracts adverse symptoms and maps to preferred terms." },
   { num: "05", label: "Sentiment Scoring", detail: "Twitter-RoBERTa trained on 58M real tweets scores each post POSITIVE, NEGATIVE, or NEUTRAL." },
   { num: "06", label: "Negation Detection", detail: "medspaCy clinical rules catch phrases like 'no nausea' and remove false positives." },
   { num: "07", label: "AE Rule Engine", detail: "Drug + Symptom + Negative Sentiment + Not Negated → AE flagged with confidence score." },

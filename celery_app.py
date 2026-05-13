@@ -6,6 +6,9 @@ Uses Redis as broker. Optional — system works without Celery via BackgroundTas
 import sys
 import os
 
+# ── Fix Intel MKL "forrtl: error (200)" crash on Ctrl+C (Windows) ──────────
+os.environ.setdefault("FOR_DISABLE_CONSOLE_CTRL_HANDLER", "1")
+
 # Force FULL mode for Celery workers (they need all NLP models)
 os.environ["FAST_MODE"] = "false"
 
@@ -111,6 +114,15 @@ def task_process_unprocessed(project_id: int = 1) -> dict:
         import logging
         logging.getLogger(__name__).error(f"Signal detection failed: {e}")
         result["signals_detected"] = 0
+
+    # ── Write sentinel so the polling endpoint knows the full pipeline is done ──
+    # This MUST happen after signal detection so the frontend doesn't stop polling early.
+    try:
+        from api.results import mark_signals_done
+        mark_signals_done(project_id)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Could not write signals_done sentinel: {e}")
 
     return result
 

@@ -3,7 +3,15 @@ AlgoPharma — FastAPI application entry point.
 Lifespan startup: init DB + load NLP models.
 """
 
+import os
 import sys
+
+# ── Fix Intel MKL "forrtl: error (200)" crash on Ctrl+C (Windows) ──────────
+# numpy/scipy ship with Intel MKL on Windows.  MKL's Fortran runtime installs
+# its own Ctrl+C handler that kills the process with a noisy stack trace.
+# Setting this env var BEFORE numpy is imported tells MKL to leave Ctrl+C alone.
+os.environ.setdefault("FOR_DISABLE_CONSOLE_CTRL_HANDLER", "1")
+
 import logging
 from contextlib import asynccontextmanager
 
@@ -126,4 +134,7 @@ def trigger_crawl(project_id: int, background_tasks: BackgroundTasks):
 # ── Run server ───────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(
+        "main:app", host="0.0.0.0", port=8000, reload=True,
+        reload_excludes=["logs/*", "*.log", "logs/**/*"],
+    )

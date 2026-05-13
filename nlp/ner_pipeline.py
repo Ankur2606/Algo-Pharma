@@ -127,7 +127,8 @@ def extract_entities(text: str) -> dict:
             merged = _merge_subwords(raw, truncated)
             for ent in merged:
                 ent_text = ent.get("word", "")
-                if ent_text and ent_text.lower() not in found_drugs:
+                # Skip very short tokens (e.g. "B4", "Ye") — not real drug names
+                if ent_text and len(ent_text) >= 3 and ent_text.lower() not in found_drugs:
                     drugs.append({
                         "text": ent_text,
                         "score": round(float(ent["score"]), 4),
@@ -146,7 +147,8 @@ def extract_entities(text: str) -> dict:
             merged = _merge_subwords(raw, truncated)
             for ent in merged:
                 ent_text = ent.get("word", "")
-                if ent_text and ent_text.lower() not in found_symptoms:
+                # Skip very short tokens — not real symptom names
+                if ent_text and len(ent_text) >= 3 and ent_text.lower() not in found_symptoms:
                     symptoms.append({
                         "text": ent_text,
                         "score": round(float(ent["score"]), 4),
