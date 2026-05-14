@@ -1,0 +1,53 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local database files — use PostgreSQL (Supabase) in production
+*.db
+*.db-shm
+*.db-wal
+algopharma_test.db
+
+# Logs
+*.log
+logs/
+
+# Environment secrets — set these in HF Space settings instead
+.env
+.env.local
+
+# Development / test files
+test/
+scratch/
+node_modules/
+
+# Large JSON data files — not needed in production
+reddit_dolo365_results.json
+twitter_dolo365_results.json
+demo_pipeline.py
+seed_demo_data.py
+
+# uv lock (large, not needed for pip-based Docker build)
+uv.lock
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

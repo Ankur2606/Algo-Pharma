@@ -11,7 +11,7 @@ ADD https://api.github.com/repos/Ankur2606/Algo-Pharma/git/refs/heads/main /tmp/
 # Clone repo into /app
 RUN git clone https://github.com/Ankur2606/Algo-Pharma .
 
-# Install Python dependencies
+# Install Python dependenciesgit add Dockerfile
 RUN uv sync
 
 # Pre-cache all NLP models so startup is fast

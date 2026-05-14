@@ -1,0 +1,70 @@
+# ==========================================
+# AlgoPharma - Environment Requirements
+# ==========================================
+# You can install these Python dependencies using:
+#    pip install -r requirements.txt
+#
+# Note: Since the project uses `uv` and `pyproject.toml`, 
+# the recommended way to install is just running: `uv sync`
+
+# --- Core Web Framework & Server ---
+fastapi>=0.136.1
+uvicorn[standard]>=0.46.0
+pydantic>=2.13.3
+pydantic-settings>=2.14.0
+python-dotenv>=1.2.2
+
+# --- Database & ORM ---
+sqlalchemy>=2.0.49
+alembic>=1.18.4
+psycopg2-binary>=2.9.10
+
+# --- Authentication & Security ---
+passlib[bcrypt]>=1.7.4
+python-jose[cryptography]>=3.5.0
+
+# --- Background Tasks & Workers ---
+celery[redis]>=5.6.3
+redis>=6.4.0
+
+# --- Web Crawling & External APIs ---
+httpx>=0.28.1
+firecrawl-py>=4.24.0
+apify-client>=2.5.0
+
+# --- Natural Language Processing (NLP) & AI ---
+numpy>=2.4.4
+scipy>=1.17.1
+spacy>=3.8.14
+vadersentiment>=3.3.2
+langdetect>=1.0.9
+torch>=2.10.0 --index-url https://download.pytorch.org/whl/cpu
+transformers>=5.8.0
+openmed[hf]>=1.3.0
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+
+# --- LLM Providers & Agents ---
+openai>=2.34.0
+groq>=0.28.0
+google-genai>=1.74.0
+sarvamai>=0.1.28
+mcp>=1.0.0
+
+# ==========================================
+# External System & Infrastructure Dependencies
+# ==========================================
+# The following software must be installed on your machine or server:
+#
+# 1. Redis Server
+#    - Required by Celery for message brokering and task queuing.
+#    - Windows: Install via WSL or use Memurai/Docker.
+#    - Mac/Linux: `sudo apt install redis` or `brew install redis`.
+#
+# 2. Database
+#    - SQLite: Built-in with Python, used by default (no install needed).
+#    - PostgreSQL: If deploying to production, a Postgres instance is required.
+#
+# 3. Frontend
+#    - The frontend uses Vanilla HTML/CSS/JS and is served directly by FastAPI from the `static/` folder.
+#    - Chart.js is loaded dynamically via CDN.
+#    - No Node.js or npm installation is required to run the frontend.
