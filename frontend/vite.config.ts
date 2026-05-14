@@ -35,6 +35,7 @@ export default defineConfig({
   assetsInclude: ['**/*.svg', '**/*.csv'],
 
   server: {
+    allowedHosts: ['unhoaxed-eleanor-unomnisciently.ngrok-free.dev'],
     proxy: {
       // Forward /api/* to the FastAPI backend running on port 8000
       '/api': {

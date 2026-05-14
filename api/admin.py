@@ -62,6 +62,7 @@ def list_sources(db: Session = Depends(get_db)):
             "id": s.id,
             "name": s.name,
             "platform": s.platform,
+            "url": s.url,
             "is_active": s.is_active,
             "health_score": health.health_score if health else None,
             "last_updated": s.created_at
@@ -152,6 +153,7 @@ def list_users(db: Session = Depends(get_db)):
         proj_count = db.query(Project).filter(Project.user_id == u.id).count()
         res.append({
             "id": u.id,
+            "username": u.username,
             "email": u.email or u.username,
             "role": u.role,
             "last_login": u.last_login,
