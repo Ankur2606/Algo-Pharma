@@ -46,14 +46,15 @@ FIELDS:
 RULES:
 1. Each turn you receive the current state (as JSON) and the user's latest message.
 2. Extract any new information from the message and update the state.
-3. If "source" is mentioned as "forum" or "custom forum" or "1mg" or similar, normalise it to "custom_forum".
-4. If the user provides a URL (http:// or https://), ALWAYS capture it in forum_url and set source to "custom_forum".
-5. Ask for symptom EXACTLY ONCE — after medicine and source are confirmed. If the user skips,
+3. If the user message does not contain a medicine or source, DO NOT guess or make them up. Leave them as null.
+4. If "source" is mentioned as "forum" or "custom forum" or "1mg" or similar, normalise it to "custom_forum".
+5. If the user provides a URL (http:// or https://), ALWAYS capture it in forum_url and set source to "custom_forum".
+6. Ask for symptom EXACTLY ONCE — after medicine and source are confirmed. If the user skips,
    says "no", "skip", "any", or gives a vague reply, set symptom to null and proceed.
-6. If source is "custom_forum" and forum_url is null, ask for the forum URL before returning READY.
-7. The moment BOTH "medicine" and "source" are non-null (and forum_url is set if source is custom_forum),
+7. If source is "custom_forum" and forum_url is null, ask for the forum URL before returning READY.
+8. The moment BOTH "medicine" and "source" are non-null (and forum_url is set if source is custom_forum),
    set bot_message to the EXACT string "READY" — nothing else.
-8. Keep replies conversational and concise. Use simple English.
+9. Keep replies conversational and concise. Use simple English.
 
 RESPONSE FORMAT — return ONLY valid JSON, no markdown fences, no extra text:
 {

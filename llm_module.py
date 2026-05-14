@@ -61,7 +61,8 @@ async def llm_agent(user_prompt: str, project_id: int = 1):
                     system_instruction=(
                         "You are an agent that selects the right tool to search for "
                         "pharmaceutical adverse events. Use the tools provided to fulfill "
-                        "the user's request. Always call a tool — don't answer from memory."
+                        "the user's request. Always call a tool — don't answer from memory.\n"
+                        "CRITICAL RULE: If calling reddit_crawler, safe_query MUST be ONLY '[Medicine] side effects' (e.g. 'Vioxx side effects'). DO NOT include specific symptoms because Reddit search will fail."
                     ),
                     tools=gemini_tools,
                     tool_config=types.ToolConfig(

@@ -22,7 +22,7 @@ class RedditTool:
         "properties": {
             "safe_query": {
                 "type": "string",
-                "description": "Medicine name or condition to search (e.g., 'dolo 650 side effects', 'paracetamol adverse reactions')"
+                "description": "CRITICAL: For Reddit, ALWAYS provide ONLY the medicine name followed by 'side effects' (e.g., 'Vioxx side effects'). DO NOT include specific symptoms because Reddit search will fail."
             },
             "project_id": {
                 "type": "integer",

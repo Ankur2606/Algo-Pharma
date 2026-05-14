@@ -26,6 +26,9 @@ export function ChatPage() {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
+    } else {
+      // Clear previous session's chat state on mount
+      localStorage.removeItem('chat_state');
     }
   }, [isAuthenticated, navigate]);
 

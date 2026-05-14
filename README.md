@@ -1,13 +1,40 @@
-# ⬡ AlgoPharma: AI-Powered Pharmacovigilance Pipeline
+# ⬡ AlgoPharma: High-Fidelity Pharmacovigilance Intelligence
 
-AlgoPharma is an end-to-end agentic workflow and NLP pipeline designed to proactively detect adverse drug events (ADEs) and pharmacovigilance signals from unstructured social media and forum data (Reddit, Twitter, etc.).
+AlgoPharma is a state-of-the-art, agentic AI platform engineered for proactive, large-scale detection of Adverse Drug Events (ADEs). Unlike traditional keyword-matching systems, AlgoPharma deploys a highly decoupled, asynchronously scalable architecture that leverages dynamic LLM query routing, multi-stage PII neutralization, and strict clinical logic gates to extract verified pharmacovigilance signals from unstructured social media and regional forums.
 
-## 🌟 Key Features
+## 🚀 Architectural Novelties & Technical Moats
 
-- **Agentic Chat Interface**: A Groq-powered (Llama 3.3 70B) local tool-calling agent that translates natural language requests (e.g., *"Find side effects of paracetamol on Reddit"*) into parameterized crawling jobs.
-- **Decoupled Ingestion Pipeline**: Asynchronous processing using FastAPI, Upstash Redis, and Celery to ensure the UI remains non-blocking while heavy NLP tasks run in the background.
-- **7-Stage NLP Analysis**: An extensive pipeline covering PII redaction (Nemotron/Regex), Drug/Symptom Named Entity Recognition (NER), Sentiment Analysis, Negation Detection, and PRR/ROR signal statistical scoring.
-- **Premium Glassmorphic Dashboard**: A fully responsive, dark-themed UI built with vanilla JS and Chart.js that dynamically polls backend endpoints to render live metrics, AE probabilities, and signal distributions.
+Our system is defined by zero-to-one engineering breakthroughs that establish a deep technical moat for automated pharmacovigilance:
+
+### 1. Agentic Forum Onboarding & MCP Dynamic Query Routing
+- **Autonomous Crawler Generation**: Instead of manual scraping scripts, AlgoPharma utilizes **Nvidia Nemotron-3** via Firecrawl to autonomously analyze unknown forum structures and generate tailored CSS/JSON crawling configurations on the fly.
+- **MCP-Driven Slot Filling**: The ingestion layer acts as a Model Context Protocol (MCP) router powered by **Groq (Llama 3.3 70B)**. It handles conversational state management across chat turns, performing low-latency slot-filling (identifying target drugs, symptoms, and data sources) to dynamically parameterize and dispatch Python crawling tasks without hardcoded logic.
+
+### 2. Zero-Leakage 3-Layer PII Guard
+Data security is embedded at the earliest stage. Before any unstructured text reaches an external LLM or translation API, it passes through a rigorous three-layer redaction funnel:
+- **Layer 1: Indian-Specific Regex**: Instantly strips Aadhaar, PAN, UPI, phone numbers, and standard identifiers.
+- **Layer 2: Localized Clinical NER**: Runs entirely locally using `OpenMed-PII-SuperClinical-Small-44M` (with an 82M variant for regional languages) to accurately scrub patient names, hospital locations, and personal health metadata.
+- **Layer 3: Verification Check**: Ensures absolute anonymity, enabling HIPAA/GDPR-compliant processing of sensitive patient narratives without third-party exposure.
+
+### 3. Cross-Lingual Clinical Translation
+To capture adverse events across diverse demographics, AlgoPharma natively processes vernacular content.
+- **Sarvam AI Integration**: Automatically intercepts regional Indian languages (Hindi, Tamil, Telugu, etc.) and translates them to context-accurate English using specialized Indic models. This ensures downstream NER and clinical gating operate on uniform, high-quality semantic representations.
+
+### 4. 4-Gate Explainable Adverse Event (AE) Detection
+We reject the "black-box" approach to signal detection. Our `ae_detector` enforces strict, explainable clinical logic gates:
+1. **Drug Presence**: Verifies pharmaceutical entities via `OpenMed-NER-PharmaDetect-ModernClinical-149M`.
+2. **Symptom/Disease Presence**: Confirms clinical manifestations via `OpenMed-NER-DiseaseDetect-SuperClinical-184M`.
+3. **Sentiment Polarity**: Utilizes `cardiffnlp/twitter-roberta-base-sentiment` to confirm negative or distressing patient experiences.
+4. **Negation Detection**: Applies `medspaCy` clinical rules to prevent false positives (e.g., explicitly dismissing "no nausea" as an AE).
+*Crucially, any gate failure is explicitly logged with its reason, ensuring 100% auditability for regulatory compliance.*
+
+### 5. Multi-Turn Thread Scoring
+An isolated post is a data point; a corroborated thread is a signal.
+- **Corroboration Matrix**: The `thread_scorer` mechanism evaluates the main post against all subsequent replies. It mathematically weighs corroborating symptoms against contradicting sentiment, synthesizing a final Confidence Score (0.0 to 1.0) and assigning a definitive RAG status (Red/Amber/Green) for the entire discussion thread.
+
+### 6. Relational Risk Mapping & Asynchronous Scalability
+- **Decoupled Architecture**: **FastAPI** handles high-throughput API requests while **Celery** workers (backed by Upstash Redis) asynchronously execute the heavy, multi-model NLP funnel. This prevents UI blocking and guarantees horizontal scalability.
+- **Relational Risk Intelligence**: The frontend dashboard dynamically maps drug-symptom co-occurrence clusters. Medicines exhibiting high symptomatic density are instantly flagged with a "Relational Risk" metric, automatically surfacing emerging safety signals for priority review.
 
 ---
 
@@ -15,53 +42,20 @@ AlgoPharma is an end-to-end agentic workflow and NLP pipeline designed to proact
 
 <img width="2048" height="2048" alt="image (3)" src="https://github.com/user-attachments/assets/98f75875-f0a2-45ba-afac-622ad124e966" />
 <br>
-The platform is designed around a decoupled, event-driven architecture to handle high-latency web scraping and heavy machine learning inference without blocking the user interface.
 
-### 1. The Interaction Layer (FastAPI + JS)
-- The user logs into the static dashboard (`index.html`) served directly by FastAPI.
-- They submit a natural language query via the chat UI.
-- FastAPI's `/api/chat` endpoint spawns `llm_module.py` as an isolated subprocess.
-
-### 2. The Agentic Layer (Groq Tool Calling)
-- `llm_module.py` acts as the orchestrator.
-- It uses the **Groq API** (`llama-3.3-70b-versatile`) to perform slot-filling and intent recognition.
-- Groq selects the appropriate local python tool (e.g., `reddit_crawler` or `twitter_crawler`) from the tool registry (`mcp_tools.py`).
-- The crawler executes, storing raw JSON posts in the SQLite database (`algopharma.db`), and immediately pushes a task to the **Upstash Redis** broker.
-
-### 3. The Asynchronous Worker Layer (Celery)
-- A separate Celery worker (`celery_app.py`) listens to a dedicated Upstash Redis queue (`algopharma_ankur_queue` for team isolation).
-- It consumes `process_unprocessed` tasks, loading the heavy HuggingFace/spaCy models into memory just once upon startup.
-
-### 4. The 7-Stage NLP Pipeline
-Once the Celery worker picks up raw posts, they are pushed through a rigorous NLP funnel:
-
-1. **Language Detection**: Determines the text language.
-2. **PII Guard**: Redacts sensitive data using `OpenMed-PII-SuperClinical-Small-44M` (and 82M for regional languages) along with Indian-specific regex (Aadhaar, PAN, UPI).
-3. **Drug NER**: Identifies pharmaceutical terms using `OpenMed-NER-PharmaDetect-ModernClinical-149M` and maps them to MedDRA standards.
-4. **Symptom/Disease NER**: Identifies adverse symptoms using `OpenMed-NER-DiseaseDetect-SuperClinical-184M`.
-5. **Sentiment & Negation Scoring**: Uses `cardiffnlp/twitter-roberta-base-sentiment` alongside `medspaCy` clinical negation rules to prevent false positives (e.g., "no nausea" is NOT an adverse event).
-6. **AE Rule Engine**: If `(Drug + Symptom + Negative Sentiment + Not Negated)` → Flags the post as an Adverse Event (AE) with a calculated confidence score.
-7. **Signal Detection**: Calculates **Proportional Reporting Ratio (PRR)**, **Reporting Odds Ratio (ROR)**, and **Chi-Square (χ²)** statistics across the dataset. If thresholds are met (e.g., PRR ≥ 2, χ² ≥ 4), a high-confidence Pharmacovigilance Signal is generated.
-
-### 5. The Presentation Layer (Polling UI)
-- The dashboard polls the `/api/results/{project_id}` endpoint every 4 seconds.
-- It renders live updates using Chart.js:
-  - **AE Probability Gauge**: Percentage of processed posts flagged as adverse events.
-  - **Sentiment Split**: Doughnut chart of positive/neutral/negative posts.
-  - **Platform Breakdown**: Bar chart of data sources.
-  - **Signal Strength Matrix**: Distribution of PRR and ROR scores per drug/symptom pair.
+*The interaction flow moves from the React/Vanilla JS Dashboard, through the FastAPI orchestration layer, into the Celery worker queue where the 7-stage NLP pipeline (PII Guard → Translation → NER → Sentiment → Negation → AE Gating → Thread Scoring) executes.*
 
 ---
 
 ## 🚀 Quick Setup & Execution
 
-For detailed commands, see `setup.txt` and `setup.md`. Here is the high-level summary:
-
 ### 1. Environment Configuration
 Create a `.env` file based on `.env.example`. You must provide:
-- `GROQ_API_KEY`: For the agentic crawler selection.
+- `GROQ_API_KEY`: For Llama 3.3 MCP routing.
+- `NVIDIA_API_KEY`: For agentic forum structure analysis.
+- `FIRECRAWL_API_KEY`: For the crawling engine.
+- `SARVAM_API_KEY`: For regional translation.
 - `REDIS_URL`: An Upstash Redis connection string (`rediss://...`).
-- `SECRET_KEY`: A secure random string for JWT auth.
 
 ### 2. Installation
 We use `uv` for blazing-fast dependency management:
@@ -77,7 +71,7 @@ You must run the web server and the background worker concurrently:
 ```bash
 uv run uvicorn main:app --reload --port 8000
 ```
-*Access the UI at http://localhost:8000*
+*Access the UI at http://localhost:8000 or http://localhost:5173 for the React dev server*
 
 **Terminal 2: Celery Background Worker**
 ```bash
@@ -92,14 +86,7 @@ uv run celery -A celery_app worker --loglevel=info --pool=solo
 - **Backend Framework**: FastAPI (Python 3.12)
 - **Database (ORM)**: SQLAlchemy 2.0 with SQLite (Production ready for Postgres/Supabase)
 - **Task Queue & Broker**: Celery + Upstash Redis (Cloud)
-- **LLM Orchestration**: Groq API + Native Python Local Tool Calling
-- **NLP Models**: HuggingFace Transformers, spaCy, medspaCy, NLTK/VADER
-- **Frontend**: Vanilla HTML/CSS/JS (Zero-build), Chart.js
+- **LLM Orchestration**: Groq API + Nvidia Nemotron + Native Python Local Tool Calling
+- **NLP Models**: HuggingFace Transformers, spaCy, medspaCy, NLTK/VADER, Sarvam AI, OpenMed
+- **Frontend**: React (TSX) & Vanilla HTML/JS, Chart.js
 - **Package Manager**: `uv`
-
----
-
-## 🔒 Security & Isolation Notes
-- **JWT Authentication**: All API endpoints and the dashboard are secured via OAuth2 with Password Flow (JWT Bearer tokens).
-- **Queue Isolation**: The Celery worker uses `task_default_queue="algopharma_ankur_queue"` to prevent cross-contamination if multiple developers share the same Upstash Redis database.
-- **Process Isolation**: The Groq agent (`llm_module.py`) is spawned as an entirely separate subprocess via `api/chat.py` to prevent stdout/stderr log pollution from leaking into the clean FastAPI console.

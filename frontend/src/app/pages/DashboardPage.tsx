@@ -156,7 +156,7 @@ export function DashboardPage() {
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#070b14]">
+      <div className="min-h-screen flex items-center justify-center bg-transparent">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center animate-pulse">
             <Activity className="w-6 h-6 text-cyan-400" />
@@ -168,15 +168,10 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col p-4 md:p-8 space-y-6 relative bg-[#070b14]">
-      {/* Background radial gradients matching index.html */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[30%] w-[80%] h-[80%] bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.08),transparent_70%)]" />
-        <div className="absolute top-[40%] left-[60%] w-[60%] h-[60%] bg-[radial-gradient(ellipse_at_center,rgba(6,182,212,0.05),transparent_70%)]" />
-      </div>
+    <div className="min-h-screen flex flex-col p-4 md:p-8 space-y-6 relative bg-transparent">
 
       {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 z-10 glass-panel p-5 rounded-2xl border border-white/5 shadow-2xl bg-[#0d1220]/80 backdrop-blur-xl">
+      <header className="w-full max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 z-10 glass-panel p-5 rounded-2xl border border-white/5 shadow-2xl">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
             <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-sm shadow-lg">⬡</span>
@@ -229,7 +224,7 @@ export function DashboardPage() {
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="glass-panel p-6 rounded-2xl h-72 flex flex-col bg-[#111827]/60 border border-white/5 relative">
+          <div className="glass-panel p-6 rounded-2xl h-72 flex flex-col  relative">
             <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-rose-500" /> AE Probability
             </h3>
@@ -253,7 +248,7 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <div className="glass-panel p-6 rounded-2xl h-72 flex flex-col bg-[#111827]/60 border border-white/5">
+          <div className="glass-panel p-6 rounded-2xl h-72 flex flex-col ">
             <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-cyan-400" /> Sentiment Split
             </h3>
@@ -272,7 +267,7 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <div className="glass-panel p-6 rounded-2xl h-72 flex flex-col bg-[#111827]/60 border border-white/5">
+          <div className="glass-panel p-6 rounded-2xl h-72 flex flex-col ">
             <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-4 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-indigo-500" /> Platform
             </h3>
@@ -280,7 +275,7 @@ export function DashboardPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={sourceData} layout="vertical" margin={{ top: 0, right: 20, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
-                  <XAxis type="number" stroke="#ffffff40" fontSize={10} tickLine={false} axisLine={false} />
+                  <XAxis type="number" stroke="#ffffff40" fontSize={10} tickLine={false} axisLine={false} tick={false} />
                   <YAxis type="category" dataKey="name" stroke="#ffffff80" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip cursor={{fill: '#ffffff05'}} content={<CustomTooltip />} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
@@ -295,7 +290,7 @@ export function DashboardPage() {
         </div>
 
         {/* Big Chart: Signal Strength */}
-        <div className="glass-panel p-6 rounded-2xl bg-[#111827]/60 border border-white/5 h-80 flex flex-col">
+        <div className="glass-panel p-6 rounded-2xl  h-80 flex flex-col">
           <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest mb-6 flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-amber-500" /> Signal Strength Distribution & PRR Scores
           </h3>
@@ -308,7 +303,7 @@ export function DashboardPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.signals} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                  <XAxis dataKey={(sig) => `${sig.drug}/${sig.symptom}`} stroke="#ffffff40" fontSize={9} tickLine={false} axisLine={false} tickMargin={10} interval={0} angle={-15} textAnchor="end" />
+                  <XAxis dataKey={(sig) => `${sig.drug}/${sig.symptom}`} stroke="#ffffff40" fontSize={9} tickLine={false} axisLine={false} tickMargin={10} interval={0} angle={-15} textAnchor="end" tick={false} />
                   <YAxis stroke="#ffffff40" fontSize={10} tickLine={false} axisLine={false} />
                   <Tooltip cursor={{fill: '#ffffff05'}} content={<CustomTooltip />} />
                   <Legend verticalAlign="top" height={36} iconType="square" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#94a3b8' }} />
@@ -323,7 +318,7 @@ export function DashboardPage() {
         {/* Infographics Row */}
         {data.processed > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="glass-panel p-5 rounded-2xl bg-[#111827]/60 border border-white/5">
+            <div className="glass-panel p-5 rounded-2xl ">
               <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">AE Gate Analysis</h3>
               <div className="space-y-3.5">
                 {aeGates.map(gate => (
@@ -343,7 +338,7 @@ export function DashboardPage() {
               </div>
             </div>
 
-            <div className="glass-panel p-5 rounded-2xl bg-[#111827]/60 border border-white/5">
+            <div className="glass-panel p-5 rounded-2xl ">
               <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Top Drugs Detected</h3>
               <div className="space-y-3.5">
                 {topDrugs.map(([d, c]) => (
@@ -360,7 +355,7 @@ export function DashboardPage() {
               </div>
             </div>
 
-            <div className="glass-panel p-5 rounded-2xl bg-[#111827]/60 border border-white/5">
+            <div className="glass-panel p-5 rounded-2xl ">
               <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Top Symptoms Detected</h3>
               <div className="space-y-3.5">
                 {topSymptoms.map(([s, c]) => (
@@ -380,7 +375,7 @@ export function DashboardPage() {
         )}
 
         {/* Signals Table */}
-        <div className="glass-panel p-6 rounded-2xl bg-[#111827]/60 border border-white/5 overflow-hidden flex flex-col">
+        <div className="glass-panel p-6 rounded-2xl  overflow-hidden flex flex-col">
           <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-6 flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-indigo-400" /> Detected Signals
             <span className="bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full text-xs font-mono">{data.signals.length}</span>
@@ -442,7 +437,7 @@ export function DashboardPage() {
         </div>
 
         {/* Processed Posts List */}
-        <div className="glass-panel p-6 rounded-2xl bg-[#111827]/60 border border-white/5 flex flex-col mb-12">
+        <div className="glass-panel p-6 rounded-2xl  flex flex-col mb-12">
           <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest mb-6 flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-emerald-400" /> Processed Posts
             <span className="bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full text-xs font-mono">{data.live_posts.length}</span>
@@ -547,7 +542,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 // Helper component
 function MetricCard({ title, value, subtext, color, glow, icon }: any) {
   return (
-    <div className="glass-panel p-6 rounded-2xl flex flex-col justify-between bg-[#111827]/60 border border-white/5 relative overflow-hidden group">
+    <div className="glass-panel p-6 rounded-2xl flex flex-col justify-between  relative overflow-hidden group">
       <div className={`absolute -right-8 -top-8 w-24 h-24 rounded-full ${glow || 'bg-indigo-500'} opacity-5 group-hover:opacity-10 transition-opacity blur-xl`} />
       <div className="flex items-center justify-between mb-3 z-10">
         <h3 className="text-slate-400 font-bold text-[11px] uppercase tracking-widest">{title}</h3>

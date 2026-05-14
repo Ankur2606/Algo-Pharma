@@ -49,6 +49,13 @@ def crawl_reddit(project_id: int = 1, query: str = "dolo 650 medicine side effec
         log_id = log.id
 
     try:
+        # Enhance query to ensure high-quality Reddit results if LLM didn't already
+        lower_q = query.lower()
+        if "side effect" not in lower_q and "side effects" not in lower_q and "adverse" not in lower_q and "reaction" not in lower_q and "complication" not in lower_q:
+            query = f"{query} side effects"
+            
+        logger.info(f"Using Reddit search query: {query}")
+
         # Import and run the existing crawler
         import reddit_crawler
         reddit_crawler.SEARCH_QUERY = query
