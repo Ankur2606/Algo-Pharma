@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoPharma — Admin Console</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #050505;
+      --bg2: #0f1219;
+      --bg3: #1a1e29;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.15);
+      --accent: #818cf8;
+      --accent-glow: rgba(129, 140, 248, 0.4);
+      --green: #10b981;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --cyan: #06b6d4;
+      --text: #f8fafc;
+      --text2: #94a3b8;
+      --glass: rgba(15, 18, 25, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.05);
+      --font: 'Outfit', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 10% 20%, rgba(129, 140, 248, 0.1), transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.1), transparent 40%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      padding: 24px 0;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #818cf8, #06b6d4);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.2rem;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    .logo-text h2 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
+    .logo-text p { font-size: 0.75rem; color: var(--accent); font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
+    
+    .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 0 16px; }
+    .nav-item {
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text2);
+      transition: all 0.3s ease;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+    .nav-item.active { background: rgba(129, 140, 248, 0.1); color: var(--accent); box-shadow: inset 2px 0 0 var(--accent); }
+    
+    .user-profile {
+      padding: 20px 24px 0;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--bg3); display: flex; align-items: center; justify-content: center;
+      font-weight: 700; border: 1px solid var(--border);
+    }
+    .user-info h4 { font-size: 0.9rem; }
+    .user-info p { font-size: 0.75rem; color: var(--text2); cursor: pointer; }
+    .user-info p:hover { color: var(--red); }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 40px 48px;
+      overflow-y: auto;
+      z-index: 1;
+      position: relative;
+    }
+    
+    .view-section { display: none; animation: fadeUp 0.4s ease forwards; }
+    .view-section.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .header-block { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .header-block h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+    .header-block p { color: var(--text2); font-size: 0.95rem; }
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px; font-weight: 600; font-size: 0.9rem; font-family: var(--font);
+      cursor: pointer; transition: all 0.2s; border: none; outline: none;
+    }
+    .btn-primary { background: linear-gradient(135deg, #6366f1, #818cf8); color: #fff; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4); }
+    .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .btn-danger:hover { background: var(--red); color: #fff; }
+    .btn-success { background: rgba(16, 185, 129, 0.1); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .btn-success:hover { background: var(--green); color: #fff; }
+    
+    /* Cards & Tables */
+    .glass-card {
+      background: rgba(20, 24, 34, 0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .data-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .data-table th { 
+      text-align: left; padding: 12px 16px; color: var(--text2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border);
+    }
+    .data-table td { padding: 16px; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .data-table tr { transition: background 0.2s; }
+    .data-table tr:hover { background: rgba(255,255,255,0.02); }
+
+    .status-badge {
+      padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; font-family: var(--mono);
+    }
+    .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-red { background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-yellow { background: rgba(245, 158, 11, 0.15); color: var(--yellow); border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .mono { font-family: var(--mono); color: var(--text2); font-size: 0.85rem; }
+
+    /* Forms */
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--text2); margin-bottom: 8px; font-weight: 500; }
+    .form-control {
+      width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-family: var(--font); font-size: 0.95rem; transition: border 0.3s;
+    }
+    .form-control:focus { outline: none; border-color: var(--accent); }
+    
+    /* Modals */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 20px;
+      width: 100%; max-width: 500px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      animation: fadeUp 0.3s ease;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-header h3 { font-size: 1.4rem; }
+    .close-btn { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 1.5rem; }
+    
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">⬡</div>
+      <div class="logo-text">
+        <h2>AlgoPharma</h2>
+        <p>Admin Console</p>
+      </div>
+    </div>
+    
+    <div class="nav-menu">
+      <div class="nav-item active" onclick="switchView('sources', this)">
+        <span>🌐</span> Source Management
+      </div>
+      <div class="nav-item" onclick="switchView('onboarding', this)">
+        <span>🤖</span> Agentic Onboarding
+      </div>
+      <div class="nav-item" onclick="switchView('users', this)">
+        <span>👥</span> User Management
+      </div>
+      <div class="nav-item" onclick="switchView('infrastructure', this)">
+        <span>⚙️</span> Infrastructure
+      </div>
+    </div>
+
+    <div class="user-profile">
+      <div class="avatar" id="admin-avatar">AD</div>
+      <div class="user-info">
+        <h4 id="admin-name">Admin</h4>
+        <p onclick="logout()">Sign Out ➜</p>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    
+    <!-- 1. Source Management -->
+    <section id="view-sources" class="view-section active">
+      <div class="header-block">
+        <div>
+          <h1>Source Management</h1>
+          <p>Monitor and configure active data ingestion sources and MCP engines.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('add-source-modal')">+ Add MCP Engine</button>
+      </div>
+      
+      <div class="glass-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Platform</th>
+              <th>Health</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="sources-tbody">
+            <tr><td colspan="6" style="text-align:center;color:#888;">Loading sources...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 2. Agentic Onboarding -->
+    <section id="view-onboarding" class="view-section">
+      <div class="header-block">
+        <div>
+          <h1>Agentic Onboarding</h1>
+          <p>Deploy AI agents to map new forum structures automatically.</p>
+        </div>
+      </div>
+      
+      <div class="glass-card" style="margin-bottom: 24px;">
+        <h3 style="margin-bottom: 16px;">Initiate New Scraper Agent</h3>
+        <div style="display:flex; gap:12px;">
+          <input type="text" id="forum-url-input" class="form-control" placeholder="https://patient.info/forums/..." style="flex:1;">
+          <button class="btn btn-primary" onclick="runAgenticOnboarding()">Deploy Agent</button>
+        </div>
+        <p id="onboarding-msg" style="color:var(--yellow); font-size:0.85rem; margin-top:8px;"></p>
+      </div>
+      
+      <div class="glass-card" id="onboarding-results" style="display:none;">
+        <h3 style="margin-bottom: 12px; color:var(--accent);">Agent Analysis Complete</h3>
+        <p style="color:var(--text2); font-size:0.9rem; margin-bottom:16px;">The agent successfully mapped the forum and extracted these 3 sample posts:</p>
+        <div id="sample-posts" style="display:flex; flex-direction:column; gap:12px; margin-bottom: 24px;"></div>
+        <div style="display:flex; gap:12px;">
+          <button class="btn btn-success" id="btn-approve" onclick="approveOnboarding()">Approve & Register Source</button>
+          <button class="btn btn-danger" id="btn-reject" onclick="rejectOnboarding()">Reject Mapping</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. User Management -->
+    <section id="view-users" class="view-section">
+      <div class="header-block">
+        <div>
+          <h1>User Management</h1>
+          <p>Control access, roles, and view user audit logs.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('invite-user-modal')">✉️ Invite User</button>
+      </div>
+      
+      <div class="glass-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Email / Name</th>
+              <th>Role</th>
+              <th>Projects</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="6" style="text-align:center;color:#888;">Loading users...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 4. Infrastructure -->
+    <section id="view-infrastructure" class="view-section">
+      <div class="header-block">
+        <div>
+          <h1>Infrastructure & Security</h1>
+          <p>Manage encrypted API keys and system configurations safely.</p>
+        </div>
+      </div>
+      
+      <div class="glass-card" style="max-width: 600px;">
+        <h3 style="margin-bottom: 24px;">Update API Credentials</h3>
+        <div class="form-group">
+          <label>Credential Key Name</label>
+          <select id="cred-key" class="form-control">
+            <option value="firecrawl_api_key">Firecrawl API Key</option>
+            <option value="reddit_client_secret">Reddit Client Secret</option>
+            <option value="x_api_bearer">X (Twitter) Bearer Token</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Encrypted Value / Secret</label>
+          <input type="password" id="cred-val" class="form-control" placeholder="••••••••••••••••">
+        </div>
+        <button class="btn btn-primary" onclick="updateCredentials()">Save Encrypted</button>
+        <span id="cred-msg" style="margin-left: 12px; font-size:0.85rem; color:var(--green);"></span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modals -->
+  <div class="modal-overlay" id="add-source-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Add MCP Engine</h3>
+        <button class="close-btn" onclick="closeModal('add-source-modal')">×</button>
+      </div>
+      <div class="form-group">
+        <label>Source Name</label>
+        <input type="text" id="src-name" class="form-control" placeholder="E.g., Custom Med Forum">
+      </div>
+      <div class="form-group">
+        <label>Platform Type</label>
+        <select id="src-platform" class="form-control">
+          <option value="forum">Custom Forum</option>
+          <option value="reddit">Reddit</option>
+          <option value="twitter">Twitter</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>MCP Server URL</label>
+        <input type="text" id="src-url" class="form-control" placeholder="https://mcp.engine.local">
+      </div>
+      <div class="form-group">
+        <label>Config JSON</label>
+        <textarea id="src-config" class="form-control" style="height: 80px; font-family:var(--mono); font-size:0.8rem;">{"timeout": 30}</textarea>
+      </div>
+      <div style="display:flex; gap:12px; margin-top:24px;">
+        <button class="btn" style="background:var(--bg3); color:var(--text);" onclick="testSource()">Test Connection</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="saveSource()">Save Source</button>
+      </div>
+      <div id="src-test-msg" style="margin-top:12px; font-size:0.85rem;"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="invite-user-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Invite New User</h3>
+        <button class="close-btn" onclick="closeModal('invite-user-modal')">×</button>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="inv-email" class="form-control" placeholder="doctor@hospital.com">
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <select id="inv-role" class="form-control">
+          <option value="viewer">Viewer (Analyst)</option>
+          <option value="admin">Administrator</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="sendInvite()">Send Email Invite</button>
+      <div id="inv-msg" style="margin-top:12px; font-size:0.85rem; color:var(--green); text-align:center;"></div>
+    </div>
+  </div>
+
+  <script>
+    const API = '';
+    let token = localStorage.getItem('ap_token');
+    
+    // Auth Check
+    if (!token) {
+      window.location.href = '/';
+    } else {
+      document.getElementById('admin-name').textContent = localStorage.getItem('ap_name') || 'Admin';
+      loadSources();
+      loadUsers();
+    }
+
+    function logout() {
+      localStorage.removeItem('ap_token');
+      localStorage.removeItem('ap_name');
+      window.location.href = '/';
+    }
+
+    function switchView(viewId, el) {
+      document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + viewId).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // API Helpers
+    async function fetchAPI(endpoint, method='GET', body=null) {
+      const headers = { 'Authorization': `Bearer ${token}` };
+      if (body) { headers['Content-Type'] = 'application/json'; }
+      const res = await fetch(`${API}${endpoint}`, { method, headers, body: body ? JSON.stringify(body) : null });
+      if (res.status === 401) { logout(); }
+      return res.json();
+    }
+
+    // --- SOURCES ---
+    async function loadSources() {
+      try {
+        const data = await fetchAPI('/api/admin/sources');
+        const tb = document.getElementById('sources-tbody');
+        if (!data.length) { tb.innerHTML = `<tr><td colspan="6" style="text-align:center">No sources configured.</td></tr>`; return; }
+        
+        tb.innerHTML = data.map(s => `
+          <tr>
+            <td class="mono">#${s.id}</td>
+            <td style="font-weight:500;">${s.name}</td>
+            <td><span style="padding:4px 8px; background:rgba(255,255,255,0.05); border-radius:6px; font-size:0.75rem;">${s.platform}</span></td>
+            <td>${s.health_score ? `<span class="badge-green">${(s.health_score*100).toFixed(0)}%</span>` : '<span class="badge-yellow">N/A</span>'}</td>
+            <td>${s.is_active ? '<span class="badge-green">Active</span>' : '<span class="badge-red">Disabled</span>'}</td>
+            <td>
+              <button class="btn" style="padding:4px 8px; font-size:0.75rem; background:rgba(239, 68, 68, 0.1); color:var(--red);" onclick="disableSource(${s.id})">Disable</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    async function testSource() {
+      const msg = document.getElementById('src-test-msg');
+      msg.textContent = 'Testing connection...'; msg.style.color = 'var(--text2)';
+      try {
+        const payload = {
+          server_url: document.getElementById('src-url').value,
+          config_json: JSON.parse(document.getElementById('src-config').value)
+        };
+        const res = await fetchAPI('/api/admin/sources/test', 'POST', payload);
+        if (res.status === 'success') { msg.textContent = '✅ Connection successful!'; msg.style.color = 'var(--green)'; }
+        else { msg.textContent = '❌ Failed: ' + (res.detail || 'Invalid details'); msg.style.color = 'var(--red)'; }
+      } catch (e) { msg.textContent = '❌ Error parsing JSON or network issue.'; msg.style.color = 'var(--red)'; }
+    }
+
+    async function saveSource() {
+      try {
+        const payload = {
+          name: document.getElementById('src-name').value,
+          platform: document.getElementById('src-platform').value,
+          url: document.getElementById('src-url').value,
+          config_json: JSON.parse(document.getElementById('src-config').value)
+        };
+        await fetchAPI('/api/admin/sources', 'POST', payload);
+        closeModal('add-source-modal');
+        loadSources();
+      } catch (e) { alert('Failed to save source. Check JSON config.'); }
+    }
+
+    async function disableSource(id) {
+      if(confirm('Are you sure you want to disable this source? All crawlers will stop.')){
+        await fetchAPI(`/api/admin/sources/${id}/disable`, 'PATCH');
+        loadSources();
+      }
+    }
+
+    // --- ONBOARDING ---
+    let currentOnboardingId = null;
+    async function runAgenticOnboarding() {
+      const url = document.getElementById('forum-url-input').value;
+      if (!url) return;
+      const msg = document.getElementById('onboarding-msg');
+      msg.textContent = 'Agent deployed! Simulating dynamic forum mapping (takes a few seconds)...';
+      
+      const res = await fetchAPI('/api/admin/onboarding/forum', 'POST', { forum_url: url });
+      
+      setTimeout(() => {
+        msg.textContent = '';
+        currentOnboardingId = res.onboarding_id;
+        document.getElementById('onboarding-results').style.display = 'block';
+        
+        document.getElementById('sample-posts').innerHTML = res.samples.map((p,i) => `
+          <div style="padding:12px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:8px;">
+            <div style="font-size:0.75rem; color:var(--text2); margin-bottom:4px;">Sample #${i+1}</div>
+            <div style="font-weight:500;">${p.title}</div>
+          </div>
+        `).join('');
+      }, 1500); // simulate delay
+    }
+
+    async function approveOnboarding() {
+      await fetchAPI(`/api/admin/onboarding/${currentOnboardingId}/approve`, 'POST');
+      document.getElementById('onboarding-results').innerHTML = `<h3 style="color:var(--green)">✅ Approved & Registered!</h3><p style="color:var(--text2); font-size:0.9rem; margin-top:8px;">The source is now available in Source Management.</p>`;
+      loadSources();
+    }
+    
+    async function rejectOnboarding() {
+      await fetchAPI(`/api/admin/onboarding/${currentOnboardingId}/reject`, 'POST');
+      document.getElementById('onboarding-results').innerHTML = `<h3 style="color:var(--red)">❌ Rejected</h3>`;
+    }
+
+    // --- USERS ---
+    async function loadUsers() {
+      try {
+        const data = await fetchAPI('/api/admin/users');
+        const tb = document.getElementById('users-tbody');
+        tb.innerHTML = data.map(u => `
+          <tr>
+            <td class="mono">#${u.id}</td>
+            <td style="font-weight:500;">${u.email}</td>
+            <td><span style="padding:4px 8px; background:rgba(255,255,255,0.05); border-radius:6px; font-size:0.75rem; text-transform:capitalize;">${u.role}</span></td>
+            <td><span class="badge-green">${u.project_count} projects</span></td>
+            <td>${u.is_active ? '<span class="badge-green">Active</span>' : '<span class="badge-red">Disabled</span>'}</td>
+            <td>
+              <button class="btn" style="padding:4px 8px; font-size:0.75rem; background:rgba(255, 255, 255, 0.05); color:var(--text);" onclick="toggleRole(${u.id}, '${u.role}')">Toggle Role</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    async function sendInvite() {
+      const email = document.getElementById('inv-email').value;
+      const role = document.getElementById('inv-role').value;
+      await fetchAPI('/api/admin/users/invite', 'POST', { email, role });
+      document.getElementById('inv-msg').textContent = `✅ Invitation email sent to ${email}`;
+      setTimeout(() => { closeModal('invite-user-modal'); document.getElementById('inv-msg').textContent=''; }, 2000);
+    }
+    
+    async function toggleRole(id, currentRole) {
+      const newRole = currentRole === 'admin' ? 'viewer' : 'admin';
+      await fetchAPI(`/api/admin/users/${id}/role`, 'PATCH', { role: newRole });
+      loadUsers();
+    }
+
+    // --- INFRA ---
+    async function updateCredentials() {
+      const key = document.getElementById('cred-key').value;
+      const val = document.getElementById('cred-val').value;
+      if(!val) return;
+      await fetchAPI('/api/admin/credentials', 'PUT', { key_name: key, encrypted_value: val });
+      document.getElementById('cred-msg').textContent = '✅ Encrypted and Saved!';
+      document.getElementById('cred-val').value = '';
+      setTimeout(() => document.getElementById('cred-msg').textContent = '', 3000);
+    }
+
+  </script>
+</body>
+</html>

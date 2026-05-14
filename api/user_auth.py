@@ -58,6 +58,10 @@ def login_for_access_token(
     # If using the hardcoded admin bypass, ensure username is set
     username = user.username if user else form_data.username
     
+    if user:
+        user.last_login = datetime.now(timezone.utc)
+        db.commit()
+    
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": username}, expires_delta=access_token_expires

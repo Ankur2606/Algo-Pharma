@@ -25,8 +25,11 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(255), nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(20), default="viewer")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    last_login: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
@@ -37,6 +40,7 @@ class Project(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
     description: Mapped[str] = mapped_column(Text, default="")
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     keywords = relationship("Keyword", back_populates="project", cascade="all, delete-orphan")
@@ -190,6 +194,27 @@ class AuditLog(Base):
     user_id: Mapped[int] = mapped_column(Integer, nullable=True)
     action: Mapped[str] = mapped_column(String(100), nullable=False)
     detail: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+# ── 13. SystemConfig ──────────────────────────────────────
+class SystemConfig(Base):
+    __tablename__ = "system_config"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    key_name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    encrypted_value: Mapped[str] = mapped_column(Text, default="")
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+
+
+# ── 14. PendingOnboarding ─────────────────────────────────
+class PendingOnboarding(Base):
+    __tablename__ = "pending_onboarding"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    forum_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    sample_posts_json: Mapped[str] = mapped_column(Text, default="[]")
+    status: Mapped[str] = mapped_column(String(20), default="pending")  # pending/approved/rejected
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
 
