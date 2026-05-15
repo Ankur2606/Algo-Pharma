@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Activity, AlertTriangle, CheckCircle2, Clock, 
-  Database, ShieldAlert, FileText, ArrowRight, XCircle
+import {
+  Activity, AlertTriangle, CheckCircle2, Clock,
+  Database, ShieldAlert, FileText, ArrowRight, XCircle,
+  ChevronDown, Pill, Globe, Zap, Calendar, CalendarDays, RefreshCw
 } from 'lucide-react';
-import { 
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend 
+import {
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
 } from 'recharts';
 import { useAlgoPharmaAPI, DashboardData } from '../hooks/useAlgoPharmaAPI';
 
@@ -20,18 +21,133 @@ const COLORS = {
   bars: ['#6366f1', '#06b6d4', '#f59e0b', '#10b981', '#ef4444']
 };
 
+const FREQ_CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string; interval: number }> = {
+  realtime: { label: 'Real-time', icon: <Zap className="w-3.5 h-3.5" />, color: 'text-cyan-400 bg-cyan-500/15 border-cyan-500/25', interval: 900 },
+  daily:    { label: 'Daily',     icon: <Calendar className="w-3.5 h-3.5" />, color: 'text-indigo-400 bg-indigo-500/15 border-indigo-500/25', interval: 86400 },
+  weekly:   { label: 'Weekly',    icon: <CalendarDays className="w-3.5 h-3.5" />, color: 'text-violet-400 bg-violet-500/15 border-violet-500/25', interval: 604800 },
+};
+
+function fmt(iso: string | null): string {
+  if (!iso) return 'N/A';
+  return new Date(iso).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function MonitoringCard({
+  frequency, lastCrawledAt, nextCrawlAt, crawlHistory
+}: {
+  frequency: string;
+  lastCrawledAt: string | null;
+  nextCrawlAt: string | null;
+  crawlHistory: any[];
+}) {
+  const cfg = FREQ_CONFIG[frequency] || { label: frequency, icon: <RefreshCw className="w-3.5 h-3.5" />, color: 'text-slate-400 bg-slate-500/15 border-slate-500/25', interval: 0 };
+
+  // Live countdown to next crawl
+  const [countdown, setCountdown] = React.useState('');
+  React.useEffect(() => {
+    if (!nextCrawlAt) return;
+    const tick = () => {
+      const diff = Math.max(0, new Date(nextCrawlAt).getTime() - Date.now());
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setCountdown(diff === 0 ? 'crawling now...' : `${h > 0 ? `${h}h ` : ''}${m}m ${s}s`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [nextCrawlAt]);
+
+  return (
+    <div className="glass-panel rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+            <RefreshCw className="w-4 h-4 text-emerald-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-white">Monitoring Schedule</h3>
+            <p className="text-[10px] text-slate-500">Automated periodic crawling is active</p>
+          </div>
+        </div>
+        {/* Pulsing ACTIVE badge */}
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[11px] text-emerald-400 font-semibold tracking-wide">ACTIVE</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        {/* Frequency */}
+        <div className="rounded-xl bg-zinc-900/50 border border-white/5 p-3">
+          <p className="text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">Frequency</p>
+          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${cfg.color}`}>
+            {cfg.icon} {cfg.label}
+          </div>
+        </div>
+        {/* Last crawl */}
+        <div className="rounded-xl bg-zinc-900/50 border border-white/5 p-3">
+          <p className="text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">Last Crawled</p>
+          <p className="text-sm font-mono text-slate-200">{fmt(lastCrawledAt)}</p>
+        </div>
+        {/* Next crawl */}
+        <div className="rounded-xl bg-zinc-900/50 border border-white/5 p-3">
+          <p className="text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">Next Crawl In</p>
+          <p className="text-sm font-mono text-cyan-400 font-bold">{countdown || fmt(nextCrawlAt)}</p>
+        </div>
+      </div>
+
+      {/* Crawl history */}
+      {crawlHistory.length > 0 && (
+        <div>
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Crawl History</p>
+          <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+            {crawlHistory.map((log: any, i: number) => (
+              <div key={i} className="flex items-center gap-3 rounded-lg bg-zinc-900/40 border border-white/[0.04] px-3 py-2">
+                <span className={`w-2 h-2 rounded-full shrink-0 ${
+                  log.status === 'success' ? 'bg-emerald-400' :
+                  log.status === 'failed'  ? 'bg-rose-400' : 'bg-amber-400 animate-pulse'
+                }`} />
+                <span className="text-[11px] text-slate-400 font-mono flex-1 truncate">
+                  {fmt(log.started_at)}
+                </span>
+                <span className={`text-[10px] font-semibold ${
+                  log.status === 'success' ? 'text-emerald-400' :
+                  log.status === 'failed'  ? 'text-rose-400' : 'text-amber-400'
+                }`}>{log.status}</span>
+                <span className="text-[10px] text-slate-600">{log.posts_found ?? 0} posts</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [allProjects, setAllProjects] = useState<{ id: number; name: string }[]>([]);
+  const [showProjectPicker, setShowProjectPicker] = useState(false);
   const { fetchDashboardData, logout } = useAlgoPharmaAPI();
   const location = useLocation();
   const navigate = useNavigate();
-  const projectId = location.state?.projectId || localStorage.getItem('current_project_id');
+  const initialProjectId = location.state?.projectId || localStorage.getItem('current_project_id');
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(initialProjectId);
+  const projectId = selectedProjectId;
 
   useEffect(() => {
     if (!projectId) {
       navigate('/chat');
       return;
     }
+    // Fetch all projects for the project switcher
+    fetch('/api/results/list', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+    })
+      .then(r => r.ok ? r.json() : [])
+      .then(d => setAllProjects(Array.isArray(d) ? d : []))
+      .catch(() => { });
 
     let polling = true;
     let pollCount = 0;
@@ -39,9 +155,9 @@ export function DashboardPage() {
 
     const loadData = async () => {
       if (!polling) return;
-      
+
       const res = await fetchDashboardData(projectId);
-      
+
       // Stop polling if we hit an error (e.g. 404) or reached max timeout
       if (!res || pollCount >= MAX_POLLS) {
         polling = false;
@@ -54,7 +170,7 @@ export function DashboardPage() {
       }
 
       setData(res);
-      
+
       if (res.status === 'complete' || res.status === 'failed') {
         polling = false;
       }
@@ -71,6 +187,34 @@ export function DashboardPage() {
       polling = false;
     };
   }, [projectId, fetchDashboardData, navigate]);
+
+  // Parse medicine + source from project name e.g. "vioxx_reddit_20260515_173938"
+  const parsedMeta = useMemo(() => {
+    if (!data?.project_name) return { medicine: 'Unknown', source: 'Unknown' };
+    const parts = data.project_name.split('_');
+    // Last part is timestamp (8 digits date + _ + 6 digits time = 2 parts)
+    // Format: medicine_source_YYYYMMDD_HHMMSS
+    const withoutTimestamp = parts.slice(0, -2);
+    const sourceParts = withoutTimestamp.filter(p => ['reddit', 'twitter', 'custom', 'forum', 'custom_forum'].includes(p.toLowerCase()));
+    const medicineParts = withoutTimestamp.filter(p => !['reddit', 'twitter', 'custom', 'forum'].includes(p.toLowerCase()));
+    const medicine = medicineParts.join(' ') || parts[0] || 'Unknown';
+    const rawSource = sourceParts.join('_') || 'unknown';
+    const sourceLabel: Record<string, string> = {
+      reddit: 'Reddit', twitter: 'Twitter / X',
+      custom_forum: 'Custom Forum', forum: 'Custom Forum', custom: 'Custom Forum'
+    };
+    return {
+      medicine: medicine.charAt(0).toUpperCase() + medicine.slice(1),
+      source: sourceLabel[rawSource] || rawSource,
+    };
+  }, [data?.project_name]);
+
+  const handleSwitchProject = (id: number) => {
+    setData(null);
+    setShowProjectPicker(false);
+    setSelectedProjectId(id.toString());
+    localStorage.setItem('current_project_id', id.toString());
+  };
 
   const handleLogout = () => {
     logout();
@@ -122,7 +266,7 @@ export function DashboardPage() {
       if (!drugSymptoms[sig.drug]) drugSymptoms[sig.drug] = new Set();
       drugSymptoms[sig.drug].add(sig.symptom);
     });
-    
+
     let maxDrug = '';
     let maxCount = 0;
     Object.entries(drugSymptoms).forEach(([drug, symptoms]) => {
@@ -137,7 +281,7 @@ export function DashboardPage() {
 
   const aeGates = useMemo(() => {
     if (!data) return [];
-    const gates = {ae: 0, no_drug: 0, no_symptom: 0, not_negative: 0, all_negated: 0, other: 0};
+    const gates = { ae: 0, no_drug: 0, no_symptom: 0, not_negative: 0, all_negated: 0, other: 0 };
     data.live_posts.forEach((p: any) => {
       if (p.ae_flag) { gates.ae++; return; }
       const r = p.ae_reason || '';
@@ -177,8 +321,19 @@ export function DashboardPage() {
             <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-sm shadow-lg">⬡</span>
             Intelligence Dashboard
           </h1>
-          <div className="flex items-center gap-3 mt-2 text-xs font-medium">
-            <span className="text-slate-400">Project ID: <span className="font-mono text-cyan-400">#{projectId}</span></span>
+          <div className="flex flex-wrap items-center gap-3 mt-2 text-xs font-medium">
+            <span className="text-slate-400">Project: <span className="font-mono text-cyan-400">#{projectId}</span></span>
+            <span className="text-slate-600">•</span>
+            {/* Medicine + Source */}
+            <span className="flex items-center gap-1.5 text-indigo-300">
+              <Pill className="w-3.5 h-3.5" />
+              {parsedMeta.medicine}
+            </span>
+            <span className="text-slate-600">•</span>
+            <span className="flex items-center gap-1.5 text-emerald-300">
+              <Globe className="w-3.5 h-3.5" />
+              {parsedMeta.source}
+            </span>
             <span className="text-slate-600">•</span>
             <div className="flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${data.status === 'complete' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)] animate-pulse'}`} />
@@ -189,6 +344,41 @@ export function DashboardPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {/* Project Switcher
+          <div className="relative">
+            <button
+              onClick={() => setShowProjectPicker(p => !p)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-800 text-slate-300 hover:bg-zinc-700 transition-colors border border-white/10 text-sm font-medium"
+            >
+              <FileText className="w-4 h-4 text-slate-400" />
+              My Projects
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform ${showProjectPicker ? 'rotate-180' : ''}`} />
+            </button>
+            {showProjectPicker && (
+              <div className="absolute right-0 top-full mt-2 w-72 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden">
+                <div className="px-3 py-2 border-b border-white/5">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Recent Projects</p>
+                </div>
+                <div className="max-h-64 overflow-y-auto">
+                  {allProjects.length === 0 && (
+                    <p className="text-xs text-slate-600 text-center py-4">No projects yet</p>
+                  )}
+                  {allProjects.map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => handleSwitchProject(p.id)}
+                      className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors border-b border-white/[0.03] ${
+                        p.id.toString() === projectId ? 'text-cyan-400 bg-cyan-500/5' : 'text-slate-300'
+                      }`}
+                    >
+                      <span className="font-mono text-[10px] text-slate-500 block">#{p.id}</span>
+                      <span className="truncate block">{p.name.replace(/_\d{8}_\d{6}$/, '').replace(/_/g, ' ')}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div> */}
           <button onClick={() => navigate('/chat')} className="px-4 py-2 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 transition-colors border border-white/10 text-sm font-medium shadow-md">
             New Query
           </button>
@@ -199,28 +389,38 @@ export function DashboardPage() {
       </header>
 
       <main className="flex-1 flex flex-col gap-6 z-10 w-full max-w-7xl mx-auto">
-        
+
         {/* Top Metrics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard title="Posts Crawled" value={data.total_raw} subtext="raw data collected" color="text-indigo-400" glow="bg-indigo-500" icon={<Database className="w-4 h-4 text-indigo-400/50" />} />
           <MetricCard title="Processed" value={data.processed} subtext="NLP analysed" color="text-emerald-400" glow="bg-emerald-500" icon={<CheckCircle2 className="w-4 h-4 text-emerald-400/50" />} />
-          <MetricCard 
-            title="Adverse Event Rate" 
-            value={`${aeRate.toFixed(1)}%`} 
-            subtext={`${data.ae_flagged} of ${data.processed} flagged`} 
+          <MetricCard
+            title="Adverse Event Rate"
+            value={`${aeRate.toFixed(1)}%`}
+            subtext={`${data.ae_flagged} of ${data.processed} flagged`}
             color="text-amber-400"
             glow="bg-amber-500"
-            icon={<AlertTriangle className="w-4 h-4 text-amber-400/50" />} 
+            icon={<AlertTriangle className="w-4 h-4 text-amber-400/50" />}
           />
-          <MetricCard 
-            title="Relational Risk" 
-            value={relationalRisk ? relationalRisk.drug : 'N/A'} 
-            subtext={relationalRisk ? `${relationalRisk.count} associated symptoms` : 'Gathering relations...'} 
+          <MetricCard
+            title="Relational Risk"
+            value={relationalRisk ? relationalRisk.drug : 'N/A'}
+            subtext={relationalRisk ? `${relationalRisk.count} associated symptoms` : 'Gathering relations...'}
             color={relationalRisk && relationalRisk.count > 3 ? 'text-rose-400' : 'text-cyan-400'}
             glow={relationalRisk && relationalRisk.count > 3 ? 'bg-rose-500' : 'bg-cyan-500'}
-            icon={<ShieldAlert className={`w-4 h-4 ${relationalRisk && relationalRisk.count > 3 ? 'text-rose-400 animate-pulse' : 'text-cyan-400/50'}`} />} 
+            icon={<ShieldAlert className={`w-4 h-4 ${relationalRisk && relationalRisk.count > 3 ? 'text-rose-400 animate-pulse' : 'text-cyan-400/50'}`} />}
           />
         </div>
+
+        {/* ── Monitoring Schedule Card (shown only when frequency is set) ── */}
+        {data.crawl_frequency && (
+          <MonitoringCard
+            frequency={data.crawl_frequency}
+            lastCrawledAt={data.last_crawled_at}
+            nextCrawlAt={data.next_crawl_at}
+            crawlHistory={data.crawl_history}
+          />
+        )}
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -277,7 +477,7 @@ export function DashboardPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
                   <XAxis type="number" stroke="#ffffff40" fontSize={10} tickLine={false} axisLine={false} tick={false} />
                   <YAxis type="category" dataKey="name" stroke="#ffffff80" fontSize={11} tickLine={false} axisLine={false} />
-                  <Tooltip cursor={{fill: '#ffffff05'}} content={<CustomTooltip />} />
+                  <Tooltip cursor={{ fill: '#ffffff05' }} content={<CustomTooltip />} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                     {sourceData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS.bars[index % COLORS.bars.length]} />
@@ -305,7 +505,7 @@ export function DashboardPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                   <XAxis dataKey={(sig) => `${sig.drug}/${sig.symptom}`} stroke="#ffffff40" fontSize={9} tickLine={false} axisLine={false} tickMargin={10} interval={0} angle={-15} textAnchor="end" tick={false} />
                   <YAxis stroke="#ffffff40" fontSize={10} tickLine={false} axisLine={false} />
-                  <Tooltip cursor={{fill: '#ffffff05'}} content={<CustomTooltip />} />
+                  <Tooltip cursor={{ fill: '#ffffff05' }} content={<CustomTooltip />} />
                   <Legend verticalAlign="top" height={36} iconType="square" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#94a3b8' }} />
                   <Bar dataKey="prr" name="PRR" fill="#6366f1" radius={[2, 2, 0, 0]} />
                   <Bar dataKey="ror" name="ROR" fill="#06b6d4" radius={[2, 2, 0, 0]} />
@@ -325,7 +525,7 @@ export function DashboardPage() {
                   <div key={gate.label} className="space-y-1.5">
                     <div className="flex justify-between text-[11px] text-slate-300">
                       <span className="flex items-center gap-1.5 uppercase tracking-wide">
-                        {gate.label === 'AE Confirmed' ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <XCircle className="w-3.5 h-3.5 text-rose-500" />} 
+                        {gate.label === 'AE Confirmed' ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <XCircle className="w-3.5 h-3.5 text-rose-500" />}
                         {gate.label}
                       </span>
                       <span className="font-mono text-slate-500">{gate.count} / {Math.round((gate.count / data.processed) * 100)}%</span>
@@ -380,7 +580,7 @@ export function DashboardPage() {
             <div className="w-2 h-2 rounded-full bg-indigo-400" /> Detected Signals
             <span className="bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full text-xs font-mono">{data.signals.length}</span>
           </h3>
-          
+
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -405,31 +605,31 @@ export function DashboardPage() {
                   data.signals.map((sig, i) => {
                     const maxPRR = Math.max(...data.signals.map(s => s.prr), 1);
                     return (
-                    <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                      <td className="py-3 px-4 font-bold text-white lowercase">{sig.drug}</td>
-                      <td className="py-3 px-4 text-slate-300 lowercase">{sig.symptom}</td>
-                      <td className="py-3 px-4 text-slate-400 font-mono text-center text-xs">{sig.co_occurrences}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-16 h-1 bg-[#1e293b] rounded-full overflow-hidden">
-                            <div className="h-full bg-cyan-400" style={{ width: `${Math.min((sig.prr / maxPRR) * 100, 100)}%` }} />
+                      <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td className="py-3 px-4 font-bold text-white lowercase">{sig.drug}</td>
+                        <td className="py-3 px-4 text-slate-300 lowercase">{sig.symptom}</td>
+                        <td className="py-3 px-4 text-slate-400 font-mono text-center text-xs">{sig.co_occurrences}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-16 h-1 bg-[#1e293b] rounded-full overflow-hidden">
+                              <div className="h-full bg-cyan-400" style={{ width: `${Math.min((sig.prr / maxPRR) * 100, 100)}%` }} />
+                            </div>
+                            <span className="text-cyan-400 font-mono text-xs">{sig.prr.toFixed(2)}</span>
                           </div>
-                          <span className="text-cyan-400 font-mono text-xs">{sig.prr.toFixed(2)}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-slate-300 font-mono text-xs">{sig.ror?.toFixed(2) || '0.00'}</td>
-                      <td className="py-3 px-4 text-slate-300 font-mono text-xs">{sig.chi_square.toFixed(2)}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
-                          sig.strength === 'STRONG' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
-                          sig.strength === 'MODERATE' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                          'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                        }`}>
-                          {sig.strength}
-                        </span>
-                      </td>
-                    </tr>
-                  )})
+                        </td>
+                        <td className="py-3 px-4 text-slate-300 font-mono text-xs">{sig.ror?.toFixed(2) || '0.00'}</td>
+                        <td className="py-3 px-4 text-slate-300 font-mono text-xs">{sig.chi_square.toFixed(2)}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${sig.strength === 'STRONG' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
+                              sig.strength === 'MODERATE' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            }`}>
+                            {sig.strength}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>
@@ -442,13 +642,13 @@ export function DashboardPage() {
             <div className="w-2 h-2 rounded-full bg-emerald-400" /> Processed Posts
             <span className="bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full text-xs font-mono">{data.live_posts.length}</span>
           </h3>
-          
+
           <div className="h-[600px] overflow-y-auto space-y-3 pr-4 custom-scrollbar">
             <AnimatePresence>
               {data.live_posts.length === 0 ? (
-                 <div className="h-full flex items-center justify-center text-slate-500 text-sm">
-                   Posts will appear as they are processed...
-                 </div>
+                <div className="h-full flex items-center justify-center text-slate-500 text-sm">
+                  Posts will appear as they are processed...
+                </div>
               ) : data.live_posts.map((post: any, idx: number) => {
                 const isPositive = post.sentiment?.toUpperCase() === 'POSITIVE';
                 const isNegative = post.sentiment?.toUpperCase() === 'NEGATIVE';
@@ -477,10 +677,10 @@ export function DashboardPage() {
                       </div>
                       <span className="text-xs font-mono text-slate-500">#{idx + 1}</span>
                     </div>
-                    
+
                     {post.title && <h4 className="text-sm font-semibold text-white mb-2">{post.title}</h4>}
                     <p className="text-[13px] text-slate-300 leading-relaxed mb-4">{post.text}</p>
-                    
+
                     {(post.drugs?.length > 0 || post.symptoms?.length > 0 || post.ae_reason) && (
                       <div className="flex flex-wrap gap-2 mt-2 pt-3 border-t border-white/5">
                         {post.drugs?.map((d: string, i: number) => (

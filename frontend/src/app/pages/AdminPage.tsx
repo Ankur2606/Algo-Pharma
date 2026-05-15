@@ -50,7 +50,9 @@ export function AdminPage() {
 
   const handleTestSource = async () => {
     setLoading(true);
-    const result = await testAdminSource(sourceForm.url, sourceForm.config_json);
+    // Map 'forum' (dropdown value) to 'custom_forum' (backend platform name)
+    const platform = sourceForm.platform === 'forum' ? 'custom_forum' : sourceForm.platform;
+    const result = await testAdminSource(sourceForm.url, sourceForm.config_json, platform);
     setTestResult(result);
     setLoading(false);
   };
@@ -198,7 +200,7 @@ export function AdminPage() {
                   <div className="space-y-3">
                     <input type="text" value={sourceForm.name} onChange={e => setSourceForm({...sourceForm, name: e.target.value})} className="w-full bg-zinc-800/50 border border-white/[0.06] rounded-lg px-3.5 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30" placeholder="Source Name" />
                     <select value={sourceForm.platform} onChange={e => setSourceForm({...sourceForm, platform: e.target.value})} className="w-full bg-zinc-800/50 border border-white/[0.06] rounded-lg px-3.5 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30">
-                      <option value="forum">Medical Forum</option>
+                      <option value="custom_forum">Medical Forum</option>
                       <option value="reddit">Reddit</option>
                       <option value="twitter">Twitter / X</option>
                     </select>

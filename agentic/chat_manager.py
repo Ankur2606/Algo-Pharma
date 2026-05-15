@@ -11,6 +11,7 @@ State schema:
     "source":    str | null,   # MANDATORY — one of: reddit, twitter, custom_forum
     "symptom":   str | null,   # OPTIONAL — bot asks once, accepts skip
     "forum_url": str | null,   # CONDITIONAL — MANDATORY when source == custom_forum
+    "source_id": int | null,   # SET BY FRONTEND when user picks an Admin-configured source
   }
 
 Returns when mandatory fields are filled:
@@ -81,8 +82,8 @@ def _fallback_question(state: dict) -> str:
         return "Could you tell me the name of the medicine you'd like to investigate?"
     if not state.get("source"):
         return f"Got it — {state['medicine']}! Where should I search? Please choose: **Reddit**, **Twitter**, or a **Custom Forum**."
-    # If custom_forum, we need a URL
-    if state.get("source") == "custom_forum" and not state.get("forum_url"):
+    # If custom_forum, we need EITHER a URL typed by user OR a source_id set by frontend
+    if state.get("source") == "custom_forum" and not state.get("forum_url") and not state.get("source_id"):
         return f"Great — I'll search a custom forum for {state['medicine']}. Could you share the forum URL?"
     # Both mandatory fields present
     return READY_SIGNAL
@@ -150,6 +151,8 @@ def get_nemotron_response(message: str, state: dict) -> tuple[dict, str]:
                     break
             if "forum" in msg_lower or "1mg" in msg_lower or "custom" in msg_lower:
                 new_state["source"] = "custom_forum"
+        # Preserve extra frontend-injected fields
+        new_state.setdefault("crawl_frequency", state.get("crawl_frequency"))
         return new_state, _fallback_question(new_state)
 
     try:
@@ -195,10 +198,12 @@ def get_nemotron_response(message: str, state: dict) -> tuple[dict, str]:
         bot_message = data.get("bot_message", "") or ""
 
         # Sanitise — preserve previously filled fields if model drops them
-        new_state.setdefault("medicine",  state.get("medicine"))
-        new_state.setdefault("source",    state.get("source"))
-        new_state.setdefault("symptom",   state.get("symptom"))
-        new_state.setdefault("forum_url", state.get("forum_url"))
+        new_state.setdefault("medicine",        state.get("medicine"))
+        new_state.setdefault("source",          state.get("source"))
+        new_state.setdefault("symptom",         state.get("symptom"))
+        new_state.setdefault("forum_url",       state.get("forum_url"))
+        new_state.setdefault("source_id",       state.get("source_id"))
+        new_state.setdefault("crawl_frequency", state.get("crawl_frequency"))  # preserve frontend-set field
 
         # Safety net: if a URL was in the message but Groq didn't capture it, grab it now
         url_in_msg = _extract_url(message)
@@ -212,9 +217,9 @@ def get_nemotron_response(message: str, state: dict) -> tuple[dict, str]:
             bot_message = _fallback_question(new_state)
 
         # Hard guard: mandatory fields filled → always READY
-        # For custom_forum, also require forum_url
+        # For custom_forum, require EITHER forum_url (typed by user) OR source_id (picked from Admin list)
         if new_state.get("medicine") and new_state.get("source"):
-            if new_state["source"] == "custom_forum" and not new_state.get("forum_url"):
+            if new_state["source"] == "custom_forum" and not new_state.get("forum_url") and not new_state.get("source_id"):
                 bot_message = _fallback_question(new_state)
             else:
                 bot_message = READY_SIGNAL

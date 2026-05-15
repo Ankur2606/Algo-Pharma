@@ -18,6 +18,7 @@ export interface ChatResponse {
 
 export interface DashboardData {
   status: string;
+  project_name: string;
   total_raw: number;
   processed: number;
   ae_flagged: number;
@@ -27,6 +28,11 @@ export interface DashboardData {
   sentiment_distribution: { positive: number; neutral: number; negative: number };
   signals: any[];
   live_posts: any[];
+  // Monitoring schedule
+  crawl_frequency: string | null;
+  last_crawled_at: string | null;
+  next_crawl_at: string | null;
+  crawl_history: any[];
 }
 
 export function useAlgoPharmaAPI() {
@@ -113,7 +119,7 @@ export function useAlgoPharmaAPI() {
       if (!token) throw new Error('Not authenticated');
 
       const currentStateStr = localStorage.getItem('chat_state');
-      const currentState = currentStateStr ? JSON.parse(currentStateStr) : { medicine: null, source: null, symptom: null, forum_url: null };
+      const currentState = currentStateStr ? JSON.parse(currentStateStr) : { medicine: null, source: null, symptom: null, forum_url: null, source_id: null };
 
       const res = await fetch(`${API_BASE_URL}/chat`, {
         method: 'POST',
@@ -184,6 +190,7 @@ export function useAlgoPharmaAPI() {
 
       return {
         status: data.status || 'unknown',
+        project_name: data.project_name || '',
         total_raw: data.total_raw || data.counts?.total_raw || 0,
         processed: data.processed || data.counts?.processed_posts || 0,
         ae_flagged: data.ae_flagged || data.counts?.ae_flagged || 0,
@@ -195,7 +202,12 @@ export function useAlgoPharmaAPI() {
           ...s,
           co_occurrences: s.post_count || s.co_occurrences || 0
         })),
-        live_posts: posts
+        live_posts: posts,
+        // Monitoring
+        crawl_frequency: data.crawl_frequency || null,
+        last_crawled_at: data.last_crawled_at || null,
+        next_crawl_at: data.next_crawl_at || null,
+        crawl_history: data.crawl_history || data.crawl_logs || [],
       };
     } catch (err: any) {
       setError(err.message);
@@ -215,10 +227,12 @@ export function useAlgoPharmaAPI() {
     } catch { return []; }
   };
 
-  const testAdminSource = async (url: string, configJson: string) => {
+  const testAdminSource = async (url: string, configJson: string, platform: string = 'custom_forum') => {
     try {
       let parsedConfig: any;
       try { parsedConfig = JSON.parse(configJson); } catch { parsedConfig = {}; }
+      // Include platform so backend knows whether to do a real Firecrawl test
+      parsedConfig.platform = platform;
 
       const res = await fetch(`${API_BASE_URL}/admin/sources/test`, {
         method: 'POST',

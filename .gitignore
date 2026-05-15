@@ -132,7 +132,11 @@ __pypackages__/
 
 # Celery stuff
 celerybeat-schedule
+celerybeat-schedule.*
 celerybeat.pid
+
+# Corrupt/temp DB files
+*.db.corrupt
 
 # Redis
 *.rdb

@@ -20,7 +20,7 @@ import logging
 import os
 from pathlib import Path
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 
 logger = logging.getLogger(__name__)
 
@@ -86,13 +86,36 @@ def _serialize_post(pp, raw) -> dict:
 
 
 @router.get("/list")
-def list_projects():
-    """Return all projects — lets the frontend populate a dropdown."""
+def list_projects(request: Request):
+    """Return only projects belonging to the currently authenticated user."""
     from database import SessionLocal
-    from models import Project
+    from models import Project, User
+    from jose import jwt, JWTError
+    from config import get_settings
+
+    settings = get_settings()
+
+    # Decode the JWT to get the username
+    user_id = None
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        token = auth_header.split(" ", 1)[1]
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            username = payload.get("sub")
+            if username:
+                with SessionLocal() as s:
+                    user = s.query(User).filter(User.username == username).first()
+                    if user:
+                        user_id = user.id
+        except JWTError:
+            pass
 
     with SessionLocal() as session:
-        projects = session.query(Project).order_by(Project.created_at.desc()).all()
+        query = session.query(Project).order_by(Project.created_at.desc())
+        if user_id is not None:
+            query = query.filter(Project.user_id == user_id)
+        projects = query.all()
         return [
             {"id": p.id, "name": p.name, "created_at": str(p.created_at)}
             for p in projects
@@ -158,7 +181,10 @@ def get_results(project_id: int):
         pipeline_done = signals_done(project_id)  # sentinel file written by Celery task
         
         # Check if all crawls for this project are finished (completed or failed)
-        crawls_finished = len(crawl_logs) > 0 and all(cl.status in ("completed", "failed") for cl in crawl_logs)
+        # Note: crawl tasks save status as "success" or "failed", not "completed"
+        crawls_finished = len(crawl_logs) > 0 and all(
+            cl.status in ("completed", "success", "failed") for cl in crawl_logs
+        )
 
         if signals:
             status = "complete"
@@ -214,21 +240,38 @@ def get_results(project_id: int):
                 "started_at": str(cl.started_at),
                 "finished_at": str(cl.finished_at) if cl.finished_at else None,
             }
-            for cl in crawl_logs[:5]
+            for cl in crawl_logs
         ]
+
+        # ── Compute next crawl time ─────────────────────────────
+        FREQ_SECONDS = {"realtime": 900, "daily": 86400, "weekly": 604800}
+        next_crawl_at = None
+        if project.crawl_frequency and project.last_crawled_at:
+            interval = FREQ_SECONDS.get(project.crawl_frequency, 0)
+            if interval:
+                from datetime import timedelta
+                last = project.last_crawled_at
+                if last.tzinfo is None:
+                    from datetime import timezone
+                    last = last.replace(tzinfo=timezone.utc)
+                next_crawl_at = str(last + timedelta(seconds=interval))
 
         response = {
             "project_id":   project_id,
             "project_name": project.name,
             "status":       status,
-            # ── Top-level stats for frontend dashboard ────────────
             "total_raw":    total_raw,
             "processed":    total_processed,
             "ae_flagged":   ae_flagged_count,
-            # ──────────────────────────────────────────────────────
             "signals":      signal_data,
             "posts":        post_data,
             "crawl_logs":   crawl_summary,
+            # ── Monitoring schedule (shown in dashboard UI) ───────
+            "crawl_frequency":  project.crawl_frequency,
+            "last_crawled_at":  str(project.last_crawled_at) if project.last_crawled_at else None,
+            "next_crawl_at":    next_crawl_at,
+            "crawl_history":    crawl_summary,
+            # ─────────────────────────────────────────────────────
             "counts": {
                 "signals":         len(signals),
                 "processed_posts": total_processed,
@@ -237,6 +280,7 @@ def get_results(project_id: int):
                 "ae_flagged":      ae_flagged_count,
             },
         }
+
 
         # Save result log only when complete (avoid spamming files during polling)
         if status == "complete":

@@ -148,21 +148,40 @@ def task_crawl_twitter(project_id: int = 1, query: str = "dolo 650") -> dict:
     return crawl_twitter(project_id, query)
 
 
+@celery_app.task(name="algopharma.periodic_crawl_tick")
+def task_periodic_crawl_tick() -> dict:
+    """
+    Celery Beat periodic task.
+    Runs every 15 minutes and re-crawls any projects that are due.
+    """
+    from tasks.periodic_crawl import periodic_crawl_tick
+    return periodic_crawl_tick()
+
+
+# ── Celery Beat schedule ──────────────────────────────────────────────────
+celery_app.conf.beat_schedule = {
+    "periodic-crawl-tick": {
+        "task": "algopharma.periodic_crawl_tick",
+        "schedule": 900,  # every 15 minutes
+    },
+}
+
+
 if __name__ == "__main__":
     if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
         sys.stdout.reconfigure(encoding="utf-8")
 
-    print("✅ Celery app configured")
+    print("Celery app configured")
     print(f"  Broker: {settings.REDIS_URL}")
-    
+
     # Test Redis connection
     try:
         import redis
         from urllib.parse import urlparse
-        
+
         parsed = urlparse(settings.REDIS_URL)
         is_ssl = parsed.scheme == "rediss"
-        
+
         r = redis.Redis(
             host=parsed.hostname,
             port=parsed.port or 6379,
@@ -173,12 +192,13 @@ if __name__ == "__main__":
             socket_connect_timeout=5
         )
         r.ping()
-        print("  ✅ Redis connection: SUCCESS")
+        print("  Redis connection: SUCCESS")
         print(f"     Host: {parsed.hostname}")
         print(f"     Port: {parsed.port or 6379}")
         print(f"     SSL: {'Enabled' if is_ssl else 'Disabled'}")
     except Exception as e:
-        print(f"  ❌ Redis connection: FAILED - {e}")
-    
+        print(f"  Redis connection: FAILED - {e}")
+
     print(f"  Tasks registered: {list(celery_app.tasks.keys())}")
     print("  Start worker: celery -A celery_app worker --loglevel=info")
+    print("  Start beat:   celery -A celery_app beat --loglevel=info")

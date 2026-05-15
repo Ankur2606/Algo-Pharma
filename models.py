@@ -41,6 +41,9 @@ class Project(Base):
     name: Mapped[str] = mapped_column(String(200), unique=True, nullable=False)
     description: Mapped[str] = mapped_column(Text, default="")
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
+    # Periodic crawling fields — NULL means one-time crawl (existing behaviour)
+    crawl_frequency: Mapped[str] = mapped_column(String(20), nullable=True, default=None)
+    last_crawled_at: Mapped[datetime] = mapped_column(DateTime, nullable=True, default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     keywords = relationship("Keyword", back_populates="project", cascade="all, delete-orphan")

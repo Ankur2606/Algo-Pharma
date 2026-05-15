@@ -71,9 +71,14 @@ def list_sources(db: Session = Depends(get_db)):
 
 @router.post("/sources")
 def add_source(payload: SourceCreate, db: Session = Depends(get_db)):
+    # Normalize platform: treat 'forum' as 'custom_forum' for consistency
+    platform = payload.platform
+    if platform == "forum":
+        platform = "custom_forum"
+
     source = Source(
         name=payload.name,
-        platform=payload.platform,
+        platform=platform,
         url=payload.url,
         config_json=json.dumps(payload.config_json)
     )
@@ -84,9 +89,75 @@ def add_source(payload: SourceCreate, db: Session = Depends(get_db)):
 
 @router.post("/sources/test")
 def test_source_connection(payload: TestConnectionReq):
+    """Test if a source URL is reachable and scrapable via Firecrawl."""
+    import logging
+    log = logging.getLogger(__name__)
+
     if not payload.server_url.startswith("http"):
         raise HTTPException(status_code=400, detail="Invalid URL")
-    return {"status": "success", "message": "Connection successful"}
+
+    platform = payload.config_json.get("platform", "custom_forum")
+    log.info(f"[source_test] ▶ Starting test | url={payload.server_url!r} | platform={platform!r}")
+
+    if platform in ("reddit", "twitter"):
+        log.info(f"[source_test] ✅ Platform '{platform}' uses its own crawler — no Firecrawl needed.")
+        return {"status": "success", "message": f"'{platform}' uses its own live crawler. No Firecrawl test needed."}
+
+    try:
+        from config import get_settings
+        settings = get_settings()
+
+        if not settings.FIRECRAWL_API_KEY:
+            log.error("[source_test] ❌ FIRECRAWL_API_KEY is not set in .env")
+            raise HTTPException(
+                status_code=503,
+                detail="FIRECRAWL_API_KEY is not configured. Set it in .env to test forum sources."
+            )
+
+        log.info("[source_test] 🔑 Firecrawl API key found — initializing client...")
+        from firecrawl import Firecrawl
+        fc = Firecrawl(api_key=settings.FIRECRAWL_API_KEY)
+
+        log.info(f"[source_test] 🌐 Sending scrape request to Firecrawl for: {payload.server_url}")
+        result = fc.scrape(payload.server_url, formats=["markdown"])
+        md = getattr(result, "markdown", "")
+
+        if not md:
+            log.warning(f"[source_test] ⚠️  Firecrawl returned empty content for {payload.server_url}")
+            raise HTTPException(status_code=422, detail="Firecrawl returned empty content for this URL.")
+
+        char_count = len(md)
+        word_count = len(md.split())
+        preview = md[:300].replace("\n", " ").strip()
+
+        try:
+            from langdetect import detect as lang_detect
+            detected_lang = lang_detect(md[:1000])
+        except Exception:
+            detected_lang = "unknown"
+
+        log.info(
+            f"[source_test] ✅ Success | chars={char_count} | words={word_count} "
+            f"| lang={detected_lang!r} | preview={preview[:80]!r}..."
+        )
+
+        return {
+            "status": "success",
+            "message": f"Firecrawl successfully scraped {char_count} characters of content.",
+            "details": {
+                "url": payload.server_url,
+                "characters": char_count,
+                "words": word_count,
+                "detected_language": detected_lang,
+                "content_preview": preview[:300],
+            }
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"[source_test] ❌ Firecrawl test failed: {e}")
+        raise HTTPException(status_code=422, detail=f"Firecrawl test failed: {str(e)}")
 
 @router.put("/sources/{source_id}")
 def update_source(source_id: int, payload: SourceUpdate, db: Session = Depends(get_db)):
@@ -106,6 +177,23 @@ def disable_source(source_id: int, db: Session = Depends(get_db)):
     source.is_active = False
     db.commit()
     return {"status": "success", "message": "Source disabled"}
+
+@router.get("/sources/available")
+def get_available_sources(db: Session = Depends(get_db)):
+    """
+    Return all active custom forum sources.
+    Called by the frontend chat UI to show users which forums are available to choose from.
+    Accepts both 'custom_forum' and legacy 'forum' platform values.
+    """
+    sources = db.query(Source).filter(
+        Source.is_active == True,
+        Source.platform.in_(["custom_forum", "forum"])
+    ).all()
+    return [
+        {"id": s.id, "name": s.name, "url": s.url, "platform": s.platform}
+        for s in sources
+    ]
+
 
 @router.post("/onboarding/forum")
 def run_forum_onboarding(payload: ForumOnboardingReq, db: Session = Depends(get_db)):
