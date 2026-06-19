@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router";
 
 const ARTIFACTS = [
   { file: "/artifacts/System_Architecture.png", title: "System Architecture", desc: "End-to-end view of how data flows from social platforms through the AI pipeline to the signal dashboard." },
@@ -143,7 +144,7 @@ export function LandingPage() {
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <a href="https://github.com/Ankur2606/Algo-Pharma" target="_blank" rel="noreferrer" style={{ padding: "8px 18px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.7)", textDecoration: "none", fontSize: 13, fontWeight: 500, transition: "all 0.2s" }}>GitHub</a>
-          <a href="https://huggingface.co/spaces/DecentSanage/Algo-Pharma" target="_blank" rel="noreferrer" style={{ padding: "8px 18px", borderRadius: 8, background: "linear-gradient(135deg, #7c3aed, #4f46e5)", color: "#fff", textDecoration: "none", fontSize: 13, fontWeight: 600 }}>Try Live Demo →</a>
+          <Link to="/login" style={{ padding: "8px 18px", borderRadius: 8, background: "linear-gradient(135deg, #7c3aed, #4f46e5)", color: "#fff", textDecoration: "none", fontSize: 13, fontWeight: 600 }}>Try Live Demo →</Link>
         </div>
       </nav>
 
@@ -165,9 +166,9 @@ export function LandingPage() {
             AlgoPharma turns social media chatter into explainable drug safety signals. Chat with an AI agent, watch it crawl Reddit and Twitter, and see statistically ranked adverse event alerts appear on your dashboard in real time.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="https://huggingface.co/spaces/DecentSanage/Algo-Pharma" target="_blank" rel="noreferrer" style={{ padding: "14px 32px", borderRadius: 10, background: "linear-gradient(135deg, #7c3aed, #4f46e5)", color: "#fff", textDecoration: "none", fontSize: 15, fontWeight: 700, letterSpacing: "-0.01em", boxShadow: "0 0 40px rgba(124,58,237,0.4)" }}>
+            <Link to="/login" style={{ padding: "14px 32px", borderRadius: 10, background: "linear-gradient(135deg, #7c3aed, #4f46e5)", color: "#fff", textDecoration: "none", fontSize: 15, fontWeight: 700, letterSpacing: "-0.01em", boxShadow: "0 0 40px rgba(124,58,237,0.4)" }}>
               Launch Live App →
-            </a>
+            </Link>
             <a href="https://github.com/Ankur2606/Algo-Pharma" target="_blank" rel="noreferrer" style={{ padding: "14px 32px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.8)", textDecoration: "none", fontSize: 15, fontWeight: 600 }}>
               View on GitHub
             </a>
@@ -309,9 +310,9 @@ export function LandingPage() {
               <p style={{ fontSize: 15, color: "rgba(255,255,255,0.48)", lineHeight: 1.7, marginBottom: 32 }}>
                 Built for the AI for Bharat Hackathon, Theme 6. We touched every layer — from Aadhaar-aware PII redaction to PRR signal statistics — with India's healthcare reality in mind.
               </p>
-              <a href="https://huggingface.co/spaces/DecentSanage/Algo-Pharma" target="_blank" rel="noreferrer" style={{ display: "inline-block", padding: "14px 36px", borderRadius: 10, background: "linear-gradient(135deg, #7c3aed, #4f46e5)", color: "#fff", textDecoration: "none", fontSize: 15, fontWeight: 700, boxShadow: "0 0 48px rgba(124,58,237,0.45)" }}>
+              <Link to="/login" style={{ display: "inline-block", padding: "14px 36px", borderRadius: 10, background: "linear-gradient(135deg, #7c3aed, #4f46e5)", color: "#fff", textDecoration: "none", fontSize: 15, fontWeight: 700, boxShadow: "0 0 48px rgba(124,58,237,0.45)" }}>
                 Open AlgoPharma on Hugging Face →
-              </a>
+              </Link>
             </GlassCard>
           </FadeIn>
         </section>

@@ -1,7 +1,7 @@
 
   # Replicate existing design
 
-  This is a code bundle for Replicate existing design. The original project is available at https://www.figma.com/design/ymbUsbaoefcZE8kOdUYcwE/Replicate-existing-design.
+  This is a code bundle for AlgoPharma. The original project is available at https://www.figma.com/design/ymbUsbaoefcZE8kOdUYcwE/Replicate-existing-design.
 
   ## Running the code
 

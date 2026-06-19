@@ -62,23 +62,26 @@ def crawl_twitter(project_id: int = 1, query: str = "dolo 650 medicine side effe
         raw_result = ingest_twitter_json_raw(project_id)
 
         # ── Phase 2: Dispatch NLP + signal detection asynchronously ─────────
+        # IMPORTANT: Use task_process_unprocessed (same as crawl_reddit), NOT
+        # task_ingest_all.  task_ingest_all calls ingest_all() which re-reads
+        # BOTH the reddit and twitter JSON files from disk and ingests them all,
+        # causing Reddit posts to bleed into Twitter projects.
+        # task_process_unprocessed operates purely on RawPosts already stored in
+        # the DB for this project_id — so source isolation is guaranteed by
+        # whatever Phase 1 (ingest_twitter_json_raw) wrote, not by file paths.
         try:
-            from celery_app import task_ingest_all, task_detect_signals
-            res_ingest = task_ingest_all.delay(project_id)
-            res_detect = task_detect_signals.delay(project_id)
-            logger.info("✅ NLP tasks queued asynchronously via Celery")
-            
+            from celery_app import task_process_unprocessed
+            res = task_process_unprocessed.delay(project_id)
+            logger.info(f"✅ NLP task queued | task_id={res.id}")
+
             import threading
-            def _track_celery(res, name):
+            def _track(res):
                 try:
-                    logger.info(f"⏳ Tracking Celery [{name}] in background...")
                     data = res.get(timeout=300)
-                    logger.info(f"✅ Celery [{name}] COMPLETE: {data}")
+                    logger.info(f"✅ Celery [process_unprocessed] COMPLETE: {data}")
                 except Exception as e:
-                    logger.error(f"❌ Celery [{name}] FAILED/TIMEOUT: {e}")
-                    
-            threading.Thread(target=_track_celery, args=(res_ingest, "ingest_all"), daemon=True).start()
-            threading.Thread(target=_track_celery, args=(res_detect, "detect_signals"), daemon=True).start()
+                    logger.error(f"❌ Celery [process_unprocessed] FAILED: {e}")
+            threading.Thread(target=_track, args=(res,), daemon=True).start()
         except Exception as celery_err:
             logger.warning(f"⚠️  Celery dispatch failed: {celery_err}")
 
