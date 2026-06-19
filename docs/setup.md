@@ -51,7 +51,7 @@ Open `.env` and fill in **at minimum**:
 
 ## 3. Install Redis
 
-### Windows (recommended)
+<!-- ### Windows (recommended)
 ```powershell
 winget install Redis.Redis
 # Then start Redis:
@@ -62,7 +62,7 @@ redis-server
 ```bash
 sudo apt-get install redis-server
 sudo service redis-server start
-```
+``` -->
 
 ### Cloud (zero local setup)
 Use [Upstash](https://upstash.com/) free tier and set:
