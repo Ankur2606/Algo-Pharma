@@ -39,7 +39,7 @@ function parseProjectLabel(name: string, id: number) {
 }
 
 const FREQUENCY_OPTIONS = [
-  { key: 'realtime', label: 'Real-time', desc: 'Crawl continuously', icon: Zap, color: 'text-cyan-300 border-cyan-500/25 bg-cyan-500/10 hover:bg-cyan-500/20' },
+  { key: 'realtime', label: 'Realtime', desc: 'Crawl continuously', icon: Zap, color: 'text-cyan-300 border-cyan-500/25 bg-cyan-500/10 hover:bg-cyan-500/20' },
   { key: 'daily', label: 'Daily', desc: 'Once per day', icon: Calendar, color: 'text-indigo-300 border-indigo-500/25 bg-indigo-500/10 hover:bg-indigo-500/20' },
   { key: 'weekly', label: 'Weekly', desc: 'Once per week', icon: CalendarDays, color: 'text-violet-300 border-violet-500/25 bg-violet-500/10 hover:bg-violet-500/20' },
 ];
@@ -66,6 +66,7 @@ export function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', type: 'bot', content: 'Welcome to AlgoPharma Intelligence. Enter a drug name to begin adverse event surveillance.' }
   ]);
+  console.log("MESSAGES STATE:", messages);
   const [input, setInput] = useState('');
   const [customForums, setCustomForums] = useState<CustomForum[]>([]);
   const [showSourcePicker, setShowSourcePicker] = useState(false);
@@ -109,11 +110,14 @@ export function ChatPage() {
     } catch { }
   };
 
-  const addBotMsg = (content: string) =>
-    setMessages(prev => [...prev, { id: Date.now().toString(), type: 'bot', content }]);
+  const addBotMsg = (content: string) => {
+    const msgId = Date.now().toString();
+    setMessages(prev => [...prev, { id: msgId, type: 'bot', content }]);
+  };
 
   const sendMessage = useCallback(async (userMessage: string) => {
-    setMessages(prev => [...prev, { id: Date.now().toString(), type: 'user', content: userMessage }]);
+    const msgId = Date.now().toString();
+    setMessages(prev => [...prev, { id: msgId, type: 'user', content: userMessage }]);
     setShowSourcePicker(false);
     const result = await sendChat(userMessage);
     if (result) {
@@ -156,8 +160,15 @@ export function ChatPage() {
     // Always store pending forum/source name and show frequency picker
     setPendingForumName(forumName || sourceName);
     setShowFrequencyPicker(true);
-    setMessages(prev => [...prev, { id: Date.now().toString(), type: 'user', content: sourceName }]);
-    addBotMsg(`How often should I crawl **${forumName || sourceName}** for new posts?`);
+
+    // Generate static IDs outside setMessages to prevent double render duplication
+    const userMsgId = Date.now().toString();
+    const botMsgId = (Date.now() + 1).toString();
+    setMessages(prev => [
+      ...prev,
+      { id: userMsgId, type: 'user', content: sourceName },
+      { id: botMsgId, type: 'bot', content: `How often should I crawl **${forumName || sourceName}** for new posts?` }
+    ]);
   };
 
   const handleFrequencyPick = async (freq: typeof FREQUENCY_OPTIONS[0]) => {
@@ -167,10 +178,16 @@ export function ChatPage() {
     const state = stateStr ? JSON.parse(stateStr) : {};
     state.crawl_frequency = freq.key;
     localStorage.setItem('chat_state', JSON.stringify(state));
-    // Show the frequency choice in chat (UI confirmation)
-    setMessages(prev => [...prev, { id: Date.now().toString(), type: 'user', content: freq.label }]);
-    addBotMsg(`Got it — **${freq.label}** monitoring selected. Starting analysis on ${pendingForumName}...`);
-    
+
+    // Generate static IDs outside setMessages to prevent double render duplication
+    const userMsgId = Date.now().toString();
+    const botMsgId = (Date.now() + 1).toString();
+    setMessages(prev => [
+      ...prev,
+      { id: userMsgId, type: 'user', content: freq.label },
+      { id: botMsgId, type: 'bot', content: ` Pretty cool choice , got it **${freq.label}** , monitoring selected. Starting analysis on ${pendingForumName}...` }
+    ]);
+
     // Call sendChat directly to start the project crawl on the backend,
     // without printing the source name in the chat UI a second time
     const result = await sendChat(pendingForumName);
