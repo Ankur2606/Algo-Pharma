@@ -88,6 +88,16 @@ _static_dir.mkdir(exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
 
 
+# ── Serve favicon ────────────────────────────────────────
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    """Serve the favicon."""
+    favicon_path = Path(__file__).parent / "static" / "favicon.ico"
+    if favicon_path.exists():
+        return FileResponse(str(favicon_path))
+    return FileResponse(str(Path(__file__).parent / "favicon.ico"))
+
+
 # ── Root endpoint ────────────────────────────────────────
 @app.get("/")
 def root():
