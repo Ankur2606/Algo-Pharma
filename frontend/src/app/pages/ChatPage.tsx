@@ -44,6 +44,24 @@ const FREQUENCY_OPTIONS = [
   { key: 'weekly', label: 'Weekly', desc: 'Once per week', icon: CalendarDays, color: 'text-violet-300 border-violet-500/25 bg-violet-500/10 hover:bg-violet-500/20' },
 ];
 
+const renderMarkdown = (text: string) => {
+  if (!text) return null;
+  const parts = text.split(/(\*\*.*?\*\*|\*.*?\*)/g);
+  return (
+    <>
+      {parts.map((part, idx) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={idx} className="font-extrabold text-white">{part.slice(2, -2)}</strong>;
+        }
+        if (part.startsWith('*') && part.endsWith('*')) {
+          return <em key={idx} className="italic text-slate-300">{part.slice(1, -1)}</em>;
+        }
+        return part;
+      })}
+    </>
+  );
+};
+
 export function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', type: 'bot', content: 'Welcome to AlgoPharma Intelligence. Enter a drug name to begin adverse event surveillance.' }
@@ -55,7 +73,7 @@ export function ChatPage() {
   const [pendingForumName, setPendingForumName] = useState('');
   const [projects, setProjects] = useState<Project[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const { sendChat, logout, loading, error, isAuthenticated, role } = useAlgoPharmaAPI();
   const navigate = useNavigate();
 
@@ -66,7 +84,14 @@ export function ChatPage() {
     fetchProjects();
   }, [isAuthenticated, navigate]);
 
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [messages]);
 
   const fetchCustomForums = async () => {
     try {
@@ -145,8 +170,27 @@ export function ChatPage() {
     // Show the frequency choice in chat (UI confirmation)
     setMessages(prev => [...prev, { id: Date.now().toString(), type: 'user', content: freq.label }]);
     addBotMsg(`Got it — **${freq.label}** monitoring selected. Starting analysis on ${pendingForumName}...`);
-    // Send the original source name to backend — backend reads frequency from state
-    await sendMessage(pendingForumName);
+    
+    // Call sendChat directly to start the project crawl on the backend,
+    // without printing the source name in the chat UI a second time
+    const result = await sendChat(pendingForumName);
+    if (result) {
+      addBotMsg(result.bot_message);
+      if (result.ready && result.project_id) {
+        setShowSourcePicker(false);
+        setShowFrequencyPicker(false);
+        if (pendingForumName) {
+          const map = getForumMap();
+          map[result.project_id.toString()] = pendingForumName;
+          localStorage.setItem('project_forum_map', JSON.stringify(map));
+          setPendingForumName('');
+        }
+        fetchProjects();
+        setTimeout(() => navigate('/processing', { state: { projectId: result.project_id } }), 1500);
+      }
+    } else if (error) {
+      addBotMsg(`Error: ${error}`);
+    }
   };
 
   const openProject = (id: number) => {
@@ -249,7 +293,7 @@ export function ChatPage() {
 
         {/* Chat */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto p-4 md:p-8 z-10">
+          <main ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 md:p-8 z-10">
             <div className="max-w-3xl mx-auto space-y-6">
               <AnimatePresence>
                 {messages.map((msg) => (
@@ -259,7 +303,7 @@ export function ChatPage() {
                       {msg.type === 'user' ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
                     </div>
                     <div className={`max-w-[80%] rounded-2xl px-6 py-4 shadow-xl backdrop-blur-md ${msg.type === 'user' ? 'bg-zinc-800/80 border border-white/5 text-slate-200 rounded-tr-sm' : 'bg-zinc-900/60 border border-cyan-500/20 text-slate-200 rounded-tl-sm'}`}>
-                      <p className="leading-relaxed">{msg.content}</p>
+                      <p className="leading-relaxed whitespace-pre-wrap">{renderMarkdown(msg.content)}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -324,7 +368,6 @@ export function ChatPage() {
                   </motion.div>
                 )}
               </AnimatePresence>
-              <div ref={messagesEndRef} />
             </div>
           </main>
 
