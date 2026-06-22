@@ -101,7 +101,7 @@ The database is created automatically on first start. To pre-seed with demo data
 
 ```bash
 # Create all tables
-uv run python -c "from database import Base, engine; Base.metadata.create_all(engine)"
+uv run python -c "from database import init_db; init_db()"
 
 # (Optional) Seed demo data
 uv run python seed_demo_data.py
