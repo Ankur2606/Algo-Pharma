@@ -20,8 +20,8 @@ if __name__ == "__main__":
         sys.stdout.reconfigure(encoding='utf-8')
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
-SEARCH_QUERY = "dolo 365 medicine side effects"      # your search term
-MAX_ITEMS    = 20                       # max items to fetch
+SEARCH_QUERY = "vioxx"     # your search term
+MAX_ITEMS    = 23                     # max items to fetch
 SORT         = "relevance"              # relevance | new | top | comments
 TIME_FILTER  = "all"                    # all | year | month | week | day | hour
 OUTPUT_FILE  = "reddit_dolo365_results.json"
@@ -45,7 +45,7 @@ def clean_html(html_str):
     return clean.strip()
 
 
-def scrape_reddit(query: str, max_items: int = 20) -> list[dict]:
+def scrape_reddit(query: str, max_items: int = 23) -> list[dict]:
     print(f"🔗 Connecting directly to Reddit RSS search...", file=sys.stderr)
     
     safe_query = urllib.parse.quote(query)
@@ -56,11 +56,18 @@ def scrape_reddit(query: str, max_items: int = 20) -> list[dict]:
     print(f"   Max items: {max_items} | Sort: {SORT} | Time: {TIME_FILTER}", file=sys.stderr)
     print(f"{'─'*55}", file=sys.stderr)
 
-    user_agents = [
-        'windows:algopharma:v1.0.0 (by /u/algopharma_dev)',
-        'python:algopharma:v1.0.0 (by /u/algopharma_dev)',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    ]
+    # Generate a unique custom User-Agent per request to prevent footprint blocks
+    import random
+    rand_id = random.randint(1000, 9999)
+    dynamic_custom_ua = f"windows:algopharma_monitor_app_{rand_id}:v1.0.0 (by /u/algopharma_dev_{rand_id})"
+    dynamic_python_ua = f"python:crawler_service_{rand_id}:v1.0 (by /u/bot_user_{rand_id})"
+    
+    # Standard Chrome/Firefox UA with dynamic version numbers
+    chrome_ver = random.randint(118, 125)
+    safari_ver = random.randint(535, 537)
+    dynamic_browser_ua = f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/{safari_ver}.36 (KHTML, like Gecko) Chrome/{chrome_ver}.0.0.0 Safari/{safari_ver}.36"
+    
+    user_agents = [dynamic_custom_ua, dynamic_python_ua, dynamic_browser_ua]
     
     posts = []
 
