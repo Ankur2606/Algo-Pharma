@@ -5,6 +5,10 @@ Lifespan startup: init DB + load NLP models.
 
 import os
 import sys
+from pathlib import Path
+
+# Insert backend directory to python path to resolve absolute imports
+sys.path.insert(0, str(Path(__file__).parent.resolve()))
 
 # ── Fix Intel MKL "forrtl: error (200)" crash on Ctrl+C (Windows) ──────────
 # numpy/scipy ship with Intel MKL on Windows.  MKL's Fortran runtime installs

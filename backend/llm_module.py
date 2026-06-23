@@ -19,10 +19,13 @@ async def llm_agent(user_prompt: str, project_id: int = 1):
     # Initialize Gemini Client
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
+    from pathlib import Path
+    server_script = str(Path(__file__).parent / "mcp_server.py")
+
     # Start our MCP server as a subprocess
     server_params = StdioServerParameters(
         command=sys.executable,
-        args=["-u", "mcp_server.py"]
+        args=["-u", server_script]
     )
 
     async with stdio_client(server_params) as (read, write):
@@ -55,7 +58,7 @@ async def llm_agent(user_prompt: str, project_id: int = 1):
 
             # 3. Send to Gemini with native tool calling (no Pydantic schema hack needed)
             response = client.models.generate_content(
-                model="gemini-2.5-flash",   # ✅ Free tier, not deprecated
+                model="gemini-flash-latest",   # ✅ Free tier, higher quota
                 contents=user_prompt,
                 config=types.GenerateContentConfig(
                     system_instruction=(

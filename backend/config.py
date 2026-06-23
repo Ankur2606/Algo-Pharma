@@ -11,13 +11,13 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # ── App ───────────────────────────────────────────────
     FAST_MODE: bool = False
-    DATABASE_URL: str = "sqlite:///./algopharma.db"
+    DATABASE_URL: str = "sqlite:///./db/algopharma.db"
     REDIS_URL: str = "redis://localhost:6379/0"
     SECRET_KEY: str = "dev-secret-change-in-production"
 
     # ── Existing data files ───────────────────────────────
-    REDDIT_JSON_PATH: str = "reddit_dolo365_results.json"
-    TWITTER_JSON_PATH: str = "twitter_dolo365_results.json"
+    REDDIT_JSON_PATH: str = "data/reddit_dolo365_results.json"
+    TWITTER_JSON_PATH: str = "data/twitter_dolo365_results.json"
 
     # ── Reddit ────────────────────────────────────────────
     REDDIT_CLIENT_ID: str = ""

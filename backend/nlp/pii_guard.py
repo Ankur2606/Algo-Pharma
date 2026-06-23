@@ -48,12 +48,12 @@ def redact_pii(text: str, lang: str = "en", preserve_urls: bool = False) -> dict
     pii_entities = []
     redacted = text
 
-    # ── Layer 1 — Indian ID regex (DISABLED FOR NLP BASELINE TEST) ──
-    # for pii_type, pattern in PII_PATTERNS.items():
-    #     for match in pattern.finditer(redacted):
-    #         matched_text = match.group()
-    #         redacted = redacted.replace(matched_text, f"[{pii_type}]")
-    #         pii_entities.append({"type": pii_type, "layer": 1, "method": "regex"})
+    # ── Layer 1 — Indian ID regex ────────────────────────────
+    for pii_type, pattern in PII_PATTERNS.items():
+        for match in pattern.finditer(redacted):
+            matched_text = match.group()
+            redacted = redacted.replace(matched_text, f"[{pii_type}]")
+            pii_entities.append({"type": pii_type, "layer": 1, "method": "regex"})
 
 
     # ── Layer 2 — OpenMed NLP Models (Catch names, addresses, etc.) ──────

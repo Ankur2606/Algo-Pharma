@@ -1,5 +1,10 @@
 import os
 import sys
+from pathlib import Path
+
+# Insert backend directory to python path to resolve absolute imports
+sys.path.insert(0, str(Path(__file__).parent.resolve()))
+
 import json
 import urllib.request
 import urllib.parse
@@ -17,7 +22,7 @@ if __name__ == "__main__" and sys.stdout.encoding.lower() != 'utf-8':
 TWITTER_API_KEY = os.getenv("TWITTER_API_KEY")
 SEARCH_QUERY    = "dolo 365 medicine side effects"
 QUERY_TYPE      = "Top"      # "Top" or "Latest"
-OUTPUT_FILE     = "twitter_dolo365_results.json"
+OUTPUT_FILE     = "data/twitter_dolo365_results.json"
 # ─────────────────────────────────────────────────────────────────────────────
 
 def scrape_twitter(query: str, query_type: str = "Top") -> list[dict]:

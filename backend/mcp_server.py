@@ -1,6 +1,10 @@
 import asyncio
 import sys
 import os
+from pathlib import Path
+
+# Insert backend directory to python path to resolve absolute imports
+sys.path.insert(0, str(Path(__file__).parent.resolve()))
 
 # Enable FAST_MODE to prevent downloading 2GB+ of HuggingFace models during MCP tool calls
 os.environ["FAST_MODE"] = "true"

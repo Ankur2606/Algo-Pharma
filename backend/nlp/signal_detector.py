@@ -186,7 +186,7 @@ if __name__ == "__main__":
         ae_count = session.query(ProcessedPost).filter(ProcessedPost.ae_flag == True).count()
 
     if ae_count == 0:
-        print("  ⚠️  No AE posts in DB. Run seed_demo_data.py or ingest_existing.py first.")
+        print("  ⚠️  No AE posts in DB. Run scripts/seed_demo_data.py or ingest_existing.py first.")
         print("─" * 55)
     else:
         print(f"  📊 Found {ae_count} AE-flagged posts in DB")

@@ -25,7 +25,7 @@ RUN uv pip install --system -r pyproject.toml
 EXPOSE 7860
 
 # Run both Celery and FastAPI in the background
-CMD uv run celery -A celery_app worker --loglevel=info --pool=solo & uv run uvicorn main:app --host 0.0.0.0 --port 7860
+CMD uv run celery -A backend.celery_app worker --loglevel=info --pool=solo & uv run uvicorn backend.main:app --host 0.0.0.0 --port 7860
 """
 
 with open("Dockerfile_hf", "w") as f:

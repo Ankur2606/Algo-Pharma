@@ -1,15 +1,22 @@
 import asyncio
 import sys
+from pathlib import Path
+
+# Insert backend directory to python path to resolve absolute imports
+sys.path.insert(0, str(Path(__file__).parent.resolve()))
+
 from mcp import ClientSession
 from mcp.client.stdio import stdio_client, StdioServerParameters
 
 async def test():
     print("Initializing MCP Client Test...")
     
+    server_script = str(Path(__file__).parent / "mcp_server.py")
+    
     # Configure the MCP server command
     server_params = StdioServerParameters(
         command=sys.executable,
-        args=["-u", "mcp_server.py"]
+        args=["-u", server_script]
     )
     
     print(f"Connecting to server: {server_params.command} {' '.join(server_params.args)}")

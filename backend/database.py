@@ -10,7 +10,19 @@ from sqlalchemy.orm import sessionmaker, Session
 from config import get_settings
 
 
+from pathlib import Path
+
 _settings = get_settings()
+
+# Auto-create SQLite directory if using SQLite database
+if "sqlite" in _settings.DATABASE_URL:
+    # Resolve the sqlite database file path to create parent directories
+    db_file_path = _settings.DATABASE_URL.replace("sqlite:///", "")
+    if db_file_path.startswith("./"):
+        db_file_path = db_file_path[2:]
+    db_file_path = db_file_path.split("?")[0]
+    db_dir = Path(db_file_path).parent.resolve()
+    db_dir.mkdir(parents=True, exist_ok=True)
 
 engine = create_engine(
     _settings.DATABASE_URL,

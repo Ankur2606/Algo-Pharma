@@ -7,7 +7,7 @@ import sqlite3
 import os
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent / "algopharma.db"
+DB_PATH = Path(__file__).parent.parent.parent / "db" / "algopharma.db"
 
 def migrate():
     if not DB_PATH.exists():

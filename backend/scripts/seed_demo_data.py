@@ -4,6 +4,10 @@ Master setup script — run first on demo day.
 """
 
 import sys
+import os
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import json
 import logging
 

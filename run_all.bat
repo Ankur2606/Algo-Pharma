@@ -1,9 +1,9 @@
 @echo off
 :: Start Uvicorn
-start "Backend API" cmd /k "uv run uvicorn main:app --reload --port 8000"
+start "Backend API" cmd /k "uv run uvicorn backend.main:app --reload --port 8000"
 
 :: Start Celery
-start "Celery Worker" cmd /k "uv run celery -A celery_app worker --loglevel=info --pool=solo"
+start "Celery Worker" cmd /k "uv run celery -A backend.celery_app worker --loglevel=info --pool=solo"
 
 :: Start Frontend
 cd frontend

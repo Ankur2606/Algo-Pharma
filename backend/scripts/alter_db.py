@@ -1,7 +1,9 @@
 import sqlite3
 
 def alter_db():
-    conn = sqlite3.connect('algopharma.db')
+    import os
+    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'db', 'algopharma.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
     queries = [

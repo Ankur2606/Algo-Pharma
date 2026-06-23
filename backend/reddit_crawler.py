@@ -7,6 +7,11 @@ Does NOT require an API token.
 import json
 import os
 import sys
+from pathlib import Path
+
+# Insert backend directory to python path to resolve absolute imports
+sys.path.insert(0, str(Path(__file__).parent.resolve()))
+
 import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
@@ -24,7 +29,7 @@ SEARCH_QUERY = "vioxx"     # your search term
 MAX_ITEMS    = 23                     # max items to fetch
 SORT         = "relevance"              # relevance | new | top | comments
 TIME_FILTER  = "all"                    # all | year | month | week | day | hour
-OUTPUT_FILE  = "reddit_dolo365_results.json"
+OUTPUT_FILE  = "data/reddit_dolo365_results.json"
 # ─────────────────────────────────────────────────────────────────────────────
 
 

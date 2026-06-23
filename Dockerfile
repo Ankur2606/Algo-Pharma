@@ -16,8 +16,8 @@ RUN uv sync
 
 # Pre-cache all NLP models so startup is fast
 RUN uv run python -m spacy download en_core_web_sm
-RUN uv run python nlp/models_loader.py
-RUN uv run python setup_pii.py
+RUN uv run python backend/nlp/models_loader.py
+RUN uv run python backend/scripts/setup_pii.py
 
 # Make startup script executable
 RUN chmod +x /app/start.sh

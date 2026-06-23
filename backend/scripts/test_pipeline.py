@@ -5,12 +5,20 @@ Each test is independent and prints PASS or FAIL with reason.
 
 import sys
 import os
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 os.environ["FAST_MODE"] = "false"
-os.environ["DATABASE_URL"] = "sqlite:///./algopharma_test.db"
+os.environ["DATABASE_URL"] = "sqlite:///./db/algopharma_test.db"
 
 
 def run_tests():
+    # Ensure a completely fresh test database at start
+    try:
+        os.remove("db/algopharma_test.db")
+    except OSError:
+        pass
+
     if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
         sys.stdout.reconfigure(encoding="utf-8")
 
@@ -26,7 +34,7 @@ def run_tests():
     try:
         from config import get_settings
         s = get_settings()
-        assert s.FAST_MODE is True
+        assert s.FAST_MODE is False
         assert s.DATABASE_URL != ""
         results.append(("Config loads correctly", True, ""))
     except Exception as e:
@@ -156,7 +164,7 @@ def run_tests():
 
     # Cleanup test DB
     try:
-        os.remove("algopharma_test.db")
+        os.remove("db/algopharma_test.db")
     except OSError:
         pass
 

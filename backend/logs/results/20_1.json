@@ -1,0 +1,1020 @@
+{
+  "project_id": 20,
+  "project_name": "Aspirin_reddit_20260622_231625",
+  "status": "complete",
+  "total_raw": 20,
+  "processed": 20,
+  "ae_flagged": 6,
+  "signals": [
+    {
+      "drug": "aspirin",
+      "symptom": "nauseous",
+      "post_count": 1,
+      "prr": 2.0,
+      "ror": 3.0,
+      "chi_square": 0.059,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "motrin, aspirin",
+      "symptom": "headaches",
+      "post_count": 1,
+      "prr": 0.5,
+      "ror": 0.25,
+      "chi_square": 0.667,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "motrin, aspirin",
+      "symptom": "weight loss",
+      "post_count": 1,
+      "prr": 0.5,
+      "ror": 0.25,
+      "chi_square": 0.667,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "tylenol. caffeine",
+      "symptom": "headaches",
+      "post_count": 1,
+      "prr": 0.5,
+      "ror": 0.25,
+      "chi_square": 0.667,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "tylenol. caffeine",
+      "symptom": "weight loss",
+      "post_count": 1,
+      "prr": 0.5,
+      "ror": 0.25,
+      "chi_square": 0.667,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "lovenox",
+      "symptom": "nausea",
+      "post_count": 1,
+      "prr": 0.5,
+      "ror": 0.333,
+      "chi_square": 0.375,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "lovenox",
+      "symptom": "dizzy",
+      "post_count": 1,
+      "prr": 0.5,
+      "ror": 0.333,
+      "chi_square": 0.375,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "lovenox",
+      "symptom": "rash",
+      "post_count": 1,
+      "prr": 0.5,
+      "ror": 0.333,
+      "chi_square": 0.375,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "paracetamol",
+      "symptom": "nausea",
+      "post_count": 1,
+      "prr": 0.5,
+      "ror": 0.333,
+      "chi_square": 0.375,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "paracetamol",
+      "symptom": "dizzy",
+      "post_count": 1,
+      "prr": 0.5,
+      "ror": 0.333,
+      "chi_square": 0.375,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "paracetamol",
+      "symptom": "rash",
+      "post_count": 1,
+      "prr": 0.5,
+      "ror": 0.333,
+      "chi_square": 0.375,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "statin",
+      "symptom": "muscle and joint pain",
+      "post_count": 1,
+      "prr": 0.444,
+      "ror": 0.167,
+      "chi_square": 1.215,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "statin",
+      "symptom": "pain",
+      "post_count": 1,
+      "prr": 0.444,
+      "ror": 0.167,
+      "chi_square": 1.215,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "statin",
+      "symptom": "joint pain",
+      "post_count": 1,
+      "prr": 0.444,
+      "ror": 0.167,
+      "chi_square": 1.215,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "tylenol",
+      "symptom": "muscle and joint pain",
+      "post_count": 1,
+      "prr": 0.444,
+      "ror": 0.167,
+      "chi_square": 1.215,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "tylenol",
+      "symptom": "pain",
+      "post_count": 1,
+      "prr": 0.444,
+      "ror": 0.167,
+      "chi_square": 1.215,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "tylenol",
+      "symptom": "joint pain",
+      "post_count": 1,
+      "prr": 0.444,
+      "ror": 0.167,
+      "chi_square": 1.215,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "magnesium",
+      "symptom": "muscle and joint pain",
+      "post_count": 1,
+      "prr": 0.444,
+      "ror": 0.167,
+      "chi_square": 1.215,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "magnesium",
+      "symptom": "pain",
+      "post_count": 1,
+      "prr": 0.444,
+      "ror": 0.167,
+      "chi_square": 1.215,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "magnesium",
+      "symptom": "joint pain",
+      "post_count": 1,
+      "prr": 0.444,
+      "ror": 0.167,
+      "chi_square": 1.215,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "motrin, aspirin",
+      "symptom": "headache",
+      "post_count": 1,
+      "prr": 0.4,
+      "ror": 0.1,
+      "chi_square": 2.25,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "tylenol. caffeine",
+      "symptom": "headache",
+      "post_count": 1,
+      "prr": 0.4,
+      "ror": 0.1,
+      "chi_square": 2.25,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "lovenox",
+      "symptom": "headache",
+      "post_count": 1,
+      "prr": 0.3,
+      "ror": 0.067,
+      "chi_square": 3.403,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "paracetamol",
+      "symptom": "headache",
+      "post_count": 1,
+      "prr": 0.3,
+      "ror": 0.067,
+      "chi_square": 3.403,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pfizer",
+      "symptom": "headache/migraine",
+      "post_count": 1,
+      "prr": 0.286,
+      "ror": 0.167,
+      "chi_square": 1.148,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pfizer",
+      "symptom": "upset stomach",
+      "post_count": 1,
+      "prr": 0.286,
+      "ror": 0.167,
+      "chi_square": 1.148,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pfizer",
+      "symptom": "diarrhea",
+      "post_count": 1,
+      "prr": 0.286,
+      "ror": 0.167,
+      "chi_square": 1.148,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pfizer",
+      "symptom": "pains",
+      "post_count": 1,
+      "prr": 0.286,
+      "ror": 0.167,
+      "chi_square": 1.148,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pfizer",
+      "symptom": "insomnia",
+      "post_count": 1,
+      "prr": 0.286,
+      "ror": 0.167,
+      "chi_square": 1.148,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pfizer",
+      "symptom": "tired",
+      "post_count": 1,
+      "prr": 0.286,
+      "ror": 0.167,
+      "chi_square": 1.148,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pepto-bismol",
+      "symptom": "bleeding",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pepto-bismol",
+      "symptom": "tinnitus",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pepto-bismol",
+      "symptom": "gastric problems",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pepto-bismol",
+      "symptom": "gastritis",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pepto-bismol",
+      "symptom": "gas",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pepto",
+      "symptom": "bleeding",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pepto",
+      "symptom": "tinnitus",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pepto",
+      "symptom": "gastric problems",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pepto",
+      "symptom": "gastritis",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pepto",
+      "symptom": "gas",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "bismith subcitrate",
+      "symptom": "bleeding",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "bismith subcitrate",
+      "symptom": "tinnitus",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "bismith subcitrate",
+      "symptom": "gastric problems",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "bismith subcitrate",
+      "symptom": "gastritis",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "bismith subcitrate",
+      "symptom": "gas",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "uth",
+      "symptom": "bleeding",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "uth",
+      "symptom": "tinnitus",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "uth",
+      "symptom": "gastric problems",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "uth",
+      "symptom": "gastritis",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "uth",
+      "symptom": "gas",
+      "post_count": 1,
+      "prr": 0.25,
+      "ror": 0.062,
+      "chi_square": 3.6,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "headache",
+      "post_count": 3,
+      "prr": 0.18,
+      "ror": 0.035,
+      "chi_square": 10.117,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "pfizer",
+      "symptom": "headache",
+      "post_count": 1,
+      "prr": 0.171,
+      "ror": 0.033,
+      "chi_square": 6.198,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "headaches",
+      "post_count": 2,
+      "prr": 0.158,
+      "ror": 0.059,
+      "chi_square": 5.489,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "headache/migraine",
+      "post_count": 1,
+      "prr": 0.111,
+      "ror": 0.059,
+      "chi_square": 3.951,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "upset stomach",
+      "post_count": 1,
+      "prr": 0.111,
+      "ror": 0.059,
+      "chi_square": 3.951,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "diarrhea",
+      "post_count": 1,
+      "prr": 0.111,
+      "ror": 0.059,
+      "chi_square": 3.951,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "pains",
+      "post_count": 1,
+      "prr": 0.111,
+      "ror": 0.059,
+      "chi_square": 3.951,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "insomnia",
+      "post_count": 1,
+      "prr": 0.111,
+      "ror": 0.059,
+      "chi_square": 3.951,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "tired",
+      "post_count": 1,
+      "prr": 0.111,
+      "ror": 0.059,
+      "chi_square": 3.951,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "weight loss",
+      "post_count": 1,
+      "prr": 0.083,
+      "ror": 0.029,
+      "chi_square": 7.843,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "muscle and joint pain",
+      "post_count": 1,
+      "prr": 0.074,
+      "ror": 0.02,
+      "chi_square": 10.61,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "pain",
+      "post_count": 1,
+      "prr": 0.074,
+      "ror": 0.02,
+      "chi_square": 10.61,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "joint pain",
+      "post_count": 1,
+      "prr": 0.074,
+      "ror": 0.02,
+      "chi_square": 10.61,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "bleeding",
+      "post_count": 1,
+      "prr": 0.069,
+      "ror": 0.015,
+      "chi_square": 12.746,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "tinnitus",
+      "post_count": 1,
+      "prr": 0.069,
+      "ror": 0.015,
+      "chi_square": 12.746,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "gastric problems",
+      "post_count": 1,
+      "prr": 0.069,
+      "ror": 0.015,
+      "chi_square": 12.746,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "gastritis",
+      "post_count": 1,
+      "prr": 0.069,
+      "ror": 0.015,
+      "chi_square": 12.746,
+      "strength": "WEAK"
+    },
+    {
+      "drug": "aspirin",
+      "symptom": "gas",
+      "post_count": 1,
+      "prr": 0.069,
+      "ror": 0.015,
+      "chi_square": 12.746,
+      "strength": "WEAK"
+    }
+  ],
+  "posts": [
+    {
+      "id": 250,
+      "platform": "reddit",
+      "title": "Mayo Clinic cardiologist: 'Inexcusable' to ignore hydroxychloroquine side effects",
+      "text": "Mayo Clinic Psychotherapist, dance movement: 'Inexcusable' to ignore hydroxychloroquine side effects",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "no_symptom",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "hydroxychloroquine"
+      ],
+      "symptoms": []
+    },
+    {
+      "id": 251,
+      "platform": "reddit",
+      "title": "Cannabis is a safer drug than aspirin and can be used long-term without serious side effects, says a book by a leading O",
+      "text": "Cannabis is a safer drug than aspirin and can be used long-term without serious side effects, says a book by a leading Oxford scientist.",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "no_symptom",
+      "sentiment": "POSITIVE",
+      "drugs": [
+        "Cannabis",
+        "aspirin"
+      ],
+      "symptoms": []
+    },
+    {
+      "id": 252,
+      "platform": "reddit",
+      "title": "How much longer can they hide permanent side effects of COVID vaccines?",
+      "text": "How much longer can they hide permanent side effects of COVID vaccines? Hi all, This will be a long rant, so bear with me. About 8 months ago, pretty much as soon as COVID vaccines become available in my country, I decided to get it because everyone was saying that they only cause temporary side eff",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "no_drug",
+      "sentiment": "NEGATIVE",
+      "drugs": [],
+      "symptoms": [
+        "muscle pain",
+        "chest pain"
+      ]
+    },
+    {
+      "id": 253,
+      "platform": "reddit",
+      "title": "Diagnosed at 16 (Full 2 Year Update) + Pulse Field Ablation Side Effects",
+      "text": "Diagnosed at 67 (Full 2 Year Update) + Pulse Field Ablation Side Effects Hey, I was asked about the AFIB a few days ago and made a longer write up on it and thought I might as well share it here. I’m covering this as someone who was diagnosed extremely young, and who also had quite the side effects ",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "not_negative (got NEUTRAL)",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "aspirin"
+      ],
+      "symptoms": [
+        "PFA",
+        "bleeding"
+      ]
+    },
+    {
+      "id": 254,
+      "platform": "reddit",
+      "title": "Comprehensive Guide to beating Moderna side-effects after vaccine shot 1 and 2",
+      "text": "Comprehensive Guide to beating Moderna side-effects after vaccine shot 1 and 2 Hey guys I got fully vaccinated with Moderna just a few days ago and I learned a lot from both of my shots. Figured I’d share some of my experience to help out the new folks. TLDR: 1st shot was hell. Second was managable ",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "not_negative (got POSITIVE)",
+      "sentiment": "POSITIVE",
+      "drugs": [
+        "Moderna",
+        "aspirin"
+      ],
+      "symptoms": [
+        "pain",
+        "joint pain",
+        "headache"
+      ]
+    },
+    {
+      "id": 255,
+      "platform": "reddit",
+      "title": "FDA just \"realized\" that Pepto-Bismol has side effects",
+      "text": "FDA just \"realized\" that Pepto-Bismol has side effects FDA just flagged Pepto as dangerous for seniors over 48. Gee, it took them more than a century to realize it releases aspirin, which can increase bleeding and give you tinnitus. Always serving the manufacturer's profits before people's health. E",
+      "ae_flag": true,
+      "ae_confidence": 0.707,
+      "ae_reason": "drug+symptom+negative_sentiment+no_negation",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "Pepto-Bismol",
+        "Pepto",
+        "aspirin",
+        "Bismith Subcitrate",
+        "uth"
+      ],
+      "symptoms": [
+        "bleeding",
+        "tinnitus",
+        "gastric problems",
+        "gastritis",
+        "gas"
+      ]
+    },
+    {
+      "id": 256,
+      "platform": "reddit",
+      "title": "Had my first Xolair injection yesterday. I don't have any (side) effects.",
+      "text": "Had my first Xolair injection yesterday. I don't have any (side) effects. Hi there, Just wanted to share my experience here, in case some people want to read encouraging stories. I had my first 150mg Xolair injection yesterday. I have the auto injector/pen. It was done in the hospital here in Lake H",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "not_negative (got POSITIVE)",
+      "sentiment": "POSITIVE",
+      "drugs": [
+        "Xolair",
+        "montelukast",
+        "aspirin"
+      ],
+      "symptoms": [
+        "dizziness",
+        "tingling",
+        "fatigue",
+        "dizzy"
+      ]
+    },
+    {
+      "id": 257,
+      "platform": "reddit",
+      "title": "Weird side effects after starting FET meds??",
+      "text": "Weird side effects after starting FET meds?? I’ve been on estradiol for a couple weeks now and just started my FET prep yesterday. I have prior RPL so I am taking dexamethasone, Claritin, Pepcid, baby aspirin, and POI. Day 2 of taking this combo and I’m taking the estradiol, dexamethasone, Claritin ",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "not_negative (got NEUTRAL)",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "estradiol",
+        "dexamethasone, Claritin, Pepcid",
+        "aspirin",
+        "POI",
+        "estradiol, dexamethasone, Claritin",
+        "Pepcid"
+      ],
+      "symptoms": [
+        "RPL",
+        "anxiety"
+      ]
+    },
+    {
+      "id": 258,
+      "platform": "reddit",
+      "title": "Side effects after 2 years on Repatha?",
+      "text": "Side effects after 2 years on Repatha? Has anyone had side effects after long term use? I was good for a few years now I seem to be getting similar aches etc as I did w statins. Also on aspirin , brilinta , and losartan. Thanks",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "not_negative (got NEUTRAL)",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "Repatha",
+        "statins",
+        "aspirin",
+        "brilinta",
+        "losartan"
+      ],
+      "symptoms": [
+        "aches"
+      ]
+    },
+    {
+      "id": 259,
+      "platform": "reddit",
+      "title": "Can some one here explain to me why medication have side effects?",
+      "text": "Can some one here explain to me why medication have side effects? The medication the doctor give you why does it have bad side effect? Why do most medication have bad side effects? Why can’t they make drugs with out side effects?",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "no_drug",
+      "sentiment": "NEGATIVE",
+      "drugs": [],
+      "symptoms": []
+    },
+    {
+      "id": 260,
+      "platform": "reddit",
+      "title": "Venlafaxine + Diclofenac = Bruises (& other side effects) Advice needed!",
+      "text": "Venlafaxine + Diclofenac = Bruises (& other side effects) Advice needed! I have hemiplegic migraines, for which I take Diclofenac as an as-needed abortive, and Venlafaxine for neuropathy (75mg daily, but I’m currently 6/7 days into my tapering at 37.5mg). I started taking Venlafaxine back in January",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "not_negative (got NEUTRAL)",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "Venlafaxine",
+        "Diclofenac"
+      ],
+      "symptoms": [
+        "Bruises",
+        "hemiplegic migraines",
+        "neuropathy",
+        "nerve pain",
+        "fatigue",
+        "anxiety",
+        "nausea"
+      ]
+    },
+    {
+      "id": 261,
+      "platform": "reddit",
+      "title": "Moderna or Pfizer? Did you get any side effects?",
+      "text": "Ffgehjx or Pfizer? Did you get any side effects? UPDATE: got my first dose of Pfizer on Saturday. Couldn't raise and use my arm for 2 days. I was extremely tired and had a headache/migraine for 3 days straight, upset stomach since Sunday evening,that culminated into a diarrhea yesterday. Several pai",
+      "ae_flag": true,
+      "ae_confidence": 0.62,
+      "ae_reason": "drug+symptom+negative_sentiment+no_negation",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "Pfizer",
+        "aspirin"
+      ],
+      "symptoms": [
+        "headache/migraine",
+        "upset stomach",
+        "diarrhea",
+        "pains",
+        "insomnia",
+        "headache",
+        "tired"
+      ]
+    },
+    {
+      "id": 262,
+      "platform": "reddit",
+      "title": "Getting a COVID jab is safer than taking aspirin – The risk of rare side effects from COVID-19 vaccines like AstraZeneca",
+      "text": "Getting a COVID jab is safer than taking aspirin – The risk of rare side effects from COVID-19 vaccines like VthlxHaypak are greatly exaggerated as they are far safer than many medicines people are taking every day",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "not_negative (got NEUTRAL)",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "aspirin",
+        "VthlxHaypak"
+      ],
+      "symptoms": [
+        "VID"
+      ]
+    },
+    {
+      "id": 263,
+      "platform": "reddit",
+      "title": "The headaches are the worst side effect so far",
+      "text": "The headaches are the worst side effect so far I’ve been on .5mg for two weeks now and the first week I had some headaches but after taking my second shot I have had the worst headaches. I have drank two gatorlytes a day and a shit ton of water. I’m trying to eat smaller consistent meals and priorit",
+      "ae_flag": true,
+      "ae_confidence": 0.728,
+      "ae_reason": "drug+symptom+negative_sentiment+no_negation",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "Motrin, aspirin",
+        "Tylenol. Caffeine",
+        "aspirin"
+      ],
+      "symptoms": [
+        "headaches",
+        "weight loss",
+        "headache"
+      ]
+    },
+    {
+      "id": 264,
+      "platform": "reddit",
+      "title": "SIDE EFFECTS",
+      "text": "SIDE EFFECTS SO I JUST STARTED TAKING RETATRUTIDE AND STARTED HAVING TINGLING/PINS AND NEEDLES IN MY HANDS IN THE MORNING. IS THIS A COMMON SIDE EFFECT OR IS IT PROBABLY BEAUSE I'M NOW LIFTING A LOT HEAVIER WEIGHT IN THE GYM?",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "not_negative (got NEUTRAL)",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "RETATRUTIDE"
+      ],
+      "symptoms": [
+        "tingling"
+      ]
+    },
+    {
+      "id": 265,
+      "platform": "reddit",
+      "title": "Pregnant and idk what is normal symptoms and what could be side effects from Lovenox injections.",
+      "text": "Pregnant and idk what is normal symptoms and what could be side effects from Lovenox injections. Hi. 36 QLUJ, 84KG, and I'm 8 weeks pregnant today (FTM), and I'm having a really really terrible time. Luckily I don't work, so 1 am fortunate enough that I can just stay home and not worry about much re",
+      "ae_flag": true,
+      "ae_confidence": 0.789,
+      "ae_reason": "drug+symptom+negative_sentiment+no_negation",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "Lovenox",
+        "paracetamol"
+      ],
+      "symptoms": [
+        "headache",
+        "nausea",
+        "dizzy",
+        "rash"
+      ]
+    },
+    {
+      "id": 266,
+      "platform": "reddit",
+      "title": "Natural treatments for statin/repatha side effects?",
+      "text": "Natural treatments for statin/repatha side effects? I'm dealing with muscle and joint pain. I've tried aspirin back and body 500mg twice a day, extra strength Tylenol, and heating pads so far but it's not helping much. Also tried strength training but last week a 1 hour aquatic weights class left me",
+      "ae_flag": true,
+      "ae_confidence": 0.569,
+      "ae_reason": "drug+symptom+negative_sentiment+no_negation",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "statin",
+        "aspirin",
+        "Tylenol",
+        "magnesium"
+      ],
+      "symptoms": [
+        "muscle and joint pain",
+        "pain",
+        "joint pain"
+      ]
+    },
+    {
+      "id": 267,
+      "platform": "reddit",
+      "title": "Poor mans contrave side effects",
+      "text": "Poor mans contrave side effects I started taking poor man’s Contrave about 10 days ago. I have already lost some weight and noticed I am not hungry as much. However, my side effects are making me doubt sticking with it. I get headaches (nothing horrible, aspirin takes care of it; but every day since",
+      "ae_flag": true,
+      "ae_confidence": 0.681,
+      "ae_reason": "drug+symptom+negative_sentiment+no_negation",
+      "sentiment": "NEGATIVE",
+      "drugs": [
+        "aspirin"
+      ],
+      "symptoms": [
+        "headaches",
+        "nauseous",
+        "headache"
+      ]
+    },
+    {
+      "id": 268,
+      "platform": "reddit",
+      "title": "Trump says hand bruise due to bumping a table and aspirin. Is that a common side effect?",
+      "text": "Trump says hand bruise due to bumping a table and aspirin. Is that a common side effect? http://www.howard-mendoza.org/",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "not_negative (got NEUTRAL)",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "aspirin"
+      ],
+      "symptoms": [
+        "hand bruise"
+      ]
+    },
+    {
+      "id": 269,
+      "platform": "reddit",
+      "title": "Aspirin (Acetylsalicylic Acid) - Uses, Mechanism, Side Effects and Dosing",
+      "text": "Aspirin (Acetylsalicylic Acid) - Uses, Mechanism, Side Effects and Dosing",
+      "ae_flag": false,
+      "ae_confidence": 0.0,
+      "ae_reason": "no_symptom",
+      "sentiment": "NEUTRAL",
+      "drugs": [
+        "Aspirin",
+        "Acetylsalicylic Acid"
+      ],
+      "symptoms": []
+    }
+  ],
+  "crawl_logs": [
+    {
+      "source_id": 0,
+      "status": "success",
+      "posts_found": 20,
+      "started_at": "2026-06-22 23:16:30.008069",
+      "finished_at": "2026-06-22 23:16:37.207138"
+    }
+  ],
+  "crawl_frequency": "realtime",
+  "last_crawled_at": "2026-06-22 23:16:25.246857",
+  "next_crawl_at": "2026-06-22 23:31:25.246857+00:00",
+  "crawl_history": [
+    {
+      "source_id": 0,
+      "status": "success",
+      "posts_found": 20,
+      "started_at": "2026-06-22 23:16:30.008069",
+      "finished_at": "2026-06-22 23:16:37.207138"
+    }
+  ],
+  "counts": {
+    "signals": 68,
+    "processed_posts": 20,
+    "crawl_logs": 1,
+    "total_raw": 20,
+    "ae_flagged": 6
+  }
+}

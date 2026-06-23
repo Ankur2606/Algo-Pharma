@@ -37,7 +37,7 @@ if sys.stderr.encoding.lower() != "utf-8":
     sys.stderr.reconfigure(encoding="utf-8")
 
 # ── Add project root to path ────────────────────────────────
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # ── Args ───────────────────────────────────────────────────
 parser = argparse.ArgumentParser(description="AlgoPharma full demo pipeline")

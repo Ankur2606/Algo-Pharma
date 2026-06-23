@@ -58,7 +58,9 @@ Create a `.env` file based on `.env.example`. You must provide:
 - `REDIS_URL`: An Upstash Redis connection string (`rediss://...`).
 
 ### 2. Installation
-We use `uv` for blazing-fast dependency management:
+For detailed step-by-step installation instructions (including database initialization, admin user creation, and verification tests), **please follow the exact guide in [docs/setup.md](https://github.com/Ankur2606/Algo-Pharma/blob/main/docs/setup.md)**.
+
+Basic commands:
 ```bash
 uv sync
 uv run python -m spacy download en_core_web_sm
@@ -69,13 +71,13 @@ You must run the web server and the background worker concurrently:
 
 **Terminal 1: FastAPI Backend & UI**
 ```bash
-uv run uvicorn main:app --reload --port 8000
+uv run uvicorn backend.main:app --reload --port 8000
 ```
 *Access the UI at http://localhost:8000 or http://localhost:5173 for the React dev server*
 
 **Terminal 2: Celery Background Worker**
 ```bash
-uv run celery -A celery_app worker --loglevel=info --pool=solo
+uv run celery -A backend.celery_app worker --loglevel=info --pool=solo
 ```
 *Note: `--pool=solo` is required on Windows systems.*
 

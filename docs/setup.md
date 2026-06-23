@@ -38,7 +38,7 @@ Open `.env` and fill in **at minimum**:
 |-----|----------|--------------|
 | `GROQ_API_KEY` | ✅ Yes | [console.groq.com](https://console.groq.com/) — free |
 | `SECRET_KEY` | ✅ Yes | Run `openssl rand -hex 32` |
-| `DATABASE_URL` | Optional | Defaults to `sqlite:///./algopharma.db` |
+| `DATABASE_URL` | Optional | Defaults to `sqlite:///./db/algopharma.db` |
 | `REDIS_URL` | Optional | Defaults to `redis://localhost:6379/0` |
 | `TWITTER_API_KEY` | For Twitter crawling | [twitterapi.io](https://twitterapi.io) |
 | `FIRECRAWL_API_KEY` | For forum onboarding | [firecrawl.dev](https://firecrawl.dev) |
@@ -90,7 +90,7 @@ uv run python -m spacy download en_core_web_sm
 
 ### Pre-download HuggingFace NLP models (optional but faster first run)
 ```bash
-uv run python setup_models.py
+uv run python backend/scripts/setup_models.py
 ```
 
 ---
@@ -101,10 +101,10 @@ The database is created automatically on first start. To pre-seed with demo data
 
 ```bash
 # Create all tables
-uv run python -c "from database import init_db; init_db()"
+uv run python -c "import sys; sys.path.insert(0, 'backend'); from database import init_db; init_db()"
 
 # (Optional) Seed demo data
-uv run python seed_demo_data.py
+uv run python backend/scripts/seed_demo_data.py
 ```
 
 ---
@@ -115,6 +115,8 @@ The UI authenticates against the backend. Insert the default admin:
 
 ```bash
 uv run python -c "
+import sys
+sys.path.insert(0, 'backend')
 from database import SessionLocal
 from models import User
 from passlib.context import CryptContext
@@ -137,15 +139,15 @@ Open **3 separate terminals**:
 
 ### Terminal 1 — FastAPI Backend + Static UI
 ```bash
-uv run uvicorn main:app --reload --port 8000
+uv run uvicorn backend.main:app --reload --port 8000
 ```
 - API: `http://localhost:8000`
-- Dashboard UI: `http://localhost:8000` (served from `static/index.html`)
+- Dashboard UI: `http://localhost:8000` (served from `backend/static/index.html`)
 - API docs: `http://localhost:8000/docs`
 
 ### Terminal 2 — Celery NLP Worker
 ```bash
-uv run celery -A celery_app worker --loglevel=info --pool=solo
+uv run celery -A backend.celery_app worker --loglevel=info --pool=solo
 ```
 > `--pool=solo` is required on Windows (no fork support).
 > The worker loads all HuggingFace models on startup (~60s first time).
@@ -166,16 +168,16 @@ React dev server runs at `http://localhost:5173`.
 
 ```bash
 # Check config keys are loaded
-uv run python config.py
+uv run python backend/config.py
 
 # Verify Redis connection
-uv run python celery_app.py
+uv run python backend/celery_app.py
 
 # Run the full NLP pipeline on demo data
-uv run python demo_pipeline.py
+uv run python backend/scripts/demo_pipeline.py
 
 # Run tests
-uv run pytest test/
+uv run python backend/scripts/test_pipeline.py
 ```
 
 ---
